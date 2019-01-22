@@ -1,0 +1,19 @@
+add la pills session entities:
+  title: 'Create new LA Pills Session entities'
+
+administer la pills session entities:
+  title: 'Administer LA Pills Session entities'
+  description: 'Allow to access the administration form to configure LA Pills Session entities.'
+  restrict access: true
+
+delete la pills session entities:
+  title: 'Delete LA Pills Session entities'
+
+edit la pills session entities:
+  title: 'Edit LA Pills Session entities'
+
+view published la pills session entities:
+  title: 'View published LA Pills Session entities'
+
+view unpublished la pills session entities:
+  title: 'View unpublished LA Pills Session entities'

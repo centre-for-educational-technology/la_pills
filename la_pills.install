@@ -1,0 +1,95 @@
+<?php
+
+use Symfony\Component\Yaml\Yaml;
+
+/**
+ * Implements hook_schema().
+ */
+function la_pills_schema() {
+  $schema['session_template'] = [
+    'description' => 'Stores data for Session templates.',
+    'fields' => [
+      'uuid' => [
+        'description' => 'Unique identifier for Session template.',
+        'type' => 'varchar_ascii',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'data' => [
+        'description' => 'The {language}.langcode of this node.',
+        'type' => 'text',
+        'serialize' => TRUE,
+        'size' => 'medium',
+        'not null' => TRUE,
+      ],
+      'created' => [
+        'description' => 'Creation time unix timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'changed' => [
+        'description' => 'Update time unix timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['uuid'],
+    'indexes' => [
+      'created' => [
+        'created',
+      ],
+      'changed' => [
+        'changed',
+      ],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function la_pills_install() {
+  $uuid_service = \Drupal::service('uuid');
+
+  $templates = file_scan_directory(__DIR__ . '/sessions/', '/.*.yml$/i');
+
+  if ($templates) {
+    $connection = \Drupal::database();
+
+    foreach ($templates as $template) {
+      $structure = Yaml::parse(file_get_contents($template->uri));
+
+      $structure['context']['uuid'] = $uuid_service->generate();
+
+      // TODO Consider removing the standalone questions once the process is complete
+      array_walk($structure['questions'], function(&$question) use ($uuid_service) {
+        $question['uuid'] = $uuid_service->generate();
+      });
+      $structure['questions'] = array_combine(array_map(function($single) { return $single['uuid']; }, $structure['questions']), $structure['questions']);
+
+      $lookup = array_combine(array_map(function($single) { return $single['title']; }, $structure['questions']), $structure['questions']);
+      array_walk($structure['questionnaires'], function(&$questionnaire) use ($uuid_service, $lookup) {
+        $questionnaire['uuid'] = $uuid_service->generate();
+
+        array_walk($questionnaire['questions'], function(&$question) use ($lookup) {
+          $question['uuid'] = $lookup[$question['title']]['uuid'];
+        });
+      });
+      $structure['questionnaires'] = array_combine(array_map(function($single) { return $single['uuid']; }, $structure['questionnaires']), $structure['questionnaires']);
+
+      $connection->insert('session_template')
+      ->fields([
+        'uuid' => $structure['context']['uuid'],
+        'data' => serialize($structure),
+        'created' => REQUEST_TIME,
+        'changed' => REQUEST_TIME,
+      ])
+      ->execute();
+    }
+  }
+}

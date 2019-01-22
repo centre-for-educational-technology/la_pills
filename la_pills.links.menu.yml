@@ -1,0 +1,14 @@
+
+# LA Pills Session menu items definition
+entity.session_entity.collection:
+  title: 'LA Pills Session list'
+  route_name: entity.session_entity.collection
+  description: 'List LA Pills Session entities'
+  parent: system.admin_structure
+  weight: 100
+
+session_entity.admin.structure.settings:
+  title: 'LA Pills Session settings'
+  description: 'Configure LA Pills Session entities'
+  route_name: session_entity.settings
+  parent: system.admin_structure

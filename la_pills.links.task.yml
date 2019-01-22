@@ -1,0 +1,27 @@
+# LA Pills Session routing definition
+session_entity.settings_tab:
+  route_name: session_entity.settings
+  title: 'Settings'
+  base_route: session_entity.settings
+
+entity.session_entity.canonical:
+  route_name: entity.session_entity.canonical
+  base_route: entity.session_entity.canonical
+  title: 'View'
+
+entity.session_entity.edit_form:
+  route_name: entity.session_entity.edit_form
+  base_route: entity.session_entity.canonical
+  title: 'Edit'
+
+entity.session_entity.delete_form:
+  route_name:  entity.session_entity.delete_form
+  base_route:  entity.session_entity.canonical
+  title: Delete
+  weight: 10
+
+entity.session_entity.dashboard:
+  route_name: entity.session_entity.dashboard
+  base_route: entity.session_entity.canonical
+  title: 'Dashboard'
+  weight: 20

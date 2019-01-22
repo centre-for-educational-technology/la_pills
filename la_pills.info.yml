@@ -1,0 +1,6 @@
+name: LA Pills 2.0
+description: Implements LA Pills 2.0 functionality for Drupal site.
+package: LAPills
+
+type: module
+core: 8.x

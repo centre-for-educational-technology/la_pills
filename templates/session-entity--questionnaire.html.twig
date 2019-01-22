@@ -1,0 +1,83 @@
+{#
+/**
+ * @file session_entity.html.twig
+ * Default theme implementation to present LA Pills Session data.
+ *
+ * This template is used when viewing LA Pills Session pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_session_entity()
+ *
+ * @ingroup themeable
+ */
+#}
+{% macro input_short_text(name, value, required) %}
+  {% set input_attributes = create_attribute() %}
+  <input type="text" name="{{ name }}" value="{{ value|e }}" size="20" {{ input_attributes.setAttribute('required', required) }}>
+{% endmacro %}
+
+{% macro input_long_text(name, value, required) %}
+  {% set input_attributes = create_attribute() %}
+  <textarea name="{{ name }}" value="{{ value|e }}" {{ input_attributes.setAttribute('required', required) }}></textarea>
+{% endmacro %}
+
+{% macro input_scale(name, value, required, min, max) %}
+  {% for i in range(min, max) %}
+  {% set input_attributes = create_attribute() %}
+    <label class="grid">
+      <span>{{ i }}</span>
+      <input type="radio" name="{{ name }}" value="{{ i|e }}" {{ input_attributes.setAttribute('required', required).setAttribute('checked', value is same as(i)) }}/>
+    </label>
+  {% endfor %}
+{% endmacro %}
+
+{% macro input_multi_choice(name, value, options, required) %}
+  {% for i in options %}
+    {% set input_attributes = create_attribute() %}
+    <label>
+      <input type="radio" name="{{ name }}" value="{{ i|e }}" {{ input_attributes.setAttribute('required', required).setAttribute('checked', value is same as(i)) }}/>
+      {{ i }}
+    </label>
+  {% endfor %}
+{% endmacro %}
+
+{% macro input_checkboxes(name, value, options, required) %}
+  {% for i in options %}
+    {% set input_attributes = create_attribute() %}
+    <label>
+      <input type="checkbox" name="{{ name }}[]" value="{{ i|e }}" {{ input_attributes.setAttribute('required', required).setAttribute('checked', value is same as(i)) }}/>
+      {{ i }}
+    </label>
+  {% endfor %}
+{% endmacro %}
+
+{% import _self as inputs %}
+
+<div{{ attributes.addClass('session_entity').addClass('session_entity_questionnaire')}}>
+  <h2>{{ questionnaire['title'] }}</h2>
+    {% for question in questionnaire['questions'] %}
+      {% set label_attributes = create_attribute() %}
+      {% set required = question.required == 'Yes' %}
+      {% if required %}
+        {% do label_attributes.addClass('required') %}
+      {% endif %}
+      <div class="question">
+        <label{{ label_attributes.addClass('question-label') }}>{{ question.title }}</label>
+        {% if question.type is same as('Short text') %}
+          {{ inputs.input_short_text(question.uuid, '', required) }}
+        {% elseif question.type is same as ('Long text') %}
+          {{ inputs.input_long_text(question.uuid, '', required) }}
+        {% elseif question.type is same as ('Scale') %}
+          {{ inputs.input_scale(question.uuid, '', required, question.min, question.max) }}
+        {% elseif question.type is same as ('Multi-choice') %}
+          {{ inputs.input_multi_choice(question.uuid, '', question.options, required) }}
+        {% elseif question.type is same as ('Checkboxes') %}
+          {{ inputs.input_checkboxes(question.uuid, '', question.options, required) }}
+        {% endif %}
+      </div>
+    {% endfor %}
+</div>

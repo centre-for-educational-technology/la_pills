@@ -1,0 +1,221 @@
+context:
+  title: Feedback sessions @ Vihula Winter School
+  date: 2017-01-13
+  course:
+  program: Ph.D. on Educational Sciences
+  description:
+    These parallel sessions are part of a winter school for PhD/Master
+    students on Educational Sciences, at Estonian and Finnish universities. The basic
+    idea of the sessions is for the students to present their PhD ideas to peers and
+    supervisors, and get feedback on them, especially about certain open questions that
+    the students may have (students were asked to explicitly refer to those in the presentations).
+  technologies: # Those could use a list structure with short lines of text, current format is multiline without preserving the newlines (structure also allows to preserve the newlines if that would be needed)
+    Powerpoint / Google presentations
+goals:
+  -
+    title: Every student should have the chance to communicate what the current thesis ideas are
+    short: &G1S Communicate
+  -
+    title: Every student should get input/feedback about the major open questions they have about their dissertation
+    short: &G2S Feedback
+# Special notation
+# {{website}} Placeholder for the simple website that will be created to support the teacher and students to follow the session
+# {{Q1}}, {{Q2}}, ... Placeholder for the different questionnaires that will be created to gather information from teacher and students
+# {{dashboard}} Placeholder for the dashboard that will be created to display the learning analytics (for teachers or for students)
+activities:
+  -
+    activity: Intro to the session goals and structure
+    duration: 5 #minutes
+    description: |- #preserves newlines
+      Everybody should navigate to the session {{website}}
+    resources:
+  -
+    activity: Student presentation rounds
+    duration: 20 (each)
+    description: |-
+      1. Student presents main ideas of their dissertation (less than 15 mins)
+      2a. After the presentation, presenting student answers {{Q1}}
+      2b. After the presentation, audience answers {{Q2}}
+      3. Finally, the student goes to the {{dashboard}}, looks at the questions available, and picks the most important ones. Meanwhile, the next student sets up for presenting.
+    resources:
+  -
+    activity: Breakout groups feedback
+    duration: 25
+    description: |-
+      Audience breaks out into small groups around each of the presenting students
+      Do as many repetitions as possible of:
+      1. The student picks up an important question from the {{dashboard}}, and poses it to the small group
+      2. The small group responds or gives any other input. The student takes notes of the responses/ideas/conclusions, and next actions in {{Q3}}
+      3. When there are no more ideas about a question, or the student feels another question should be posed, go back to {{dashboard}}, and create a new response in {{Q3}}
+    resources:
+  -
+    activity: Wrap-up
+    duration: 10
+    description: |-
+      The session chair opens up {{Q4}}, to take notes of the session conclusions
+      Each presenting student summarizes in 1 minute the most interesting thing they’ve learned in the session
+      The floor is opened to the audience to note (briefly!) other interesting lessons learned in the session
+      The session chair opens up the {{dashboard}}, and shows it to the participants
+    resources:
+# Question types:
+# Short text
+# Long text
+# Scale
+# Multi-choice
+# Checkboxes
+questions:
+  - &Q1
+    title: Insert your name
+    type: Short text
+    goals:
+  - &Q2
+    title: What is the MAIN open question that you have about the dissertation, that you would like to have input from the audience?
+    type: Long text
+    goals:
+      - *G1S
+  - &Q3
+    title: Please add any OTHER open questions that you would like to have feedback from the audience today
+    type: Long text
+    goals:
+      - *G1S
+  - &Q4
+    title: Insert the name of the student presenter
+    type: Short text
+    goals:
+  - &Q5
+    title: How much did you understand about the presentation?
+    type: Scale
+    min: 0
+    max: 10
+    goals:
+      - *G1S
+  - &Q6
+    title: After watching the presentation, what do you think is the MAIN open question that the student had?
+    type: Long text
+    goals:
+      - *G1S
+  - &Q7
+    title: After watching the presentation, what OTHER open questions do you think the student should be asking him/herself?
+    type: Long text
+    goals:
+      - *G1S
+  - &Q8
+    title: If you want, please insert your own name
+    type: Short text
+    goals:
+  - &Q9
+    title: Please write your name (presenting student)
+    type: Short text
+    goals:
+  - &Q10
+    title: Please write down the open question you are discussing with the audience
+    type: Short text
+    goals:
+      - *G2S
+  - &Q11
+    title: Please note down here any feedback or ideas that the audience provides, and that you would like to preserve for later thought
+    type: Long text
+    goals:
+      - *G2S
+  - &Q12
+    title: Just before submitting your notes/feedback... how satisfied are you with the responses?
+    type: Scale
+    min: 0
+    max: 10
+    goals:
+      - *G2S
+  - &Q13
+    title: Please write down the main lessons learnt by the PRESENTING STUDENTS, as they state them in the session wrapup
+    type: Long text
+    goals:
+      - *G1S
+      - *G2S
+  - &Q14
+    title: Please write down the main lessons learnt by the AUDIENCE, as they state them in the session wrapup
+    type: Long text
+    goals:
+      - *G1S
+      - *G2S
+  - &Q15
+    title: Please select the current presenter
+    type: Multi-choice
+    goals:
+    options:
+      - Juku Juurikas
+      - Mari Maasikas
+      - Kaali Kaalikas
+      - Karl Klaabu
+  - &Q16
+    title: Please check the presentrs with most interesting presentations
+    type: Checkboxes
+    goals:
+    options:
+      - Juku Juurikas
+      - Mari Maasikas
+      - Kaali Kaalikas
+      - Karl Klaabu
+questionnaires:
+  -
+    id: Q1
+    title: Student presenter
+    questions:
+      -
+        <<: *Q1
+        required: Yes
+      -
+        <<: *Q2
+        required: Yes
+      -
+        <<: *Q3
+        required: No
+  -
+    id: Q2
+    title: Audience
+    questions:
+      -
+        <<: *Q4
+        required: Yes
+      -
+        <<: *Q5
+        required: Yes
+      -
+        <<: *Q6
+        required: Yes
+      -
+        <<: *Q7
+        required: Yes
+      -
+        <<: *Q8
+        required: No
+  -
+    id: Q3
+    title: Breakout groups feedback
+    questions:
+      -
+        <<: *Q9
+        required: Yes
+      -
+        <<: *Q10
+        required: Yes
+      -
+        <<: *Q11
+        required: Yes
+      -
+        <<: *Q12
+        required: Yes
+  -
+    id: Q4
+    title: Session wrapup
+    questions:
+      -
+        <<: *Q13
+        required: Yes
+      -
+        <<: *Q14
+        required: Yes
+      -
+        <<: *Q15
+        required: Yes
+      -
+        <<: *Q16
+        required: Yes

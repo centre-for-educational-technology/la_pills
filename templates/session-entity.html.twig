@@ -1,0 +1,47 @@
+{#
+/**
+ * @file session_entity.html.twig
+ * Default theme implementation to present LA Pills Session data.
+ *
+ * This template is used when viewing LA Pills Session pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_session_entity()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('session_entity') }}>
+  {% if content %}
+    {#{{- content -}}#}
+  {% endif %}
+
+  {% if session_entity_template and session_entity_template['goals'] %}
+    <h2>Goals</h2>
+    <ol>
+      {% for goal in session_entity_template['goals'] %}
+        <li>{{ goal['title'] }} ({{ goal['short'] }})</li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+
+  {% if session_entity_template and session_entity_template['activities'] %}
+    <h2>Activities</h2>
+    <ol>
+    {% for activity in session_entity_template['activities'] %}
+      <li>
+      {{ activity['activity'] }} [{{ activity['duration'] }}']
+      <ul>
+        {% for line in activity['description']|split('\n') %}
+          <li>{{ line|replace(session_entity_replacements)|raw }}</li>
+        {% endfor %}
+      </ul>
+      </li>
+    {% endfor %}
+    </ol>
+  {% endif %}
+</div>

@@ -1,0 +1,80 @@
+<?php
+
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_theme()
+ */
+function la_pills_theme($existing) {
+  return [
+    'session_entity' => [
+      'render element' => 'elements',
+      'file' => 'session_entity.page.inc',
+    ],
+    'session_entity_dashboard' => [
+      'variables' => [],
+      'template' => 'session-entity--dashboard',
+    ],
+    'session_entity_questionnaire' => [
+      'variables' => ['questionnaire' => NULL, 'session_entity' => NULL,],
+      'template' => 'session-entity--questionnaire',
+    ],
+  ];
+}
+
+/**
+ * Returns an array of all available session templates.
+ * @return array
+ */
+function la_pills_get_session_templates() {
+  $connection = \Drupal::database();
+
+  $query = $connection->select('session_template', 'st', [
+    'fetch' => 'Drupal\la_pills\FetchClass\SessionTemplate'
+  ]);
+  $query->fields('st', ['uuid', 'data',]);
+
+  $result = $query->execute();
+
+  return $result->fetchAll();
+}
+
+/**
+ * Returns single session template object.
+ * @param  string $uuid Session template unique identifier
+ * @return Drupal\la_pills\FetchClass\SessionTemplate
+ */
+function la_pills_get_session_template($uuid) {
+  $connection = \Drupal::database();
+
+  $query = $connection->select('session_template', 'st', [
+    'fetch' => 'Drupal\la_pills\FetchClass\SessionTemplate'
+  ]);
+  $query->fields('st', ['uuid', 'data',]);
+  $query->condition('st.uuid', $uuid, '=');
+
+  // TODO Need to add a handler that will check if sessions exists
+  $result = $query->execute();
+
+  return $result->fetch();
+}
+
+/**
+ * Callback that returns options for all available session template options.
+ * @param  BaseFieldDefinition $definition [description]
+ * @param  [type]              $entity     [description]
+ * @param  [type]              $cacheable  [description]
+ * @return array
+ */
+function _la_pills_session_template_vallowed_values(BaseFieldDefinition $definition, ContentEntityInterface $entity = NULL, $cacheable) {
+  $options = [];
+  $templates = la_pills_get_session_templates();
+
+  foreach ($templates as $template) {
+    $options[$template->uuid] = $template->getData()['context']['title'] . '<p>' . $template->getData()['context']['description']. '</p>';
+  }
+
+  return $options;
+}

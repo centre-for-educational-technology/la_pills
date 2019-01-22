@@ -1,0 +1,29 @@
+label.required::after {
+  content:" *";
+  color: red;
+}
+
+label.grid {
+  display: inline-block;
+  margin: 10px;
+}
+
+label.grid span,  label.grid input{
+  display: block;
+}
+
+label.grid span {
+  margin-bottom: 10px;
+}
+
+input[type='text'], textarea {
+  width: 100%;
+}
+
+.question {
+  margin-bottom: 15px;
+}
+
+.question > label {
+  margin-bottom: 10px;
+}
