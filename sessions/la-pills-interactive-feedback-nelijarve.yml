@@ -1,0 +1,161 @@
+context:
+  title: Interactive Feedback Session
+  date: 2019-02-02
+  course:
+  program: Ph.D. on Digital Technologies
+  description:
+    These sessions are part of a winter school for PhD students. The basic
+    idea of the sessions is for the students to present their PhD ideasYpapers to peers and
+    supervisors, and get feedback on them, especially about certain open questions that
+    the students may have (students were asked to explicitly refer to those in the presentations).
+  technologies: # Those could use a list structure with short lines of text, current format is multiline without preserving the newlines (structure also allows to preserve the newlines if that would be needed)
+    Powerpoint / Google presentations
+goals:
+  -
+    title: Every student should have the chance to communicate about their current research ideas
+    short: &G1S Communicate
+  -
+    title: Every student should get input/feedback about major open questions they have on their research
+    short: &G2S Feedback
+# Special notation
+# {{website}} Placeholder for the simple website that will be created to support the teacher and students to follow the session
+# {{Q1}}, {{Q2}}, ... Placeholder for the different questionnaires that will be created to gather information from teacher and students
+# {{dashboard}} Placeholder for the dashboard that will be created to display the learning analytics (for teachers or for students)
+activities:
+  -
+    activity: Intro to the session goals and structure
+    duration: 5 #minutes
+    description: |- #preserves newlines
+      Everybody should navigate to the session {{website}}, where these instructions can be seen. The session chair explains the dynamic of the session.
+      Then, the following two activities are repeated as many times as needed until all students present and get feedback.
+    resources:
+  -
+    activity: Student presentation block
+    duration: 10-20 (each)
+    description: |-
+      Several students present in a row, with only minimal interruptions for clarifying questions (not actual discussions or longer points).
+      1. Students present their ideas (in less than 10-20 minutes). Session chairs will ensure that the timing is respected (otherwise it will sustract from everyone's feedback time).
+      2. After each individual presentation, while presenters switch computers, the audience provides basic feedback about the presentation in {{Q1}}
+    resources:
+  -
+    activity: Breakout groups feedback block
+    duration: 20
+    description: |-
+      Audience breaks out into as many small groups as presenters were in the previous block, and gather around each of the presenting students
+      1. The small group appoints a note-taker (it can be the presenting student, or any other member of the breakout group), who will take note of the group responses/ideas/conclusions, and next actions in {{Q2}}
+      2. The presenting student drives the breakout group to discuss the open questions noted in the presentation, or ask for feedback more generally. Once the time is over (as marked by the session chair), the note taker submits the form with the notes from the discussion, for the student's later reference.
+      3. At any point, the members of a small group can decide to switch no another group, if they see that the discussion in the other groups interests them more.
+    resources:
+  -
+    activity: Wrap-up
+    duration:
+    description: |-
+      1. Prompted by the session chair, the breakout groups dissolve, and all come back to a whole-room configuration
+      2. Each presenting student summarizes in 1 minute the single most interesting thing they’ve learned in the feedback and discussions.
+    resources:
+  -
+    activity: After the session
+    duration:
+    description: |-
+      After the session, each student can see the feedback and discussion notes from the session, by accessing the {{dashboard}}.
+    resources:
+# Question types:
+# Short text
+# Long text
+# Scale
+# Multi-choice
+# Checkboxes
+questions:
+  - &Q1
+    title: Please select the current presenter
+    type: Multi-choice
+    goals:
+    options:
+      - (S) Triinu Jesmin
+      - (L) Gerti Pishtari
+      - (S) Marge Kusmin
+      - (S) Amir Zare Pashaei
+      - (L) Linda Helene Sillat
+      - (S) Marianne Paimre
+      - (S) Shashi Kant Shankar
+      - (S) Ben Ighoyota
+      - (L) Merike Saar
+      - (L) Eka Jeladze
+      - (L) Siddharth Nakul Gulati
+      - (L) Kadri-Liis Kusmin
+      - (S) Stella Polikarpus
+  - &Q2
+    title: How much did you understand about the presentation?
+    type: Scale
+    min: 0
+    max: 10
+    goals:
+      - *G1S
+  - &Q3
+    title: Did the student explicitly provide open questions for feedback?
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - Yes
+      - No
+      - I'm not sure / I wasn't paying attention
+  - &Q4
+    title: After watching the presentation, can you provide an answer/feedback to ONE of the open questions that the student had?
+    type: Long text
+    goals:
+      - *G2S
+  - &Q5
+    title: Please provide ONE other suggestion about how to improve the paper or ideas presented by the student
+    type: Long text
+    goals:
+      - *G2S
+  - &Q6
+    title: If you want, please insert your own name
+    type: Short text
+    goals:
+  - &Q7
+    title: Please note down here any feedback or ideas that the audience provides during the discussion
+    type: Long text
+    goals:
+      - *G2S
+  - &Q8
+    title: What percentage of the questions posed by the student have you been able to discuss?
+    type: Scale
+    min: 0
+    max: 10
+    goals:
+      - *G2S
+questionnaires:
+  -
+    id: Q1
+    title: Initial audience feedback
+    questions:
+      -
+        <<: *Q1
+        required: Yes
+      -
+        <<: *Q2
+        required: Yes
+      -
+        <<: *Q3
+        required: Yes
+      -
+        <<: *Q4
+        required: Yes
+      -
+        <<: *Q5
+        required: No
+  -
+    id: Q2
+    title: Breakout groups feedback
+    questions:
+      -
+        <<: *Q1
+        required: Yes
+      -
+        <<: *Q7
+        required: Yes
+      -
+        <<: *Q8
+        required: Yes
