@@ -17,7 +17,7 @@ function la_pills_schema() {
         'default' => '',
       ],
       'data' => [
-        'description' => 'The {language}.langcode of this node.',
+        'description' => 'Serialized data for the template.',
         'type' => 'text',
         'serialize' => TRUE,
         'size' => 'medium',
@@ -43,6 +43,68 @@ function la_pills_schema() {
       ],
       'changed' => [
         'changed',
+      ],
+    ],
+  ];
+  $schema['session_questionnaire_answer'] = [
+    'description' => 'Stores data for Session questionnaire answers.',
+    'fields' => [
+      'session_entity_uuid' => [
+        'description' => 'Unique identifier for related Session entity.',
+        'type' => 'varchar_ascii',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'questionnaire_uuid' => [
+        'description' => 'Unique identifier for related questionnaire.',
+        'type' => 'varchar_ascii',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'question_uuid' => [
+        'description' => 'Unique identifier for related question.',
+        'type' => 'varchar_ascii',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'session_id' => [
+        'description' => 'Unique identifier for related Session entity.',
+        'type' => 'varchar_ascii',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'answer' => [
+        'description' => 'Answer provided.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ],
+      'created' => [
+        'description' => 'Creation time unix timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'indexes' => [
+      'session_entity_uuid' => [
+        'session_entity_uuid',
+      ],
+      'questionnaire_uuid' => [
+        'questionnaire_uuid',
+      ],
+      'question_uuid' => [
+        'question_uuid',
+      ],
+      'session_id' => [
+        'session_id',
+      ],
+      'created' => [
+        'created',
       ],
     ],
   ];

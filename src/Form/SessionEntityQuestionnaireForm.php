@@ -79,6 +79,11 @@ class SessionEntityQuestionnaireForm extends EntityForm {
       '#value' => $this->t('Submit'),
     ];
 
+    if (!($this->entity->isPublished() && $this->entity->isActive())) {
+      drupal_set_message($this->t('Current session is either unpublished or set to be inactive. Questionnaires can not be answerd!'), 'warning');
+      $form['submit']['#attributes']['disabled'] = 'disabled';
+    }
+
     return $form;
   }
 
@@ -93,10 +98,52 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Display result.
-    foreach ($form_state->getValues() as $key => $value) {
-      drupal_set_message($key . ': ' . $value);
+    // XXX Need a more meaningful way for dealing with that
+    // Need to make sure that session does persist and is not just constantly regenerated
+    if (\Drupal::currentUser()->isAnonymous() && !\Drupal::request()->getSession()) {
+      \Drupal::service('session_manager')->start();
     }
+
+    $connection = \Drupal::database();
+    $values = $form_state->getValues();
+    $session_id = \Drupal::request()->getSession()->getId();
+    $records = [];
+
+    foreach ($this->questionnaire['questions'] as $question) {
+      $answers = $values[$question['uuid']];
+
+      if (is_array($answers)) {
+        foreach($answers as $key => $value) {
+          if ($key !== $value && $value === 0) {
+            unset($answers[$key]);
+          }
+        }
+      }
+
+      if (!is_array($answers)) {
+        $answers = [$answers];
+      }
+
+      // TODO See if we need to store empty answers for questions that are not required
+
+      foreach($answers as $answer) {
+        $records[] = [
+          'session_entity_uuid' => $this->entity->uuid(),
+          'questionnaire_uuid' => $this->questionnaire['uuid'],
+          'question_uuid' => $question['uuid'],
+          'session_id' => $session_id, // XXX See if this identifier will always fit into the storage
+          //'UNIQUE_FORM_SUBMIT' => '', // XXX Need to make sure that we could track each unique form submit
+          'answer' => $answer,
+          'created' => REQUEST_TIME,
+        ];
+      }
+    }
+
+    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'answer', 'created']);
+    foreach ($records as $record) {
+      $query->values($record);
+    }
+    $query->execute();
 
   }
 
