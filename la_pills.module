@@ -17,10 +17,6 @@ function la_pills_theme($existing) {
       'variables' => [],
       'template' => 'session-entity--dashboard',
     ],
-    'session_entity_questionnaire' => [
-      'variables' => ['questionnaire' => NULL, 'session_entity' => NULL,],
-      'template' => 'session-entity--questionnaire',
-    ],
   ];
 }
 
