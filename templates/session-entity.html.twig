@@ -34,7 +34,10 @@
     <ol>
     {% for activity in session_entity_template['activities'] %}
       <li>
-      {{ activity['activity'] }} [{{ activity['duration'] }}']
+      {{ activity['activity'] }}
+      {% if activity['duration'] %}
+        [{{ activity['duration'] }}']
+      {% endif %}
       <ul>
         {% for line in activity['description']|split('\n') %}
           <li>{{ line|replace(session_entity_replacements)|raw }}</li>
