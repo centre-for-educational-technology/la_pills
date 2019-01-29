@@ -71,9 +71,16 @@ function la_pills_schema() {
         'default' => '',
       ],
       'session_id' => [
-        'description' => 'Unique identifier for related Session entity.',
+        'description' => 'Unique identifier for a user session.',
         'type' => 'varchar_ascii',
-        'length' => 128,
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'form_build_id' => [
+        'description' => 'Unique identifier for a form being submitted.',
+        'type' => 'varchar_ascii',
+        'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ],
@@ -102,6 +109,9 @@ function la_pills_schema() {
       ],
       'session_id' => [
         'session_id',
+      ],
+      'form_build_id' => [
+        'form_build_id'
       ],
       'created' => [
         'created',

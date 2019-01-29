@@ -39,7 +39,7 @@ function template_preprocess_session_entity(array &$variables) {
 
   if ($variables['session_entity_template'] && $variables['session_entity_template']['questionnaires']) {
     foreach ($variables['session_entity_template']['questionnaires'] as $questionnaire) {
-      $variables['session_entity_replacements']['{{' . $questionnaire['id'] . '}}'] = '<a href="' . $websiteUrl . '/questionnaire/' . $questionnaire['uuid']  . '/" target="_blank">' . $questionnaire['title'] . ' ' . t('form') . '</a>';
+      $variables['session_entity_replacements']['{{' . $questionnaire['id'] . '}}'] = '<a href="' . $websiteUrl . '/questionnaire/' . $questionnaire['uuid']  . '/" data-questionnaire-uuid="' . $questionnaire['uuid'] . '">' . $questionnaire['title'] . ' ' . t('form') . '</a>';
     }
   }
 }

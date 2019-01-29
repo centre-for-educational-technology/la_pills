@@ -2,11 +2,8 @@
 
 namespace Drupal\la_pills\Form;
 
-use Drupal\Core\Form\FormBase;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Class SessionEntityQUestionnaireForm.
@@ -98,21 +95,21 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // XXX Need a more meaningful way for dealing with that
-    // Need to make sure that session does persist and is not just constantly regenerated
+    // Make sure the session exists in case of an anonymous user
     if (\Drupal::currentUser()->isAnonymous() && !\Drupal::request()->getSession()) {
       \Drupal::service('session_manager')->start();
     }
 
     $connection = \Drupal::database();
+
     $values = $form_state->getValues();
-    $session_id = \Drupal::request()->getSession()->getId();
     $records = [];
 
     foreach ($this->questionnaire['questions'] as $question) {
       $answers = $values[$question['uuid']];
 
       if (is_array($answers)) {
+        // Remove any unchecked value for 'checkboxes' case
         foreach($answers as $key => $value) {
           if ($key !== $value && $value === 0) {
             unset($answers[$key]);
@@ -124,26 +121,26 @@ class SessionEntityQuestionnaireForm extends EntityForm {
         $answers = [$answers];
       }
 
-      // TODO See if we need to store empty answers for questions that are not required
-
       foreach($answers as $answer) {
         $records[] = [
           'session_entity_uuid' => $this->entity->uuid(),
           'questionnaire_uuid' => $this->questionnaire['uuid'],
           'question_uuid' => $question['uuid'],
-          'session_id' => $session_id, // XXX See if this identifier will always fit into the storage
-          //'UNIQUE_FORM_SUBMIT' => '', // XXX Need to make sure that we could track each unique form submit
+          'session_id' => \Drupal::request()->getSession()->getId(),
+          'form_build_id' => $values['form_build_id'],
           'answer' => $answer,
           'created' => REQUEST_TIME,
         ];
       }
     }
 
-    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'answer', 'created']);
+    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'answer', 'created']);
     foreach ($records as $record) {
       $query->values($record);
     }
     $query->execute();
+
+    drupal_set_message($this->t('Thanks you for responding to this questionnaire. Please proceed to the <a href="@link">session page</a>.', ['@link' => $this->entity->toUrl('canonical', ['absolute' => TRUE,])->toString()]));
 
   }
 

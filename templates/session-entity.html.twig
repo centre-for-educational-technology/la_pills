@@ -24,7 +24,7 @@
     <h2>Goals</h2>
     <ol>
       {% for goal in session_entity_template['goals'] %}
-        <li>{{ goal['title'] }} ({{ goal['short'] }})</li>
+        <li>{{ goal['title'] }} <strong>({{ goal['short'] }})</strong></li>
       {% endfor %}
     </ol>
   {% endif %}
@@ -34,7 +34,7 @@
     <ol>
     {% for activity in session_entity_template['activities'] %}
       <li>
-      {{ activity['activity'] }}
+      <strong>{{ activity['activity'] }}</strong>
       {% if activity['duration'] %}
         [{{ activity['duration'] }}']
       {% endif %}
