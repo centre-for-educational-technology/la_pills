@@ -1,0 +1,11 @@
+.answers-count {
+  display: inline-block;
+  text-align: center;
+  border-radius: 0.25rem;
+  padding: 0 0.4em;
+  font-size: 90%;
+  white-space: nowrap;
+  vertical-align: baseline;
+  margin-left: 5px;
+  margin-right: 5px;
+}

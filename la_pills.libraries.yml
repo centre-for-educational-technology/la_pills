@@ -3,3 +3,13 @@ questionnaire:
     css:
         theme:
             css/questionnaire.css: {}
+session_entity:
+  version: 1.x
+  css:
+      theme:
+          css/session-entity.css: {}
+  js:
+    js/session-entity.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery

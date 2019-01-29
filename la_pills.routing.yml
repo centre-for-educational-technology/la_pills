@@ -1,0 +1,11 @@
+session_entity.rest_questionnaire_count:
+  path: '/api/v1/session_entity/{session_entity}/questionnaire_count'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionEntityController::restQuestionnaireCount'
+  options:
+    parameters:
+      session_entity:
+        type: entity:session_entity
+  methods: [GET]
+  requirements:
+    _access: 'TRUE'

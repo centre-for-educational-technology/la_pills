@@ -42,4 +42,10 @@ function template_preprocess_session_entity(array &$variables) {
       $variables['session_entity_replacements']['{{' . $questionnaire['id'] . '}}'] = '<a href="' . $websiteUrl . '/questionnaire/' . $questionnaire['uuid']  . '/" data-questionnaire-uuid="' . $questionnaire['uuid'] . '">' . $questionnaire['title'] . ' ' . t('form') . '</a>';
     }
   }
+
+  $variables['#attached']['library'][] = 'la_pills/session_entity';
+  $variables['#attached']['drupalSettings']['laPillsSessionEntity'] = [
+    'id' => $session_entity->id(),
+    'canUpdate' => $session_entity->access('update'),
+  ];
 }
