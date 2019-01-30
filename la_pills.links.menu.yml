@@ -12,3 +12,17 @@ session_entity.admin.structure.settings:
   description: 'Configure LA Pills Session entities'
   route_name: session_entity.settings
   parent: system.admin_structure
+
+entity.session_entity.collection.tools:
+  title: 'LA Pills Session list'
+  route_name: entity.session_entity.collection
+  description: 'List LA Pills Session entities'
+  parent: tools
+  weight: 10
+
+entity.session_entity.add_form.tools:
+  title: 'Add LA Pills Session'
+  description: 'Create new LA Pills Session entity'
+  route_name: entity.session_entity.add_form
+  parent: tools
+  weight: 15

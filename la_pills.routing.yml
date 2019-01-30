@@ -9,3 +9,14 @@ session_entity.rest_questionnaire_count:
   methods: [GET]
   requirements:
     _access: 'TRUE'
+session_entity.download_answers:
+  path: '/admin/structure/session_entity/{session_entity}/answers'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionEntityController::downloadAnswers'
+  options:
+    parameters:
+      session_entity:
+        type: entity:session_entity
+  methods: [GET]
+  requirements:
+    _access: 'TRUE'

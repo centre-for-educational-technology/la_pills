@@ -19,6 +19,8 @@ class SessionEntityListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header['name'] = $this->t('Name');
+    $header['template'] = $this->t('Session template');
+    $header['answers'] = $this->t('Answers');
     return $header + parent::buildHeader();
   }
 
@@ -32,6 +34,16 @@ class SessionEntityListBuilder extends EntityListBuilder {
       'entity.session_entity.canonical',
       ['session_entity' => $entity->id()]
     );
+    $row['session_template'] = $entity->getSessionTemplateData()['context']['title'];
+    $row['answers'] = '';
+    if ($entity->access('update')) {
+      $row['answers'] = Link::createFromRoute(
+        $this->t('Download'),
+        'session_entity.download_answers',
+        ['session_entity' => $entity->id()],
+        ['query' => ['token' => $entity->uuid()]]
+      );
+    }
     return $row + parent::buildRow($entity);
   }
 

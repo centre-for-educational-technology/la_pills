@@ -8,7 +8,7 @@
       function updateQuestionnaireCounts(url, title) {
         $.ajax({
           method: 'GET',
-          url: Drupal.url('api/v1/session_entity/1/questionnaire_count'),
+          url: Drupal.url(url),
           cache: false,
           dataType: 'json'
         })

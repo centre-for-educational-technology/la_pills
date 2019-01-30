@@ -174,6 +174,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
    * {@inheritdoc}
    */
   public function getSessionTemplateData() {
+    // TODO This should use a service so that each of the templates would only be fetched once
     return la_pills_get_session_template($this->getEntityKey('template'))->getData();
   }
 
