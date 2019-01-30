@@ -12,6 +12,12 @@ delete la pills session entities:
 edit la pills session entities:
   title: 'Edit LA Pills Session entities'
 
+delete own la pills session entities:
+  title: 'Delete own LA Pills Session entities'
+
+edit own la pills session entities:
+  title: 'Edit own LA Pills Session entities'
+
 view published la pills session entities:
   title: 'View published LA Pills Session entities'
 

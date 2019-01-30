@@ -8,6 +8,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the LA Pills Session entity.
@@ -122,6 +123,13 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   public function setOwnerId($uid) {
     $this->set('user_id', $uid);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOwner(AccountInterface $account) {
+    return $this->getOwnerId() === $account->id();
   }
 
   /**

@@ -18,7 +18,6 @@ class SessionEntityListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['id'] = $this->t('LA Pills Session ID');
     $header['name'] = $this->t('Name');
     return $header + parent::buildHeader();
   }
@@ -28,10 +27,9 @@ class SessionEntityListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /* @var $entity \Drupal\la_pills\Entity\SessionEntity */
-    $row['id'] = $entity->id();
     $row['name'] = Link::createFromRoute(
       $entity->label(),
-      'entity.session_entity.edit_form',
+      'entity.session_entity.canonical',
       ['session_entity' => $entity->id()]
     );
     return $row + parent::buildRow($entity);

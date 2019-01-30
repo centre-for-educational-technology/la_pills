@@ -5,6 +5,7 @@ namespace Drupal\la_pills\Entity;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides an interface for defining LA Pills Session entities.
@@ -77,5 +78,7 @@ interface SessionEntityInterface extends ContentEntityInterface, EntityChangedIn
   public function isActive();
 
   public function setActive($active);
+
+  public function isOwner(AccountInterface $account);
 
 }

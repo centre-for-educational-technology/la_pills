@@ -21,15 +21,23 @@ class SessionEntityAccessControlHandler extends EntityAccessControlHandler {
     /** @var \Drupal\la_pills\Entity\SessionEntityInterface $entity */
     switch ($operation) {
       case 'view':
-        if (!$entity->isPublished()) {
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        } else if (!$entity->isPublished()) {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished la pills session entities');
         }
         return AccessResult::allowedIfHasPermission($account, 'view published la pills session entities');
 
       case 'update':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowedIfHasPermission($account, 'edit own la pills session entities');
+        }
         return AccessResult::allowedIfHasPermission($account, 'edit la pills session entities');
 
       case 'delete':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowedIfHasPermission($account, 'delete own la pills session entities');
+        }
         return AccessResult::allowedIfHasPermission($account, 'delete la pills session entities');
     }
 

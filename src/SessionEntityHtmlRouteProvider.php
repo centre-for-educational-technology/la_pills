@@ -21,6 +21,9 @@ class SessionEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
   public function getRoutes(EntityTypeInterface $entity_type) {
     $collection = parent::getRoutes($entity_type);
 
+    // Override for listing view, should no longer be required once the route logic is finalised
+    $collection->get('entity.session_entity.collection')->setRequirement('_permission', 'view unpublished la pills session entities');
+
     $entity_type_id = $entity_type->id();
 
     if ($settings_form_route = $this->getSettingsFormRoute($entity_type)) {
