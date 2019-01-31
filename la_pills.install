@@ -126,6 +126,7 @@ function la_pills_schema() {
  * Implements hook_install().
  */
 function la_pills_install() {
+  // TODO It makes sense to move all of the Session Template related functionality into a standalone service
   $uuid_service = \Drupal::service('uuid');
 
   $templates = file_scan_directory(__DIR__ . '/sessions/', '/.*.yml$/i');
@@ -138,21 +139,22 @@ function la_pills_install() {
 
       $structure['context']['uuid'] = $uuid_service->generate();
 
-      // TODO Consider removing the standalone questions once the process is complete
-      array_walk($structure['questions'], function(&$question) use ($uuid_service) {
-        $question['uuid'] = $uuid_service->generate();
-      });
-      $structure['questions'] = array_combine(array_map(function($single) { return $single['uuid']; }, $structure['questions']), $structure['questions']);
+      foreach (['goals', 'activities', 'questions', 'questionnaires',] as $key) {
+        array_walk($structure[$key], function (&$single) use ($uuid_service) {
+          $single['uuid'] = $uuid_service->generate();
+        });
+
+        $structure[$key] = array_combine(array_map(function ($single) {
+          return $single['uuid'];
+        }, $structure[$key]), $structure[$key]);
+      }
 
       $lookup = array_combine(array_map(function($single) { return $single['title']; }, $structure['questions']), $structure['questions']);
-      array_walk($structure['questionnaires'], function(&$questionnaire) use ($uuid_service, $lookup) {
-        $questionnaire['uuid'] = $uuid_service->generate();
-
+      array_walk($structure['questionnaires'], function(&$questionnaire) use ($lookup) {
         array_walk($questionnaire['questions'], function(&$question) use ($lookup) {
           $question['uuid'] = $lookup[$question['title']]['uuid'];
         });
       });
-      $structure['questionnaires'] = array_combine(array_map(function($single) { return $single['uuid']; }, $structure['questionnaires']), $structure['questionnaires']);
 
       $connection->insert('session_template')
       ->fields([
