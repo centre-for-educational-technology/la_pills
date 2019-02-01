@@ -1,0 +1,445 @@
+---
+title: "DTI Winter School - Thematic sessions"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+library(tidyverse)
+library(flexdashboard)
+library(knitr)
+library(RCurl)
+library(shiny)
+
+# Load data
+#data <- read.csv("./lapills-answers-template2.csv", stringsAsFactors = F)
+
+getData <-  reactivePoll(10000, NULL,
+    checkFunc = function(){
+      print("checkfunc")
+      download <- getURL("https://web.htk.tlu.ee/lapills/admin/structure/session_entity/1/answers?token=44d3c110-2170-45c4-a061-83f24a3926b0")
+      data <- read.csv (text = download, stringsAsFactors = F)
+      nrow(data)
+    },
+    valueFunc = function(){
+      print("VALUEFUNC")
+      download <- getURL("https://web.htk.tlu.ee/lapills/admin/structure/session_entity/1/answers?token=44d3c110-2170-45c4-a061-83f24a3926b0")
+      data <- read.csv (text = download, stringsAsFactors = F)
+      data
+    }
+  )
+
+# Load data from the actual endpoint
+
+# TODO: how to refresh every 10s?
+# data <- reactive({
+#     invalidateLater(10000) 
+#     downloadData code...
+#   })
+# or check https://shiny.rstudio.com/reference/shiny/latest/reactivePoll.html
+
+# Get the presenter/PIN matching
+pins <- data.frame(presenter=c("(S) Triinu Jesmin", "(L) Gerti Pishtari", "(S) Marge Kusmin", "(S) Amir Zare Pashaei",
+                               "(L) Linda Helene Sillat", "(S) Marianne Paimre", "(S) Shashi Kant Shankar", 
+                               "(S) Ben Ighoyota", "(L) Merike Saar", "(L) Eka Jeladze", "(L) Siddharth Nakul Gulati",
+                               "(L) Kadri-Liis Kusmin"), 
+                   pin=c("8131","9479","7077","4735","3826","3029","8294","9430","5251","6883","1845","2933"))
+
+
+presenters = reactive({
+  # Get the people that have data so far
+  pres <- getData() %>% filter(Question.title=="Please select the current presenter") %>%
+  dplyr::select(Answer) %>% unique
+  presenters <- pres$Answer
+  presenters
+})
+
+```
+
+
+Sidebar {.sidebar}
+=====================================
+
+```{r}
+ renderUI({
+   print("renderUI")
+   print(length(presenters()))
+   selectInput("presenter", label = h3("Presenter: "), 
+    choices = c("All", presenters()), 
+    selected = 1)
+ })
+
+ passwordInput("pin", "PIN:")
+```
+
+Initial Feedback
+=====================================  
+
+Row
+-------------------------------------
+
+
+### Nr. Presenters {.value-box}
+    
+```{r}
+
+      renderValueBox({
+
+        data <- getData()
+        
+        if (input$presenter=="All"){
+          num <- length(presenters())
+        }
+        else{
+            if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+              num <- 1
+            }
+            else{
+              num <- NULL
+            }
+        }
+
+        valueBox(
+          value = num,
+          icon = "fa-users",
+          caption = "Presenters",
+          color = "warning"
+        )
+        
+      })
+
+      
+      
+```
+
+
+### Nr. Responses {.value-box}
+    
+```{r}
+
+      renderValueBox({
+
+        data <- getData()
+
+        if (input$presenter=="All"){
+          num <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            dplyr::select(Form.submission.identifier) %>% unique %>% nrow
+        }
+        else{
+            if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+              subs <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+                filter(Question.title=="Please select the current presenter") %>%
+                filter(Answer==input$presenter) %>% dplyr::select(Form.submission.identifier) %>% 
+                unique
+              subs <- subs$Form.submission.identifier
+              num <- subs %>% unique %>% length
+            }
+            else{
+              num <- NULL
+            }
+        }
+
+        valueBox(
+          value = num,
+          icon = "fa-comments",
+          caption = "Responses",
+          color = "primary"
+        )
+        
+      })
+
+```
+
+Row
+-------------------------------------
+
+### Audience understanding
+    
+```{r}
+
+renderPlot({
+  d <- data.frame(Answer=numeric())
+  t <- ""
+  
+        data <- getData()
+
+    if (input$presenter=="All"){
+      d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+        filter(Question.title=="How much did you understand about the presentation?") %>%
+        dplyr::select(Answer)
+      t = "All presenters data"
+    }
+    else{
+        if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+          subs <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="Please select the current presenter") %>%
+            filter(Answer==input$presenter) %>% dplyr::select(Form.submission.identifier) %>% 
+            unique
+          subs <- subs$Form.submission.identifier
+          d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="How much did you understand about the presentation?") %>%
+            filter(Form.submission.identifier %in% subs) %>%
+            dplyr::select(Answer)
+          t <- paste("Data for",input$presenter)
+        }
+        else{
+          # Do nothing... or add label with message
+          t <- "Data cannot be shown. Wrong PIN"
+        }
+    }
+
+  ggplot(d, aes(as.numeric(Answer)))+geom_histogram(breaks=c(0:10))+theme_minimal()+
+    ylab("")+xlab("")+ggtitle(t)+
+    scale_y_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))+
+    scale_x_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
+})
+
+
+```
+
+
+### Did audience perceive clear open questions?
+    
+```{r}
+
+renderPlot({
+  d <- data.frame(Answer=character())
+  t <- ""
+  
+        data <- getData()
+
+    if (input$presenter=="All"){
+      d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+        filter(Question.title=="Did the student explicitly provide open questions for feedback?") %>%
+        dplyr::select(Answer)
+      t = "All presenters data"
+    }
+    else{
+        if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+          subs <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="Please select the current presenter") %>%
+            filter(Answer==input$presenter) %>% dplyr::select(Form.submission.identifier) %>% 
+            unique
+          subs <- subs$Form.submission.identifier
+          d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="Did the student explicitly provide open questions for feedback?") %>%
+            filter(Form.submission.identifier %in% subs) %>%
+            dplyr::select(Answer)
+          t <- paste("Data for",input$presenter)
+        }
+        else{
+          # Do nothing... or add label with message
+          t <- "Data cannot be shown. Wrong PIN"
+        }
+    }
+
+  ggplot(d, aes(as.factor(Answer), fill=as.factor(Answer)))+geom_bar()+theme_minimal()+
+    ylab("")+xlab("")+ggtitle(t)+ theme(legend.position="none")+
+    scale_y_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
+})
+
+
+
+```
+
+
+Row
+-------------------------------------
+
+### Audience answers to open questions
+    
+```{r}
+
+renderTable({
+  d <- data.frame(Answer=character())
+
+        data <- getData()
+
+        
+    if (input$presenter=="All"){
+      d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+        filter(Question.title=="After watching the presentation, can you provide an answer/feedback to ONE of the open questions that the student had?") %>%
+        dplyr::select(Answer)
+      msg <- paste(nrow(d), "responses (not shown)")
+      d <- data.frame(Answer=msg)
+    }
+    else{
+        if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+          subs <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="Please select the current presenter") %>%
+            filter(Answer==input$presenter) %>% dplyr::select(Form.submission.identifier) %>% 
+            unique
+          subs <- subs$Form.submission.identifier
+          d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="After watching the presentation, can you provide an answer/feedback to ONE of the open questions that the student had?") %>%
+            filter(Form.submission.identifier %in% subs) %>%
+            dplyr::select(Answer)
+        }
+        else{
+          # Do nothing... or add label with message
+          msg <- "Data cannot be shown. Wrong PIN"
+          d <- data.frame(Answer=msg)
+        }
+    }
+
+  names(d) <- ""
+  
+  d
+})
+
+
+
+
+```
+
+
+### Audience suggestions
+    
+```{r}
+
+renderTable({
+  d <- data.frame(Answer=character())
+
+        data <- getData()
+
+        
+    if (input$presenter=="All"){
+      d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+        filter(Question.title=="Please provide ONE other suggestion about how to improve the paper or ideas presented by the student") %>%
+        dplyr::select(Answer)
+      msg <- paste(nrow(d), "responses (not shown)")
+      d <- data.frame(Answer=msg)
+    }
+    else{
+        if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+          subs <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="Please select the current presenter") %>%
+            filter(Answer==input$presenter) %>% dplyr::select(Form.submission.identifier) %>% 
+            unique
+          subs <- subs$Form.submission.identifier
+          d <- data %>% filter(Questionnaire.title=="Initial audience feedback") %>%
+            filter(Question.title=="Please provide ONE other suggestion about how to improve the paper or ideas presented by the student") %>%
+            filter(Form.submission.identifier %in% subs) %>%
+            dplyr::select(Answer)
+        }
+        else{
+          # Do nothing... or add label with message
+          msg <- "Data cannot be shown. Wrong PIN"
+          d <- data.frame(Answer=msg)
+        }
+    }
+
+  names(d) <- ""
+  
+  d
+})
+
+
+```
+
+   
+Group Discussions
+=====================================     
+
+Row
+-------------------------------------
+
+### Open question coverage
+    
+```{r}
+
+renderPlot({
+  d <- data.frame(Answer=numeric())
+  t <- ""
+  
+        data <- getData()
+
+        
+    if (input$presenter=="All"){
+      d <- data %>% filter(Questionnaire.title=="Breakout groups feedback") %>%
+        filter(Question.title=="What percentage of the questions posed by the student have you been able to discuss?") %>%
+        dplyr::select(Answer)
+      if(nrow(d)==0) d <- data.frame(Answer=NA)
+      t = "All presenters data"
+    }
+    else{
+        if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+          subs <- data %>% filter(Questionnaire.title=="Breakout groups feedback") %>%
+            filter(Question.title=="Please select the current presenter") %>%
+            filter(Answer==input$presenter) %>% dplyr::select(Form.submission.identifier) %>% 
+            unique
+          subs <- subs$Form.submission.identifier
+          d <- data %>% filter(Questionnaire.title=="Breakout groups feedback") %>%
+            filter(Question.title=="What percentage of the questions posed by the student have you been able to discuss?") %>%
+            filter(Form.submission.identifier %in% subs) %>%
+            dplyr::select(Answer)
+          t <- paste("Data for",input$presenter)
+
+        }
+        else{
+          # Do nothing... or add label with message
+          t <- "Data cannot be shown. Wrong PIN"
+          d <- data.frame(Answer=NA)
+        }
+    }
+
+  ggplot(d, aes(x="", y=as.numeric(Answer)))+geom_boxplot()+theme_minimal()+
+    ylab("")+xlab("")+ggtitle(t)+coord_flip()+
+    scale_y_continuous(limits=c(0,10), breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
+})
+
+
+
+```
+
+
+Row
+-------------------------------------
+
+### Group feedback / Notes
+    
+```{r}
+
+renderTable({
+  d <- data.frame(Answer=character())
+
+        data <- getData()
+
+    if (input$presenter=="All"){
+      d <- data %>% filter(Questionnaire.title=="Breakout groups feedback") %>%
+        filter(Question.title=="Please note down here any feedback or ideas that the audience provides during the discussion") %>%
+        dplyr::select(Answer)
+      msg <- paste(nrow(d), "responses (not shown)")
+      d <- data.frame(Answer=msg)
+    }
+    else{
+        if(input$pin == pins[pins$presenter==input$presenter,"pin"]){
+          subs <- data %>% filter(Questionnaire.title=="Breakout groups feedback") %>%
+            filter(Question.title=="Please select the current presenter") %>%
+            filter(Answer==input$presenter) %>% dplyr::select(Form.submission.identifier) %>% 
+            unique
+          subs <- subs$Form.submission.identifier
+          d <- data %>% filter(Questionnaire.title=="Breakout groups feedback") %>%
+            filter(Question.title=="Please note down here any feedback or ideas that the audience provides during the discussion") %>%
+            filter(Form.submission.identifier %in% subs) %>%
+            dplyr::select(Answer)
+        }
+        else{
+          # Do nothing... or add label with message
+          msg <- "Data cannot be shown. Wrong PIN"
+          d <- data.frame(Answer=msg)
+        }
+    }
+
+  names(d) <- ""
+  
+  d
+})
+
+
+
+```
+
+
