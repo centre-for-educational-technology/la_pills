@@ -74,6 +74,29 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   }
 
   /**
+   * Removes answers for deleted Session entities.
+   * @param  array  $entities An array of SessionEntity objects
+   * @return int              Count of removed answers
+   */
+  protected static function removeAnswersOnDelete(array $entities) {
+    $connection = \Drupal::service('database');
+
+    return $connection->delete('session_questionnaire_answer')
+    ->condition('session_entity_uuid', array_map(function($entity) {
+      return $entity->uuid();
+    }, $entities), 'IN')
+    ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function postDelete(EntityStorageInterface $storage_controller, array $entities) {
+    parent::postDelete($storage_controller, $entities);
+    static::removeAnswersOnDelete($entities);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getName() {

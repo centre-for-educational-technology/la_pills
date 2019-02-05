@@ -12,13 +12,11 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
 
   /**
    * Session template table
-   * @var string
    */
   const SESSION_TEMPLATE_TABLE = 'session_template';
 
   /**
    * Session template class
-   * @var string
    */
   const SESSION_TEMPLATE_FETCH_CLASS = 'Drupal\la_pills\FetchClass\SessionTemplate';
 
