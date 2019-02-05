@@ -126,44 +126,13 @@ function la_pills_schema() {
  * Implements hook_install().
  */
 function la_pills_install() {
-  // TODO It makes sense to move all of the Session Template related functionality into a standalone service
-  $uuid_service = \Drupal::service('uuid');
+  $manager = \Drupal::service('la_pills.sesion_template_manager');
 
   $templates = file_scan_directory(__DIR__ . '/sessions/', '/.*.yml$/i');
 
   if ($templates) {
-    $connection = \Drupal::database();
-
     foreach ($templates as $template) {
-      $structure = Yaml::parse(file_get_contents($template->uri));
-
-      $structure['context']['uuid'] = $uuid_service->generate();
-
-      foreach (['goals', 'activities', 'questions', 'questionnaires',] as $key) {
-        array_walk($structure[$key], function (&$single) use ($uuid_service) {
-          $single['uuid'] = $uuid_service->generate();
-        });
-
-        $structure[$key] = array_combine(array_map(function ($single) {
-          return $single['uuid'];
-        }, $structure[$key]), $structure[$key]);
-      }
-
-      $lookup = array_combine(array_map(function($single) { return $single['title']; }, $structure['questions']), $structure['questions']);
-      array_walk($structure['questionnaires'], function(&$questionnaire) use ($lookup) {
-        array_walk($questionnaire['questions'], function(&$question) use ($lookup) {
-          $question['uuid'] = $lookup[$question['title']]['uuid'];
-        });
-      });
-
-      $connection->insert('session_template')
-      ->fields([
-        'uuid' => $structure['context']['uuid'],
-        'data' => serialize($structure),
-        'created' => REQUEST_TIME,
-        'changed' => REQUEST_TIME,
-      ])
-      ->execute();
+      $manager->addTemplate(Yaml::parse(file_get_contents($template->uri)));
     }
   }
 }

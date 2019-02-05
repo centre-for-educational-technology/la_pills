@@ -1,0 +1,4 @@
+services:
+  la_pills.sesion_template_manager:
+    class: Drupal\la_pills\SessionTemplateManager
+    arguments: ['@database', '@uuid']

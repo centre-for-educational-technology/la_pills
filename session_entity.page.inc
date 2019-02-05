@@ -34,7 +34,7 @@ function template_preprocess_session_entity(array &$variables) {
   $variables['session_entity_template'] = $session_entity->getSessionTemplateData();
   $variables['session_entity_replacements'] = [
     '{{website}}' => '<a href="' . $websiteUrl. '" target="_blank">' . $websiteUrl. '</a>',
-    '{{dashboard}}' => '<a href="' . $dashboardUrl . '" target="_blank">' . t('dashboard') . '</a>',
+    '{{dashboard}}' => '<a href="' . $dashboardUrl . '">' . t('dashboard') . '</a>',
   ];
 
   if ($variables['session_entity_template'] && $variables['session_entity_template']['questionnaires']) {

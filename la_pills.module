@@ -1,7 +1,6 @@
 <?php
 
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
@@ -21,52 +20,17 @@ function la_pills_theme($existing) {
 }
 
 /**
- * Returns an array of all available session templates.
- * @return array
- */
-function la_pills_get_session_templates() {
-  $connection = \Drupal::database();
-
-  $query = $connection->select('session_template', 'st', [
-    'fetch' => 'Drupal\la_pills\FetchClass\SessionTemplate'
-  ]);
-  $query->fields('st', ['uuid', 'data',]);
-
-  $result = $query->execute();
-
-  return $result->fetchAll();
-}
-
-/**
- * Returns single session template object.
- * @param  string $uuid Session template unique identifier
- * @return Drupal\la_pills\FetchClass\SessionTemplate
- */
-function la_pills_get_session_template($uuid) {
-  $connection = \Drupal::database();
-
-  $query = $connection->select('session_template', 'st', [
-    'fetch' => 'Drupal\la_pills\FetchClass\SessionTemplate'
-  ]);
-  $query->fields('st', ['uuid', 'data',]);
-  $query->condition('st.uuid', $uuid, '=');
-
-  // TODO Need to add a handler that will check if sessions exists
-  $result = $query->execute();
-
-  return $result->fetch();
-}
-
-/**
  * Callback that returns options for all available session template options.
  * @param  BaseFieldDefinition $definition [description]
  * @param  [type]              $entity     [description]
  * @param  [type]              $cacheable  [description]
  * @return array
  */
-function _la_pills_session_template_vallowed_values(BaseFieldDefinition $definition, ContentEntityInterface $entity = NULL, $cacheable) {
+function _la_pills_session_template_allowed_values(BaseFieldDefinition $definition, ContentEntityInterface $entity = NULL, $cacheable) {
+  $manager = \Drupal::service('la_pills.sesion_template_manager');
+
   $options = [];
-  $templates = la_pills_get_session_templates();
+  $templates = $manager->getTemplates();
 
   foreach ($templates as $template) {
     $options[$template->uuid] = $template->getData()['context']['title'] . '<p>' . $template->getData()['context']['description']. '</p>';

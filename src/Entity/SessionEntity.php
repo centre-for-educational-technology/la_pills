@@ -174,8 +174,8 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
    * {@inheritdoc}
    */
   public function getSessionTemplateData() {
-    // TODO This should use a service so that each of the templates would only be fetched once
-    return la_pills_get_session_template($this->getEntityKey('template'))->getData();
+    $manager = \Drupal::service('la_pills.sesion_template_manager');
+    return $manager->getTemplate($this->getEntityKey('template'))->getData();
   }
 
   /**
@@ -254,7 +254,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
         ->setSettings([
           'max_length' => 50,
           'text_processing' => 0,
-          'allowed_values_function' => '_la_pills_session_template_vallowed_values',
+          'allowed_values_function' => '_la_pills_session_template_allowed_values',
         ])
         ->setDefaultValue('')
         ->setDisplayOptions('view', [
