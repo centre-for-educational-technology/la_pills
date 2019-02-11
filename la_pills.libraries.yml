@@ -13,3 +13,4 @@ session_entity:
   dependencies:
     - core/drupal
     - core/jquery
+    - core/drupalSettings
