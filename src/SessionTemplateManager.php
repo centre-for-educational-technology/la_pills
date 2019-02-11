@@ -22,12 +22,14 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
 
   /**
    * Database connection
+   *
    * @var Drupal\Core\Database\Connection
    */
   protected $connection;
 
   /**
    * Uuid service
+   *
    * @var Drupal\Component\Uuid\Php
    */
   protected $uuid;

@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Drupal\Component\Utility\Random;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Database\Connection;
 
 /**
  * Class SessionEntityController.
@@ -17,21 +19,48 @@ use Symfony\Component\HttpFoundation\Request;
 class SessionEntityController extends ControllerBase {
 
   /**
-   * Title.
+   * Database connection
+   *
+   * @var Drupal\Core\Database\Connection
+   */
+  protected $connection;
+
+  /**
+   * Controller constructor
+   *
+   * @param Drupal\Core\Database\Connection $connection
+   *   Database connection
+   */
+  public function __construct(Connection $connection) {
+    $this->connection = $connection;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    $connection = $container->get('database');
+
+    return new static($connection);
+  }
+
+  /**
+   * Returns title for dashboard page
    *
    * @return string
-   *   Return Hello string.
+   *   Title text
    */
   public function dashboardTitle() {
     return 'Dashboard';
   }
+
   /**
-   * Content.
+   * Returns dashboard page structure
    *
-   * @return string
-   *   Return Hello string.
+   * @return array
+   *   Content structure
    */
-  public function dashboard(RouteMatchInterface $route_match) {
+  public function dashboard() {
     return [
       '#theme' => 'session_entity_dashboard',
       '#type' => 'markup',
@@ -39,18 +68,31 @@ class SessionEntityController extends ControllerBase {
     ];
   }
 
+  /**
+   * Returns title for questionnaire page
+   *
+   * @return string
+   *   Title text
+   */
   public function questionnaireTitle() {
     return 'Questionnaire';
   }
 
+  /**
+   * Responds with JOSN data for questionnaire answer count
+   *
+   * @param Drupal\la_pills\Entity\SessionEntity $session_entity
+   *   Session Entity object
+   *
+   * @return Symfony\Component\HttpFoundation\JsonResponse
+   *   JSON response with data
+   */
   public function restQuestionnaireCount(SessionEntity $session_entity) {
     if (!$session_entity->access('update')) {
       return new JsonResponse([], 403);
     }
 
-    $connection = \Drupal::database();
-
-    $query = $connection->select('session_questionnaire_answer', 'sqa');
+    $query = $this->connection->select('session_questionnaire_answer', 'sqa');
 
     $query->condition('sqa.session_entity_uuid', $session_entity->uuid(), '=');
     $query->addField('sqa', 'questionnaire_uuid', 'uuid');
@@ -62,6 +104,17 @@ class SessionEntityController extends ControllerBase {
     return new JsonResponse($result->fetchAll());
   }
 
+  /**
+   * Triggers file download with all the answers for a Session Entity
+   *
+   * @param Drupal\la_pills\Entity\SessionEntity $session_entity
+   *   Session Entity object
+   * @param Symfony\Component\HttpFoundation\Request       $request
+   *   Request object
+   *
+   * @return Symfony\Component\HttpFoundation\Response
+   *   Response object
+   */
   public function downloadAnswers(SessionEntity $session_entity, Request $request) {
     // TODO Need to make sure that downloading answers has more protection
     // Permission check is the best way forward
@@ -72,9 +125,7 @@ class SessionEntityController extends ControllerBase {
       return new Response('', Response::HTTP_FORBIDDEN);
     }*/
 
-    $connection = \Drupal::database();
-
-    $query = $connection->select('session_questionnaire_answer', 'sqa');
+    $query = $this->connection->select('session_questionnaire_answer', 'sqa');
 
     $query->condition('sqa.session_entity_uuid', $session_entity->uuid(), '=');
     $query->fields('sqa', ['questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'answer', 'created',]);

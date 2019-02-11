@@ -66,7 +66,7 @@ class SessionEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
-   * Gets the settings form route.
+   * Gets the dashboard page route.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
    *   The entity type.
@@ -100,7 +100,7 @@ class SessionEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
-   * Gets the settings form route.
+   * Gets the questionnaire form route.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
    *   The entity type.

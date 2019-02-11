@@ -14,8 +14,6 @@ use Drupal\Core\Session\AccountInterface;
  */
 interface SessionEntityInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
 
-  // Add get/set methods for your configuration properties here.
-
   /**
    * Gets the LA Pills Session name.
    *
@@ -75,10 +73,40 @@ interface SessionEntityInterface extends ContentEntityInterface, EntityChangedIn
    */
   public function setPublished($published);
 
+  /**
+   * Returns active status indicator.
+   *
+   * @return bool TRUE is entity is active
+   */
   public function isActive();
 
+  /**
+   * Sets the active status of an entity.
+   *
+   * @param bool $active
+   *   TRUE to set entity as active, FALSE to set it as inactive.
+   *
+   * @return \Drupal\la_pills\Entity\SessionEntityInterface
+   *   Entity object
+   */
   public function setActive($active);
 
+  /**
+   * Determines if account is the owner of an entity.
+   *
+   * @param Drupal\Core\Session\AccountInterface $account
+   *   User account
+   *
+   * @return bool
+   *   TRUE if owner, FLSE if not
+   */
   public function isOwner(AccountInterface $account);
+
+  /**
+   * Returns chosen Session Template
+   * @return array
+   *   Session Template data structure
+   */
+  public function getSessionTemplateData();
 
 }
