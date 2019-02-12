@@ -15,9 +15,11 @@
  * @ingroup themeable
  */
 #}
-<div{{ attributes.addClass('session_entity') }}>
-  {% if content %}
-    {#{{- content -}}#}
+<div{{ attributes.addClass('session-entity') }}>
+  {% if actions %}
+    <div class="actions">
+      {{- actions -}}
+    </div>
   {% endif %}
 
   {% if session_entity_template and session_entity_template['goals'] %}

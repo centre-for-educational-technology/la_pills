@@ -5,6 +5,7 @@ namespace Drupal\la_pills;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Link;
+use Drupal\la_pills\RenderableHelper;
 
 /**
  * Defines a class to build a listing of LA Pills Session entities.
@@ -37,12 +38,7 @@ class SessionEntityListBuilder extends EntityListBuilder {
     $row['session_template'] = $entity->getSessionTemplateData()['context']['title'];
     $row['answers'] = '';
     if ($entity->access('update')) {
-      $row['answers'] = Link::createFromRoute(
-        $this->t('Download'),
-        'session_entity.download_answers',
-        ['session_entity' => $entity->id()],
-        ['query' => ['token' => $entity->uuid()]]
-      );
+      $row['answers'] = RenderableHelper::downloadAnswersLink($entity);
     }
     return $row + parent::buildRow($entity);
   }

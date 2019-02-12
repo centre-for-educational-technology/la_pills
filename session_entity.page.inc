@@ -8,6 +8,7 @@
  */
 
 use Drupal\Core\Render\Element;
+use Drupal\la_pills\RenderableHelper;
 
 /**
  * Prepares variables for LA Pills Session templates.
@@ -26,6 +27,10 @@ function template_preprocess_session_entity(array &$variables) {
   // Helpful $content variable for templates.
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  if ($session_entity->access('update')) {
+    $variables['actions']['download_answers'] = RenderableHelper::downloadAnswersLink($session_entity)->toRenderable();
   }
 
   $websiteUrl = $session_entity->toUrl('canonical', ['absolute' => TRUE,])->toString();
