@@ -21,8 +21,8 @@ interface SessionTemplateManagerInterface {
    * @param  string $uuid
    *   Session template unique identifier
    *
-   * @return Drupal\la_pills\FetchClass\SessionTemplate
-   *   Session Template
+   * @return Drupal\la_pills\FetchClass\SessionTemplate|NULL
+   *   Session Template or NULL if one does not exist
    */
   public function getTemplate(string $uuid);
 

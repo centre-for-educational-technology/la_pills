@@ -4,6 +4,7 @@ namespace Drupal\la_pills;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Component\Uuid\Php as Uuid;
+use Drupal\la_pills\FetchClass\SessionTemplate;
 
 /**
  * Class SessionTemplateManager.
@@ -14,11 +15,6 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
    * Session template table
    */
   const SESSION_TEMPLATE_TABLE = 'session_template';
-
-  /**
-   * Session template class
-   */
-  const SESSION_TEMPLATE_FETCH_CLASS = 'Drupal\la_pills\FetchClass\SessionTemplate';
 
   /**
    * Database connection
@@ -46,30 +42,44 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
    * {@inheritdoc}
    */
   public function getTemplates() {
-    $query = $this->connection->select(self::SESSION_TEMPLATE_TABLE, 'st', [
-      'fetch' => self::SESSION_TEMPLATE_FETCH_CLASS,
-    ]);
-    $query->fields('st', ['uuid', 'data',]);
+    $templates = &drupal_static(__METHOD__);
 
-    $result = $query->execute();
+    if (!isset($templates)) {
+      $query = $this->connection->select(self::SESSION_TEMPLATE_TABLE, 'st', [
+        'fetch' => SessionTemplate::class,
+      ]);
+      $query->fields('st', ['uuid', 'data',]);
 
-    return $result->fetchAll();
+      $result = $query->execute();
+
+      $templates = $result->fetchAll();
+    }
+
+    return $templates;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getTemplate(string $uuid) {
-    $query = $this->connection->select(self::SESSION_TEMPLATE_TABLE, 'st', [
-      'fetch' => self::SESSION_TEMPLATE_FETCH_CLASS,
-    ]);
-    $query->fields('st', ['uuid', 'data',]);
-    $query->condition('st.uuid', $uuid, '=');
+    // TODO See if it would make sense to always fetch all the templates and then extract the required one
+    // This would make sure that there are no duplicates
+    $templates = &drupal_static(__METHOD__);
 
-    // TODO Need to add a handler that will check if sessions exists
-    $result = $query->execute();
+    if (!isset($templates[$uuid])) {
+      $query = $this->connection->select(self::SESSION_TEMPLATE_TABLE, 'st', [
+        'fetch' => SessionTemplate::class,
+      ]);
+      $query->fields('st', ['uuid', 'data',]);
+      $query->condition('st.uuid', $uuid, '=');
 
-    return $result->fetch();
+      // TODO Need to add a handler that will check if sessions exists
+      $result = $query->execute();
+
+      $templates[$uuid] = $result->fetch();
+    }
+
+    return $templates[$uuid];
   }
 
   /**
