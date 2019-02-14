@@ -12,6 +12,9 @@ Please do not use it in production environment.
 
 * Setup Drupal 8 instance
 * Go to `DRUPAL_ROOT/modules` and run `git clone git@github.com:centre-for-educational-technology/la_pills.git`
+* Make sure that required libraries are installed in `DRUPAL_WEB_ROOT/libraries`. Use `la_pills.libraries.yml` as a source for information
+  - [d3.js](https://d3js.org/) in `libraries/d3` with only `d3.min.js` being used
+  - [c3.js](https://c3js.org/) in `libraries/c3` with only `c3.min.js` and `c3.min.css` being used
 * Go into administration and activate the module
 * Visit `structure/session_entity` for the list of available sessions and their management
 * It would be needed to configure the permissions in order for certain user roles to have access to pages

@@ -60,7 +60,48 @@ class SessionEntityController extends ControllerBase {
    * @return array
    *   Content structure
    */
-  public function dashboard() {
+  public function dashboard(SessionEntity $session_entity) {
+    $structure = $session_entity->getSessionTemplateData();
+    $response['dashboard'] = [
+      '#attached' => [
+        'library' => [
+          'la_pills/session_entity_dashboard'
+        ],
+      ],
+    ];
+
+    foreach ($structure['questionnaires'] as $questionnaire) {
+      $response_count = 90; // XXX This should not be hard-coded
+      $response[$questionnaire['uuid']] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['questionnaire'],
+        ],
+      ];
+      $response[$questionnaire['uuid']]['heading'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h2',
+        '#value' => $questionnaire['title'] . (($response_count > 0) ? ' (' . $response_count . ')' : ''),
+      ];
+
+      foreach ($questionnaire['questions'] as $question) {
+        $response[$questionnaire['uuid']][$question['uuid']] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['question'],
+            'data-question-type' => str_replace(' ', '-', strtolower($question['type'])),
+            'data-uuid' => 'question-' . $questionnaire['uuid'] . '-' . $question['uuid'],
+          ],
+        ];
+        $response[$questionnaire['uuid']][$question['uuid']]['heading'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'h3',
+          '#value' => $question['title'],
+        ];
+      }
+    }
+
+    return $response;
     return [
       '#theme' => 'session_entity_dashboard',
       '#type' => 'markup',

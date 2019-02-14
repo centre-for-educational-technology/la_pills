@@ -12,10 +12,6 @@ function la_pills_theme($existing) {
       'render element' => 'elements',
       'file' => 'session_entity.page.inc',
     ],
-    'session_entity_dashboard' => [
-      'variables' => [],
-      'template' => 'session-entity--dashboard',
-    ],
   ];
 }
 

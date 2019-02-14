@@ -1,3 +1,26 @@
+d3:
+  remote: https://github.com/d3/d3
+  version: 5.9.1
+  license:
+    name: BSD-3
+    url: https://github.com/d3/d3/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    /libraries/d3/d3.min.js: {}
+c3:
+  remote: https://github.com/c3js/c3
+  version: 0.6.12
+  license:
+    name: MIT
+    url: https://github.com/c3js/c3/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    /libraries/c3/c3.min.js: {}
+  css:
+    theme:
+      /libraries/c3/c3.min.css: {}
+  dependencies:
+    - la_pills/d3
 questionnaire:
     version: 1.x
     css:
@@ -14,3 +37,15 @@ session_entity:
     - core/drupal
     - core/jquery
     - core/drupalSettings
+session_entity_dashboard:
+  version: 1.x
+  js:
+    js/session-entity-dashboard.js: {}
+  css:
+    theme:
+      css/session-entity-dashboard.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
+    - la_pills/c3
