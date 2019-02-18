@@ -1,3 +1,7 @@
 .questionnaire .question .graph {
   height: 200px;
 }
+
+table.responses.long-text tbody td {
+  white-space: pre;
+}

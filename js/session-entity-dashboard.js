@@ -3,65 +3,65 @@
     attach: function (context, settings) {
       if (context !== window.document) return;
 
-      var questions = $('.questionnaire .question', context);
-      questions.each(function(index, element) {
-        var $element = $(element);
-        var type = $element.data('question-type');
-        var graphid = 'graph-' + $element.data('uuid');
+      $.each(settings.laPillsSessionEntityDashboardData, function(questionnaireUuid, questions) {
+        $.each(questions, function(questionUuid, data) {
+          var $element = $('#'+data.id, context);
+          var graphid = 'graph-' + data.id;
 
-        if (type === 'multi-choice') {
-          $('<div>', {
-            id: graphid,
-            class: 'graph'
-          }).appendTo($element).ready(function() {
-            var chart = c3.generate({
-              bindto: '#' + graphid,
-              data: {
-                columns: [
-                  ['data1', 30],
-                  ['data2', 50]
-                ],
-                type: 'pie'
-              }
+          if (data.type === 'multi-choice') {
+            $('<div>', {
+              id: graphid,
+              class: 'graph'
+            }).appendTo($element).ready(function() {
+              var chart = c3.generate({
+                bindto: '#' + graphid,
+                data: {
+                  columns: data.options.map(function(option) {
+                    return [option, data.counts[option]];
+                  }),
+                  type: 'pie'
+                }
+              });
             });
-          });
-        } else if (type === 'checkboxes') {
-          $('<div>', {
-            id: graphid,
-            class: 'graph'
-          }).appendTo($element).ready(function() {
-            var chart = c3.generate({
-              bindto: '#' + graphid,
-              data: {
-                columns: [
-                  ['data1', 30],
-                  ['data2', 50]
-                ],
-                type: 'bar'
-              }
+          } else if (data.type === 'checkboxes') {
+            $('<div>', {
+              id: graphid,
+              class: 'graph'
+            }).appendTo($element).ready(function() {
+              var chart = c3.generate({
+                bindto: '#' + graphid,
+                data: {
+                  columns: data.options.map(function(option) {
+                    return [option, data.counts[option]];
+                  }),
+                  type: 'bar'
+                }
+              });
             });
-          });
-        } else if (type === 'scale') {
-          $('<div>', {
-            id: graphid,
-            class: 'graph'
-          }).appendTo($element).ready(function() {
-            var chart = c3.generate({
-              bindto: '#' + graphid,
-              data: {
-                columns: [
-                  ['data1', 130, 100, 140, 200, 150, 50],
-                ],
-                type: 'area-step'
-              },
-              legend: {
-                show: false
-              }
+          } else if (data.type === 'scale') {
+            $('<div>', {
+              id: graphid,
+              class: 'graph'
+            }).appendTo($element).ready(function() {
+              var chart = c3.generate({
+                bindto: '#' + graphid,
+                data: {
+                  columns: [
+                    ['data'].concat(Object.values(data.counts)),
+                  ],
+                  types: {
+                    data: 'area-step'
+                  }
+                },
+                legend: {
+                  show: false
+                }
+              });
             });
-          });
-        } else {
-          console.warn('Unhandled graph type:', type);
-        }
+          } else {
+            console.warn('Unhandled graph type:', data.type);
+          }
+        });
       });
     }
   };
