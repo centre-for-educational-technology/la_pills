@@ -90,7 +90,7 @@ class SessionEntityController extends ControllerBase {
    */
   private function geQuestionAnswerCounts(string $session_entity_uuid, string $questionnaire_uuid, string $question_uuid) {
     $query = $this->connection->select('session_questionnaire_answer', 'sqa')
-    ->fields('sqa', ['question_uuid', 'answer'])
+    ->fields('sqa', ['answer'])
     ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
     ->condition('sqa.questionnaire_uuid', $questionnaire_uuid, '=')
     ->condition('sqa.question_uuid', $question_uuid, '=')
