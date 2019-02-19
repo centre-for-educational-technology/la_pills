@@ -1,7 +1,18 @@
 .questionnaire .question .graph {
-  height: 200px;
+  height: 300px;
 }
 
 table.responses.long-text tbody td {
-  white-space: pre;
+  white-space: pre-wrap;
+}
+
+table.responses.has-answers > thead {
+  cursor: pointer;
+}
+
+table.responses.has-answers.show-more > tbody {
+  display: block;
+  overflow: hidden;
+  max-height: 25px;
+  opacity: 0.5;
 }

@@ -352,12 +352,14 @@ class SessionEntityController extends ControllerBase {
         if ($question_type === 'short-text' || $question_type === 'long-text') {
           $answers = $this->getQuestionAnswers($session_entity->uuid(), $questionnaire['uuid'], $question['uuid']);
           $this->answersToTableRows($answers);
+          $has_answers = sizeof($answers) > 0;
+
           $response[$questionnaire['uuid']][$question['uuid']]['table'] = [
             '#type' => 'table',
             '#attributes' => [
-              'class' => ['responses', $question_type],
+              'class' => ['responses', $question_type, $has_answers ? 'has-answers' : 'no-answers'],
             ],
-            '#header' => [$this->t('Responses')],
+            '#header' => [$this->t('Responses') . ($has_answers ? ' (' . sizeof($answers) . ')' : '')],
             '#rows' => $answers,
           ];
         } else if ($this->isGraphableQuestionType($question_type)) {
