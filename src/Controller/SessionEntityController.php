@@ -148,20 +148,84 @@ class SessionEntityController extends ControllerBase {
   }
 
   /**
-   * Adds missing options with vaue of
+   * Returns answer counts for all questions based on their presenc in the
+   * database. Only elements that have any answers are present on both question
+   * and questionnaire level.
+   *
+   * @param  string $session_entity_uuid
+   *   Session Entity UUID
+   * @param  array  $question_uuids
+   *   Suitable question UUIDs
+   *
+   * @return array
+   *   Multidimensional array with data $questionnaire_uuid => (array)$question_uuid => (array)$answer => $count
+   */
+  private function getAllQuestionsAnswerCounts(string $session_entity_uuid, array $question_uuids) {
+    $data = [];
+
+    if (sizeof($question_uuids) === 0) {
+      return $data;
+    }
+
+    $query = $this->connection->select('session_questionnaire_answer', 'sqa')
+    ->fields('sqa', ['questionnaire_uuid', 'question_uuid', 'answer'])
+    ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
+    ->condition('sqa.question_uuid', $question_uuids, 'IN')
+    ->groupBy('sqa.questionnaire_uuid, sqa.question_uuid, sqa.answer');
+    $query->addExpression('COUNT(sqa.answer)', 'count');
+
+    $counts = $query->execute()->fetchAll();
+
+    if (sizeof($counts) > 0) {
+      foreach ($counts as $count) {
+        $data[$count->questionnaire_uuid][$count->question_uuid][$count->answer] = (int)$count->count;
+      }
+    }
+
+    return $data;
+  }
+
+  /**
+   * Extracts UUID identifiers for all the graphable questions
+   *
+   * @param  array  $questionnaires
+   *   Array of questionnaire structural objects
+   *
+   * @return array
+   *   UUID identifiers of suitable questions
+   */
+  private function extractGraphableQuestionUuids(array $questionnaires) {
+    $uuids = [];
+
+    foreach ($questionnaires as $questionnaire) {
+      foreach ($questionnaire['questions'] as $question) {
+        if ($this->isGraphableQuestionType($question['type'])) {
+          $uuids[] = $question['uuid'];
+        }
+      }
+    }
+
+    return $uuids;
+  }
+
+  /**
+   * Adds missing options with vaue of (also makes sure that original options
+   * order is preserved)
    *
    * @param array $counts
    *   Answer counts data
    *
    * @param array $options
-   *   All available options
+   *   All available options with counts
    */
-  private function addMissingOptions(array &$counts, array $options) {
-    array_walk($options, function($option, $key) use (&$counts) {
-      if (!array_key_exists($option, $counts)) {
-        $counts[$option] = 0;
-      }
+  private function addMissingOptionsToCounts(array &$counts, array $options) {
+    $tmp = [];
+
+    array_walk($options, function($option, $key) use (&$tmp, &$counts) {
+      $tmp[(string)$option] = (array_key_exists($option, $counts)) ? $counts[$option] : 0;
     });
+
+    $counts = $tmp;
   }
 
   /**
@@ -217,6 +281,18 @@ class SessionEntityController extends ControllerBase {
   }
 
   /**
+   * Determines if provided question type is useble for showing graphs
+   * @param  string  $type
+   *   Question type
+   * @return boolean
+   */
+  private function isGraphableQuestionType(string $type) {
+    $type = $this->processQuestionType($type);
+
+    return in_array($type, ['multi-choice', 'checkboxes', 'scale']);
+  }
+
+  /**
    * Returns dashboard page structure
    *
    * @return array
@@ -235,8 +311,12 @@ class SessionEntityController extends ControllerBase {
     $jsData = [];
 
     $submissions_counts = $this->getAllQuestionnairesSubmissionsCounts($session_entity->uuid());
+    $graphable_uuids = $this->extractGraphableQuestionUuids($structure['questionnaires']);
+    $all_graphable_counts = $this->getAllQuestionsAnswerCounts($session_entity->uuid(), $graphable_uuids);
 
+    $questionnaire_index = 0;
     foreach ($structure['questionnaires'] as $questionnaire) {
+      $questionnaire_index++;
       $response_count = (isset($submissions_counts[$questionnaire['uuid']])) ? $submissions_counts[$questionnaire['uuid']] : 0;
 
       $response[$questionnaire['uuid']] = [
@@ -248,10 +328,12 @@ class SessionEntityController extends ControllerBase {
       $response[$questionnaire['uuid']]['heading'] = [
         '#type' => 'html_tag',
         '#tag' => 'h2',
-        '#value' => $questionnaire['title'] . (($response_count > 0) ? ' (' . $response_count . ')' : ''),
+        '#value' => $questionnaire_index . '. ' . $questionnaire['title'] . (($response_count > 0) ? ' (' . $response_count . ')' : ''),
       ];
 
+      $question_index = 0;
       foreach ($questionnaire['questions'] as $question) {
+        $question_index++;
         $question_type = $this->processQuestionType($question['type']);
 
         $response[$questionnaire['uuid']][$question['uuid']] = [
@@ -264,7 +346,7 @@ class SessionEntityController extends ControllerBase {
         $response[$questionnaire['uuid']][$question['uuid']]['heading'] = [
           '#type' => 'html_tag',
           '#tag' => 'h3',
-          '#value' => $question['title'],
+          '#value' => $questionnaire_index . '.' . $question_index . ' ' . $question['title'],
         ];
 
         if ($question_type === 'short-text' || $question_type === 'long-text') {
@@ -278,11 +360,10 @@ class SessionEntityController extends ControllerBase {
             '#header' => [$this->t('Responses')],
             '#rows' => $answers,
           ];
-        } else if ($question_type === 'multi-choice' || $question_type === 'checkboxes' || $question_type === 'scale') {
-          // TODO This should be combined into a single query that would get the data on counts
+        } else if ($this->isGraphableQuestionType($question_type)) {
           $options = ($question_type !== 'scale') ? $question['options'] : range($question['min'], $question['max'], 1);
-          $counts = $this->geQuestionAnswerCounts($session_entity->uuid(), $questionnaire['uuid'], $question['uuid']);
-          $this->addMissingOptions($counts, $options);
+          $counts = (isset($all_graphable_counts[$questionnaire['uuid']][$question['uuid']])) ? $all_graphable_counts[$questionnaire['uuid']][$question['uuid']] : [];
+          $this->addMissingOptionsToCounts($counts, $options);
 
           $jsData[$questionnaire['uuid']][$question['uuid']] = [
             'id' =>'question-' . $questionnaire['uuid'] . '-' . $question['uuid'],
@@ -294,7 +375,6 @@ class SessionEntityController extends ControllerBase {
       }
     }
 
-    // XXX Answers do not really have any indexes set on them, that would make queries slow
     $response['#attached']['drupalSettings']['laPillsSessionEntityDashboardData'] = $jsData;
 
     return $response;
