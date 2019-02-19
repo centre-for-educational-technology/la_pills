@@ -55,7 +55,7 @@ class SessionEntityController extends ControllerBase {
   }
 
   /**
-   * Get count of unique form submissions to a questionnaire
+   * Returns count of unique form submissions to a questionnaire
    *
    * @param  string $session_entity_uuid
    *   Session Entity UUID
@@ -65,7 +65,7 @@ class SessionEntityController extends ControllerBase {
    * @return int
    *   Count of unique form submissions
    */
-  private function getQuestionnaireAnswersCount(string $session_entity_uuid, string $questionnaire_uuid) {
+  private function getQuestionnaireSubmissionsCount(string $session_entity_uuid, string $questionnaire_uuid) {
     return (int)$this->connection->select('session_questionnaire_answer', 'sqa')
     ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
     ->condition('sqa.questionnaire_uuid', $questionnaire_uuid, '=')
@@ -73,6 +73,51 @@ class SessionEntityController extends ControllerBase {
     ->countQuery()
     ->execute()
     ->fetchField();
+  }
+
+  /**
+   * Returns an array of counts with keys set as certain property value
+   *
+   * @param  string $key
+   *   Property nake to use as key
+   * @param  array  $counts
+   *   Array of count objects
+   *
+   * @return array
+   *   An array with $key => $count
+   */
+  private static function rekeyCountsBy(string $key, array $counts) {
+    $data = [];
+
+    if (sizeof($counts) > 0) {
+      foreach ($counts as $count) {
+        $data[$count->{$key}] = (int)$count->count;
+      }
+    }
+
+    return $data;
+  }
+
+  /**
+   * Returns counts of unique form submissions to all questionnaires that have
+   * been answered at least once.
+   *
+   * @param  string $session_entity_uuid
+   *   Session Entity UUID
+   *
+   * @return array
+   *   An array of $questionnaire_uuid => $count
+   */
+  private function getAllQuestionnairesSubmissionsCounts(string $session_entity_uuid) {
+    $query = $this->connection->select('session_questionnaire_answer', 'sqa')
+    ->fields('sqa', ['questionnaire_uuid'])
+    ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
+    ->groupBy('sqa.questionnaire_uuid');
+    $query->addExpression('COUNT(DISTINCT sqa.form_build_id)', 'count');
+
+    $counts = $query->execute()->fetchAll();
+
+    return self::rekeyCountsBy('questionnaire_uuid', $counts);
   }
 
   /**
@@ -99,14 +144,7 @@ class SessionEntityController extends ControllerBase {
 
     $counts = $query->execute()->fetchAll();
 
-    $data = [];
-    if (sizeof($counts) > 0) {
-      foreach ($counts as $count) {
-        $data[$count->answer] = (int)$count->count;
-      }
-    }
-
-    return $data;
+    return self::rekeyCountsBy('answer', $counts);
   }
 
   /**
@@ -196,9 +234,10 @@ class SessionEntityController extends ControllerBase {
 
     $jsData = [];
 
+    $submissions_counts = $this->getAllQuestionnairesSubmissionsCounts($session_entity->uuid());
+
     foreach ($structure['questionnaires'] as $questionnaire) {
-      // TODO Make a single query to fetch counts for all questionnaires
-      $response_count = $this->getQuestionnaireAnswersCount($session_entity->uuid(), $questionnaire['uuid']);
+      $response_count = (isset($submissions_counts[$questionnaire['uuid']])) ? $submissions_counts[$questionnaire['uuid']] : 0;
 
       $response[$questionnaire['uuid']] = [
         '#type' => 'container',
