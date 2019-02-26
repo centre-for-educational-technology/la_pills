@@ -4,6 +4,7 @@ namespace Drupal\la_pills\Form;
 
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\la_pills\FetchClass\SessionTemplate;
 
 /**
  * Class SessionEntityQUestionnaireForm.
@@ -44,25 +45,25 @@ class SessionEntityQuestionnaireForm extends EntityForm {
         '#required' => ($question['required'] === 'Yes') ? TRUE : FALSE
       ];
 
-      switch($question['type']) {
-        case 'Short text':
+      switch(SessionTemplate::processQuestionType($question['type'])) {
+        case 'short-text':
         $structure['#type'] = 'textfield';
         break;
-        case 'Long text':
+        case 'long-text':
         $structure['#type'] = 'textarea';
         $structure['#rows'] = 5;
         break;
-        case 'Scale':
+        case 'scale':
         $range = range($question['min'], $question['max']);
         $structure['#type'] = 'radios';
         $structure['#options'] = array_combine($range, $range);
         $structure['#attributes']['class'] = ['scale'];
         break;
-        case 'Multi-choice':
+        case 'multi-choice':
         $structure['#type'] = 'radios';
         $structure['#options'] = array_combine($question['options'], $question['options']);
         break;
-        case 'Checkboxes':
+        case 'checkboxes':
         $structure['#type'] = 'checkboxes';
         $structure['#options'] = array_combine($question['options'], $question['options']);
         break;
@@ -77,7 +78,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     ];
 
     if (!($this->entity->isPublished() && $this->entity->isActive())) {
-      drupal_set_message($this->t('Current session is either unpublished or set to be inactive. Questionnaires can not be answerd!'), 'warning');
+      \Drupal::messenger()->addMessage($this->t('Current session is either unpublished or set to be inactive. Questionnaires can not be answerd!'), 'warning');
       $form['submit']['#attributes']['disabled'] = 'disabled';
     }
 
@@ -140,8 +141,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     }
     $query->execute();
 
-    drupal_set_message($this->t('Thanks you for responding to this questionnaire. Please proceed to the <a href="@link">session page</a>.', ['@link' => $this->entity->toUrl('canonical', ['absolute' => TRUE,])->toString()]));
-
+    \Drupal::messenger()->addMessage($this->t('Thanks you for responding to this questionnaire. Please proceed to the <a href="@link">session page</a>.', ['@link' => $this->entity->toUrl('canonical', ['absolute' => TRUE,])->toString()]));
   }
 
 }

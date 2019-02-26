@@ -12,6 +12,7 @@ use Drupal\Component\Utility\Random;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\la_pills\FetchClass\SessionTemplate;
 
 /**
  * Class SessionEntityController.
@@ -268,26 +269,13 @@ class SessionEntityController extends ControllerBase {
   }
 
   /**
-   * Converts question type text to lowercase and replaces spaces with dashes.
-   *
-   * @param  string $type
-   *   Question type
-   *
-   * @return string
-   *   Processed question type
-   */
-  private static function processQuestionType(string $type) {
-    return str_replace(' ', '-', strtolower($type));
-  }
-
-  /**
    * Determines if provided question type is useble for showing graphs
    * @param  string  $type
    *   Question type
    * @return boolean
    */
   private function isGraphableQuestionType(string $type) {
-    $type = $this->processQuestionType($type);
+    $type = SessionTemplate::processQuestionType($type);
 
     return in_array($type, ['multi-choice', 'checkboxes', 'scale']);
   }
@@ -334,7 +322,7 @@ class SessionEntityController extends ControllerBase {
       $question_index = 0;
       foreach ($questionnaire['questions'] as $question) {
         $question_index++;
-        $question_type = $this->processQuestionType($question['type']);
+        $question_type = SessionTemplate::processQuestionType($question['type']);
 
         $response[$questionnaire['uuid']][$question['uuid']] = [
           '#type' => 'container',

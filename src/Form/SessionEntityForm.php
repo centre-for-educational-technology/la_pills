@@ -38,13 +38,13 @@ class SessionEntityForm extends ContentEntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label LA Pills Session.', [
+        \Drupal::messenger()->addMessage($this->t('Created the %label LA Pills Session.', [
           '%label' => $entity->label(),
         ]));
         break;
 
       default:
-        drupal_set_message($this->t('Saved the %label LA Pills Session.', [
+        \Drupal::messenger()->addMessage($this->t('Saved the %label LA Pills Session.', [
           '%label' => $entity->label(),
         ]));
     }

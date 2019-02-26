@@ -3,7 +3,7 @@
 namespace Drupal\la_pills\FetchClass;
 
 class SessionTemplate {
-  
+
   /**
    * Holds unserialized data once is requested so that processing is done once at most
    *
@@ -23,6 +23,19 @@ class SessionTemplate {
     }
 
     return $this->processedData;
+  }
+
+  /**
+   * Converts question type text to lowercase and replaces spaces with dashes.
+   *
+   * @param  string $type
+   *   Question type
+   *
+   * @return string
+   *   Processed question type
+   */
+  public static function processQuestionType(string $type) {
+    return str_replace(' ', '-', strtolower(trim($type)));
   }
 
 }
