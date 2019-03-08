@@ -287,6 +287,12 @@ class SessionEntityController extends ControllerBase {
    *   Content structure
    */
   public function dashboard(SessionEntity $session_entity) {
+    // XXX This should better be handled in a centralized manner
+    if (!$session_entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
+      // TODO Need to make sure user is redirected back after a login
+      \Drupal::messenger()->addMessage($this->t('Current session does not allow anonymous responses!'), 'warning');
+      return $this->redirect('user.login');
+    }
     $structure = $session_entity->getSessionTemplateData();
     $response['dashboard'] = [
       '#attached' => [
@@ -432,18 +438,20 @@ class SessionEntityController extends ControllerBase {
     $query->condition('sqa.session_entity_uuid', $session_entity->uuid(), '=');
     $query->fields('sqa', ['questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'answer', 'created',]);
     $query->addExpression('FROM_UNIXTIME(created)', 'created');
+    $query->leftJoin('users', 'u', 'sqa.user_id = u.uid');
+    $query->addExpression('uuid', 'user_uuid');
 
     $result = $query->execute();
 
     $handle = fopen('php://temp', 'wb');
 
-    fputcsv($handle, ['Session title', 'Questionnaire title', 'Question title', 'Question type', 'Session identifier', 'Form submission identifier', 'Answer', 'Created',]);
+    fputcsv($handle, ['Session title', 'Questionnaire title', 'Question title', 'Question type', 'Session identifier', 'Form submission identifier', 'User identifier', 'Answer', 'Created',]);
 
     $template = $session_entity->getSessionTemplateData();
     $salt = Random::string();
 
     while ($row = $result->fetchObject()) {
-      fputcsv($handle, [$session_entity->getName(), $template['questionnaires'][$row->questionnaire_uuid]['title'], $template['questions'][$row->question_uuid]['title'], $template['questions'][$row->question_uuid]['type'], hash('sha256', $row->session_id . $salt), hash('sha256', $row->form_build_id . $salt), $row->answer, $row->created,]);
+      fputcsv($handle, [$session_entity->getName(), $template['questionnaires'][$row->questionnaire_uuid]['title'], $template['questions'][$row->question_uuid]['title'], $template['questions'][$row->question_uuid]['type'], hash('sha256', $row->session_id . $salt), hash('sha256', $row->form_build_id . $salt), $row->user_uuid, $row->answer, $row->created,]);
     }
     rewind($handle);
 

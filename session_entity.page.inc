@@ -9,6 +9,8 @@
 
 use Drupal\Core\Render\Element;
 use Drupal\la_pills\RenderableHelper;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Url;
 
 /**
  * Prepares variables for LA Pills Session templates.
@@ -23,6 +25,14 @@ use Drupal\la_pills\RenderableHelper;
 function template_preprocess_session_entity(array &$variables) {
   // Fetch SessionEntity Entity Object.
   $session_entity = $variables['elements']['#session_entity'];
+
+  // Redirect anonymous user if not allowed (using events might be a bit better solution)
+  if (!$session_entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
+    \Drupal::messenger()->addMessage(t('Current session does not allow anonymous responses!'), 'warning');
+    // TODO Need to make sure user is redirected back after a login
+    $response = new RedirectResponse(Url::fromRoute('user.login')->toString());
+    $response->send();
+  }
 
   // Helpful $content variable for templates.
   foreach (Element::children($variables['elements']) as $key) {

@@ -92,6 +92,24 @@ interface SessionEntityInterface extends ContentEntityInterface, EntityChangedIn
   public function setActive($active);
 
   /**
+   * Returns the value for ananymous users being allowed to participate.
+   *
+   * @return bool TRUE is anonymous users are allowed
+   */
+  public function getAllowAnonymousResponses();
+
+  /**
+   * Sets the value for ananymous users being allowed to participate.
+   *
+   * @param bool $allow_anonymous_responses
+   *   TRUE to set as allowed, FALSE to set it as disallowed.
+   *
+   * @return \Drupal\la_pills\Entity\SessionEntityInterface
+   *   Entity object
+   */
+  public function setAllowAnonymousRespones($allow_anonymous_responses);
+
+  /**
    * Determines if account is the owner of an entity.
    *
    * @param Drupal\Core\Session\AccountInterface $account

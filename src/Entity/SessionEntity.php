@@ -45,6 +45,7 @@ use Drupal\Core\Session\AccountInterface;
  *     "langcode" = "langcode",
  *     "status" = "status",
  *     "active" = "active",
+ *     "allow_anonymous_responses" = "allow_anonymous_responses",
  *     "template" = "template",
  *   },
  *   links = {
@@ -196,6 +197,21 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   /**
    * {@inheritdoc}
    */
+  public function getAllowAnonymousResponses() {
+    return (bool) $this->getEntityKey('allow_anonymous_responses');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setAllowAnonymousRespones($allow_anonymous_responses) {
+    $this->set('allow_anonymous_responses', $allow_anonymous_responses ? TRUE : FALSE);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSessionTemplateData() {
     $manager = \Drupal::service('la_pills.sesion_template_manager');
     return $manager->getTemplate($this->getEntityKey('template'))->getData();
@@ -269,6 +285,15 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
         'weight' => -1,
+      ]);
+
+    $fields['allow_anonymous_responses'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Allow anonymous responses'))
+      ->setDescription(t('A boolean indicating whether the LA Pills Session allows anonymous answers or requires an authenticated user.'))
+      ->setDefaultValue(TRUE)
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+        'weight' => 0,
       ]);
 
       $fields['template'] = BaseFieldDefinition::create('list_string')

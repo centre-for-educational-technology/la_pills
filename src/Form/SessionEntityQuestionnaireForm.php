@@ -5,6 +5,7 @@ namespace Drupal\la_pills\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\la_pills\FetchClass\SessionTemplate;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class SessionEntityQUestionnaireForm.
@@ -20,9 +21,33 @@ class SessionEntityQuestionnaireForm extends EntityForm {
   }
 
   /**
+   * Determines if current user is allowed to answer the questionnaire
+   *
+   * @return boolean
+   */
+  private function canAnswer() {
+    if(!($this->entity->isPublished() && $this->entity->isActive())) {
+      return FALSE;
+    }
+
+    if (!$this->entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // XXX This should better be handled in a centralized manner
+    if (!$this->entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
+      // TODO Need to make sure user is redirected back after a login
+      \Drupal::messenger()->addMessage($this->t('Current session does not allow anonymous responses!'), 'warning');
+      return $this->redirect('user.login');
+    }
+
     $route_match = \Drupal::routeMatch();
 
     $this->questionnaire = $this->entity->getSessionTemplateData()['questionnaires'][$route_match->getParameter('questionnaire_uuid')];
@@ -79,6 +104,9 @@ class SessionEntityQuestionnaireForm extends EntityForm {
 
     if (!($this->entity->isPublished() && $this->entity->isActive())) {
       \Drupal::messenger()->addMessage($this->t('Current session is either unpublished or set to be inactive. Questionnaires can not be answerd!'), 'warning');
+    }
+
+    if (!$this->canAnswer()) {
       $form['submit']['#attributes']['disabled'] = 'disabled';
     }
 
@@ -96,6 +124,10 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    if (!$this->canAnswer()) {
+      return FALSE;
+    }
+
     // Make sure the session exists in case of an anonymous user
     if (\Drupal::currentUser()->isAnonymous() && !\Drupal::request()->getSession()) {
       \Drupal::service('session_manager')->start();
@@ -129,13 +161,14 @@ class SessionEntityQuestionnaireForm extends EntityForm {
           'question_uuid' => $question['uuid'],
           'session_id' => \Drupal::request()->getSession()->getId(),
           'form_build_id' => $values['form_build_id'],
+          'user_id' => (\Drupal::currentUser()->isAnonymous()) ? NULL : \Drupal::currentUser()->id(),
           'answer' => $answer,
           'created' => REQUEST_TIME,
         ];
       }
     }
 
-    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'answer', 'created']);
+    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'user_id', 'answer', 'created']);
     foreach ($records as $record) {
       $query->values($record);
     }
