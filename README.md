@@ -24,6 +24,7 @@ Please do not use it in production environment.
     - View published LA Pills Session entities - ANONYMOUS USER
     - View published LA Pills Session entities - AUTHENTICATED USER
     - View unpublished LA Pills Session entities - AUTHENTICATED USER
+* **NB!** Uninstall the **Internal Page Cache (page_cache)** module to resolve cache issues for Anonymous users
 
 The module is automatically loading any packaged session templates into the database. Please note that it currently only doing that once and it would be needed to **deactivate**, **uninstall** and **reinstall** the module to start afresh in case of any changes.
 That is the currently suggested course of action after any significant code updates that tamper with database (it might be safe to always do that).
