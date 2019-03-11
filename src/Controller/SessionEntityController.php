@@ -287,12 +287,6 @@ class SessionEntityController extends ControllerBase {
    *   Content structure
    */
   public function dashboard(SessionEntity $session_entity) {
-    // XXX This should better be handled in a centralized manner
-    if (!$session_entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
-      // TODO Need to make sure user is redirected back after a login
-      \Drupal::messenger()->addMessage($this->t('Current session does not allow anonymous responses!'), 'warning');
-      return $this->redirect('user.login');
-    }
     $structure = $session_entity->getSessionTemplateData();
     $response['dashboard'] = [
       '#attached' => [

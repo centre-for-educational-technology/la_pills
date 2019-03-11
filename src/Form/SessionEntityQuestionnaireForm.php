@@ -5,7 +5,6 @@ namespace Drupal\la_pills\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\la_pills\FetchClass\SessionTemplate;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class SessionEntityQUestionnaireForm.
@@ -41,13 +40,6 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // XXX This should better be handled in a centralized manner
-    if (!$this->entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
-      // TODO Need to make sure user is redirected back after a login
-      \Drupal::messenger()->addMessage($this->t('Current session does not allow anonymous responses!'), 'warning');
-      return $this->redirect('user.login');
-    }
-
     $route_match = \Drupal::routeMatch();
 
     $this->questionnaire = $this->entity->getSessionTemplateData()['questionnaires'][$route_match->getParameter('questionnaire_uuid')];

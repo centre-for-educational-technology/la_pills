@@ -2,3 +2,8 @@ services:
   la_pills.sesion_template_manager:
     class: Drupal\la_pills\SessionTemplateManager
     arguments: ['@database', '@uuid']
+  la_pills.session_entity_event_subscriber:
+    class: Drupal\la_pills\EventSubscriber\SessionEntityEventSubscriber
+    arguments: ['@current_user', '@messenger', '@string_translation']
+    tags:
+      - { name: event_subscriber }
