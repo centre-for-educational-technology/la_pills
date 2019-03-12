@@ -177,12 +177,20 @@ function la_pills_update_8001() {
     ->setDescription(t('A boolean indicating whether the LA Pills Session allows anonymous answers or requires an authenticated user.'))
     ->setDefaultValue(TRUE)
     ->setInitialValue(TRUE)
-    ->setSetting('not null', TRUE)
     ->setDisplayOptions('form', [
       'type' => 'boolean_checkbox',
       'weight' => 0,
   ]);
-  // This seems to create the field with NULL values allowed (that differs from the NOT NULL logic if just installing the module)
+  // This initially creates field as NULLABLE and requires applying updates.
+  // The line missing is: \Drupal::entityDefinitionUpdateManager()->applyUpdates();
   \Drupal::entityDefinitionUpdateManager()
     ->installFieldStorageDefinition('allow_anonymous_responses', 'session_entity', 'la_pills', $allow_anonymous_responses);
+}
+
+/**
+ * Triggers applyUpdates() method for Entity Definition Update Manager to fix
+ * the issue with "Mismatched entity and/or field definitions".
+ */
+function la_pills_update_8002() {
+  \Drupal::entityDefinitionUpdateManager()->applyUpdates();
 }
