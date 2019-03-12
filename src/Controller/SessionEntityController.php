@@ -427,6 +427,8 @@ class SessionEntityController extends ControllerBase {
       return new Response('', Response::HTTP_FORBIDDEN);
     }*/
 
+    $random = new Random();
+
     $query = $this->connection->select('session_questionnaire_answer', 'sqa');
 
     $query->condition('sqa.session_entity_uuid', $session_entity->uuid(), '=');
@@ -442,7 +444,7 @@ class SessionEntityController extends ControllerBase {
     fputcsv($handle, ['Session title', 'Questionnaire title', 'Question title', 'Question type', 'Session identifier', 'Form submission identifier', 'User identifier', 'Answer', 'Created',]);
 
     $template = $session_entity->getSessionTemplateData();
-    $salt = Random::string();
+    $salt = $random->string();
 
     while ($row = $result->fetchObject()) {
       fputcsv($handle, [$session_entity->getName(), $template['questionnaires'][$row->questionnaire_uuid]['title'], $template['questions'][$row->question_uuid]['title'], $template['questions'][$row->question_uuid]['type'], hash('sha256', $row->session_id . $salt), hash('sha256', $row->form_build_id . $salt), $row->user_uuid, $row->answer, $row->created,]);
