@@ -41,8 +41,16 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $route_match = \Drupal::routeMatch();
+    $questionnaire_uuid = $route_match->getParameter('questionnaire_uuid');
 
-    $this->questionnaire = $this->entity->getSessionTemplateData()['questionnaires'][$route_match->getParameter('questionnaire_uuid')];
+    $session_template_data = $this->entity->getSessionTemplateData();
+
+    if(!isset($session_template_data['questionnaires'][$questionnaire_uuid])) {
+      \Drupal::messenger()->addMessage($this->t('No such questionnaire found.'), 'warning');
+      return [];
+    }
+
+    $this->questionnaire = $session_template_data['questionnaires'][$questionnaire_uuid];
 
     $form['questionnaire'] = [
       '#markup' => '<h2>' . $this->questionnaire['title'] . '</h2>',
@@ -117,6 +125,10 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     if (!$this->canAnswer()) {
+      return FALSE;
+    }
+
+    if (!isset($this->questionnaire)) {
       return FALSE;
     }
 
