@@ -9,6 +9,7 @@ use Drupal\Core\Messenger\Messenger;
 use Drupal\Core\StringTranslation\TranslationManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Url;
+use \Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * Class SessionEntityEventSubscriber.
@@ -68,8 +69,8 @@ class SessionEntityEventSubscriber implements EventSubscriberInterface {
       $session_entity = $request->attributes->get('session_entity');
       if (!$session_entity->getAllowAnonymousResponses()) {
         $this->messenger->addMessage($this->translationManager->translate('Current session does not allow anonymous responses!'), 'warning');
-        // TODO Requires a meaningful way to redirect back
         $response = new RedirectResponse(Url::fromRoute('user.login')->toString());
+        $response->headers->setCookie(new Cookie('Drupal.la_pills.session_entity_redirect_to', $session_entity->id(), REQUEST_TIME + 3600));
         $event->setResponse($response);
         return;
       }

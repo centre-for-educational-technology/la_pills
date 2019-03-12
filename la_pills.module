@@ -2,6 +2,8 @@
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_theme()
@@ -13,6 +15,21 @@ function la_pills_theme($existing) {
       'file' => 'session_entity.page.inc',
     ],
   ];
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function la_pills_user_login($account) {
+  $request = \Drupal::request();
+
+  if ($request->cookies->has('Drupal_la_pills_session_entity_redirect_to')) {
+    $id = (int) $request->cookies->get('Drupal_la_pills_session_entity_redirect_to');
+    $response = new RedirectResponse(Url::fromRoute('entity.session_entity.canonical', ['session_entity' => $id,])->toString());
+    $response->headers->clearCookie('Drupal.la_pills.session_entity_redirect_to');
+    $response->send();
+    return;
+  }
 }
 
 /**
