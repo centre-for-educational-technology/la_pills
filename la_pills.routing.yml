@@ -20,3 +20,11 @@ session_entity.download_answers:
   methods: [GET]
   requirements:
     _access: 'TRUE'
+session_template.preview:
+  path: '/session_template/{session_template}/preview'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionTemplateController::preview'
+    _title_callback: '\Drupal\la_pills\Controller\SessionTemplateController::previewTitle'
+  methods: [GET]
+  requirements:
+    _access: 'TRUE'

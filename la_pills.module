@@ -4,6 +4,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 
 /**
  * Implements hook_theme()
@@ -13,6 +14,12 @@ function la_pills_theme($existing) {
     'session_entity' => [
       'render element' => 'elements',
       'file' => 'session_entity.page.inc',
+    ],
+    'session_template' => [
+      'variables' => [
+        'template' => NULL,
+        'replacements' => [],
+      ],
     ],
   ];
 }
@@ -50,7 +57,16 @@ function _la_pills_session_template_allowed_values(BaseFieldDefinition $definiti
   $templates = $manager->getTemplates();
 
   foreach ($templates as $template) {
-    $options[$template->uuid] = $template->getData()['context']['title'] . '<p>' . $template->getData()['context']['description']. '</p>';
+    $options[$template->uuid] = '&nbsp;';
+    $options[$template->uuid] .= Link::createFromRoute($template->getData()['context']['title'], 'session_template.preview', [
+      'session_template' => $template->uuid,
+    ], [
+      'absolute' => TRUE,
+      'attributes' => [
+        'target' => '_blank',
+      ]
+    ])->toString();
+    $options[$template->uuid] .= '<p>' . $template->getData()['context']['description']. '</p>';
   }
 
   return $options;

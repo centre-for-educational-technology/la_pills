@@ -9,6 +9,7 @@
 
 use Drupal\Core\Render\Element;
 use Drupal\la_pills\RenderableHelper;
+use Drupal\Core\Link;
 
 /**
  * Prepares variables for LA Pills Session templates.
@@ -33,20 +34,40 @@ function template_preprocess_session_entity(array &$variables) {
     $variables['actions']['download_answers'] = RenderableHelper::downloadAnswersLink($session_entity)->toRenderable();
   }
 
-  $websiteUrl = $session_entity->toUrl('canonical', ['absolute' => TRUE,])->toString();
-  $dashboardUrl = $session_entity->toUrl('dashboard', ['absolute' => TRUE,])->toString();
+  $session_url = $session_entity->toUrl('canonical', ['absolute' => TRUE,])->toString();
 
-  $variables['session_entity_template'] = $session_entity->getSessionTemplateData();
-  $variables['session_entity_replacements'] = [
-    '{{website}}' => '<a href="' . $websiteUrl. '" target="_blank">' . $websiteUrl. '</a>',
-    '{{dashboard}}' => '<a href="' . $dashboardUrl . '">' . t('dashboard') . '</a>',
+  $replacements = [
+    '{{website}}' => $session_entity->toLink($session_url, 'canonical', [
+      'absolute' => TRUE,
+      'attributes' => [
+        'target' => '_blank',
+      ],
+    ])->toString(),
+    '{{dashboard}}' => $session_entity->toLink(t('dashboard'), 'dashboard', [
+      'absolute' => TRUE,
+    ])->toString(),
   ];
 
-  if ($variables['session_entity_template'] && $variables['session_entity_template']['questionnaires']) {
-    foreach ($variables['session_entity_template']['questionnaires'] as $questionnaire) {
-      $variables['session_entity_replacements']['{{' . $questionnaire['id'] . '}}'] = '<a href="' . $websiteUrl . '/questionnaire/' . $questionnaire['uuid']  . '/" data-questionnaire-uuid="' . $questionnaire['uuid'] . '">' . $questionnaire['title'] . ' ' . t('form') . '</a>';
+  $session_template_data = $session_entity->getSessionTemplateData();
+  if ($session_template_data && $session_template_data['questionnaires']) {
+    foreach ($session_template_data['questionnaires'] as $questionnaire) {
+      $replacements['{{' . $questionnaire['id'] . '}}'] = Link::createFromRoute($questionnaire['title'] . ' ' . t('form'), 'entity.session_entity.questionnaire', [
+        'session_entity' => $session_entity->id(),
+        'questionnaire_uuid' => $questionnaire['uuid'],
+      ], [
+        'absolute' => TRUE,
+        'attributes' => [
+          'data-questionnaire-uuid' => $questionnaire['uuid'],
+        ],
+      ])->toString();
     }
   }
+
+  $variables['content']['session_template'] = [
+    '#theme' => 'session_template',
+    '#template' => $session_template_data,
+    '#replacements' => $replacements,
+  ];
 
   $variables['#attached']['library'][] = 'la_pills/session_entity';
   $variables['#attached']['drupalSettings']['laPillsSessionEntity'] = [

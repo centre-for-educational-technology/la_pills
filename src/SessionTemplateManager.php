@@ -51,8 +51,9 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
       $query->fields('st', ['uuid', 'data',]);
 
       $result = $query->execute();
+      $tmp = $result->fetchAll();
 
-      $templates = $result->fetchAll();
+      $templates = array_combine(array_column($tmp, 'uuid'), $tmp);
     }
 
     return $templates;
@@ -62,24 +63,9 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
    * {@inheritdoc}
    */
   public function getTemplate(string $uuid) {
-    // TODO See if it would make sense to always fetch all the templates and then extract the required one
-    // This would make sure that there are no duplicates
-    $templates = &drupal_static(__METHOD__);
+    $templates = $this->getTemplates();
 
-    if (!isset($templates[$uuid])) {
-      $query = $this->connection->select(self::SESSION_TEMPLATE_TABLE, 'st', [
-        'fetch' => SessionTemplate::class,
-      ]);
-      $query->fields('st', ['uuid', 'data',]);
-      $query->condition('st.uuid', $uuid, '=');
-
-      // TODO Need to add a handler that will check if sessions exists
-      $result = $query->execute();
-
-      $templates[$uuid] = $result->fetch();
-    }
-
-    return $templates[$uuid];
+    return (isset($templates[$uuid])) ? $templates[$uuid] : NULL;
   }
 
   /**

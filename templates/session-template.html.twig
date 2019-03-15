@@ -1,0 +1,44 @@
+{#
+/**
+ * @file session-template.html.twig
+ * Default theme implementation to present Session Template.
+ *
+ * This template is used when viewing LA Pills Session Template.
+ *
+ *
+ * Available variables:
+ * - template: Session Template data.
+ * - replacements: An array of replcements for placeholders.
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('session-template') }}>
+  {% if template and template['goals'] %}
+    <h2>{{ 'Goals'|t }}</h2>
+    <ol>
+      {% for goal in template['goals'] %}
+        <li>{{ goal['title'] }} <strong>({{ goal['short'] }})</strong></li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+
+  {% if template and template['activities'] %}
+    <h2>{{ 'Activities'|t }}</h2>
+    <ol>
+    {% for activity in template['activities'] %}
+      <li>
+      <strong>{{ activity['activity'] }}</strong>
+      {% if activity['duration'] %}
+        [{{ activity['duration'] }}']
+      {% endif %}
+      <ul>
+        {% for line in activity['description']|split('\n') %}
+          <li>{{ line|replace(replacements)|raw }}</li>
+        {% endfor %}
+      </ul>
+      </li>
+    {% endfor %}
+    </ol>
+  {% endif %}
+</div>

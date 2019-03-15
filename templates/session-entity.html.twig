@@ -1,6 +1,6 @@
 {#
 /**
- * @file session_entity.html.twig
+ * @file session-entity.html.twig
  * Default theme implementation to present LA Pills Session data.
  *
  * This template is used when viewing LA Pills Session pages.
@@ -9,6 +9,7 @@
  * Available variables:
  * - content: A list of content items. Use 'content' to print all content, or
  * - attributes: HTML attributes for the container element.
+ * - actions: Action buttons
  *
  * @see template_preprocess_session_entity()
  *
@@ -22,31 +23,7 @@
     </div>
   {% endif %}
 
-  {% if session_entity_template and session_entity_template['goals'] %}
-    <h2>Goals</h2>
-    <ol>
-      {% for goal in session_entity_template['goals'] %}
-        <li>{{ goal['title'] }} <strong>({{ goal['short'] }})</strong></li>
-      {% endfor %}
-    </ol>
-  {% endif %}
-
-  {% if session_entity_template and session_entity_template['activities'] %}
-    <h2>Activities</h2>
-    <ol>
-    {% for activity in session_entity_template['activities'] %}
-      <li>
-      <strong>{{ activity['activity'] }}</strong>
-      {% if activity['duration'] %}
-        [{{ activity['duration'] }}']
-      {% endif %}
-      <ul>
-        {% for line in activity['description']|split('\n') %}
-          <li>{{ line|replace(session_entity_replacements)|raw }}</li>
-        {% endfor %}
-      </ul>
-      </li>
-    {% endfor %}
-    </ol>
+  {% if content and content['session_template'] %}
+    {{- content['session_template'] -}}
   {% endif %}
 </div>
