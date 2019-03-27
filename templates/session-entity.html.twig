@@ -23,6 +23,14 @@
     </div>
   {% endif %}
 
+  {% if code %}
+    <div class="unique-access-code" data-value="{{ code }}">
+      <span class="code">
+        {{- code -}}
+      </span>
+    </div>
+  {% endif %}
+
   {% if content and content['session_template'] %}
     {{- content['session_template'] -}}
   {% endif %}

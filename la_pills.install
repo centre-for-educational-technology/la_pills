@@ -194,3 +194,60 @@ function la_pills_update_8001() {
 function la_pills_update_8002() {
   \Drupal::entityDefinitionUpdateManager()->applyUpdates();
 }
+
+/**
+ * Adds code field to session_entity.
+ * Sets unique codes for any existing entities.
+ */
+function la_pills_update_8003() {
+  $connection = \Drupal::service('database');
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $code_manager = \Drupal::service('la_pills.session_entity_code_manager');
+
+  $code = BaseFieldDefinition::create('string')
+    ->setLabel(t('Unique numeric code'))
+    ->setDescription(t('Unique automatically generated numeric code that is used to quickly access the session.'))
+    ->setDefaultValueCallback('_la_pills_unique_session_numeric_code')
+    ->addConstraint('UniqueField')
+    ->setInitialValue('')
+    ->setPropertyConstraints('value', [
+      'Length' => [
+        'min' => 6,
+      ],
+      'Regex' => [
+        'pattern' => '/^[0-9]+$/',
+        'message' => 'Code could only consist of numbers.',
+      ],
+    ])
+    ->setSettings([
+      'max_length' => '25',
+      'is_ascii' => TRUE,
+      'text_processing' => 0,
+    ])
+    ->setDisplayOptions('view', [
+      'label' => 'above',
+      'type' => 'string',
+      'weight' => 1,
+    ])
+    ->setDisplayOptions('form', [
+      'type' => 'hidden',
+      'weight' => 1,
+    ])
+    ->setRequired(TRUE);
+  $update_manager
+    ->installFieldStorageDefinition('code', 'session_entity', 'la_pills', $code);
+  $update_manager
+    ->applyUpdates();
+
+  $result = $connection->select('session_entity', 'se')
+    ->fields('se', ['id'])
+    ->execute();
+  foreach ($result as $record) {
+    $connection->update('session_entity')
+      ->fields([
+        'code' => $code_manager->generateUniqueCode('session_entity', 'code', 6),
+      ])
+      ->condition('id', $record->id)
+      ->execute();
+  }
+}

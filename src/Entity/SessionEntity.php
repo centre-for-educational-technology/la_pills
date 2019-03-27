@@ -19,6 +19,7 @@ use Drupal\Core\Session\AccountInterface;
  *   id = "session_entity",
  *   label = @Translation("LA Pills Session"),
  *   handlers = {
+ *     "storage_schema" = "Drupal\la_pills\SessionEntityStorageSchema",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\la_pills\SessionEntityListBuilder",
  *     "views_data" = "Drupal\la_pills\Entity\SessionEntityViewsData",
@@ -47,6 +48,7 @@ use Drupal\Core\Session\AccountInterface;
  *     "active" = "active",
  *     "allow_anonymous_responses" = "allow_anonymous_responses",
  *     "template" = "template",
+ *     "code" = "code",
  *   },
  *   links = {
  *     "canonical" = "/admin/structure/session_entity/{session_entity}",
@@ -220,6 +222,13 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   /**
    * {@inheritdoc}
    */
+  public function getCode() {
+    return $this->getEntityKey('code');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -317,6 +326,36 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
         ->setDisplayConfigurable('form', TRUE)
         ->setDisplayConfigurable('view', TRUE)
         ->setRequired(TRUE);
+
+    $fields['code'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Unique numeric code'))
+      ->setDescription(t('Unique automatically generated numeric code that is used to quickly access the session.'))
+      ->addConstraint('UniqueField')
+      ->setPropertyConstraints('value', [
+        'Length' => [
+          'min' => 6,
+        ],
+        'Regex' => [
+          'pattern' => '/^[0-9]+$/',
+          'message' => 'Code could only consist of numbers.',
+        ],
+      ])
+      ->setDefaultValueCallback('_la_pills_unique_session_numeric_code')
+      ->setSettings([
+        'max_length' => '25',
+        'is_ascii' => TRUE,
+        'text_processing' => 0,
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => 1,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => 1,
+      ])
+      ->setRequired(TRUE);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))

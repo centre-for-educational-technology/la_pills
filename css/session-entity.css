@@ -10,6 +10,15 @@
   margin-right: 5px;
 }
 
-.session-entity .actions {
+.session-entity .actions, .session-entity .unique-access-code {
   text-align: right;
+}
+
+.session-entity .unique-access-code {
+  margin-top: 0.5em;
+}
+
+.session-entity .unique-access-code span {
+  font-weight: bold;
+  font-size: 200%;
 }

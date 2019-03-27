@@ -5,6 +5,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
  * Implements hook_theme()
@@ -70,4 +72,24 @@ function _la_pills_session_template_allowed_values(BaseFieldDefinition $definiti
   }
 
   return $options;
+}
+
+/**
+ * Callback that generates a unique numeric code and checks that one does not
+ * yet exist within the same column of the entity table.
+ *
+ * @param  Drupal\Core\Entity\FieldableEntityInterface $entity
+ *   Entity being created/updated
+ * @param  Drupal\Core\Field\FieldDefinitionInterface $definition
+ *   Field definition
+ *
+ * @return string
+ *   Unique code that consists of numbers
+ */
+function _la_pills_unique_session_numeric_code(FieldableEntityInterface $entity, FieldDefinitionInterface $definition) {
+  $manager = \Drupal::service('la_pills.session_entity_code_manager');
+  $base_table = $entity->getEntityType()->getBaseTable();
+  $field_name = $definition->getName();
+
+  return $manager->generateUniqueCode($base_table, $field_name, 6);
 }

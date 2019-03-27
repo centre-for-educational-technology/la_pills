@@ -32,6 +32,7 @@ function template_preprocess_session_entity(array &$variables) {
 
   if ($session_entity->access('update')) {
     $variables['actions']['download_answers'] = RenderableHelper::downloadAnswersLink($session_entity)->toRenderable();
+    $variables['code'] = $session_entity->getCode();
   }
 
   $session_url = $session_entity->toUrl('canonical', ['absolute' => TRUE,])->toString();

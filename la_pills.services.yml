@@ -7,3 +7,6 @@ services:
     arguments: ['@current_user', '@messenger', '@string_translation']
     tags:
       - { name: event_subscriber }
+  la_pills.session_entity_code_manager:
+    class: Drupal\la_pills\SessionEntityCodeManager
+    arguments: ['@database']

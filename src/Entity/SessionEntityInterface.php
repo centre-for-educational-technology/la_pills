@@ -122,9 +122,18 @@ interface SessionEntityInterface extends ContentEntityInterface, EntityChangedIn
 
   /**
    * Returns chosen Session Template
+   *
    * @return array
    *   Session Template data structure
    */
   public function getSessionTemplateData();
+
+  /**
+   * Returns unique numeric code value.
+   *
+   * @return string
+   *   Unique numeric coe value
+   */
+  public function getCode();
 
 }

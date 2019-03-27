@@ -21,6 +21,7 @@ class SessionEntityForm extends ContentEntityForm {
 
     if ($form_state->getBuildInfo()['form_id'] === 'session_entity_edit_form') {
       $form['template']['widget']['#disabled'] = TRUE;
+      $form['code']['widget']['#disabled'] = TRUE;
     }
 
     $entity = $this->entity;
