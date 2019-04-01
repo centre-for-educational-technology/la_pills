@@ -49,3 +49,8 @@ session_entity_dashboard:
     - core/jquery
     - core/drupalSettings
     - la_pills/c3
+session_entity_code:
+  version: 1.x
+  css:
+    theme:
+      css/session-entity-code.css: {}

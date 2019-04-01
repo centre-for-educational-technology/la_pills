@@ -1,0 +1,12 @@
+form.session-entity-code {
+  text-align: center;
+}
+
+form.session-entity-code div.session-entity-code {
+  display: inline-block;
+  text-align: center;
+}
+
+form.session-entity-code div.session-entity-code input[name="code"] {
+  text-align: center;
+}

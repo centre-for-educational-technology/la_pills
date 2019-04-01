@@ -28,3 +28,10 @@ session_template.preview:
   methods: [GET]
   requirements:
     _access: 'TRUE'
+la_pills.session_entity_code:
+  path: '/session_entity_code'
+  defaults:
+    _form: '\Drupal\la_pills\Form\SessionEntityCodeForm'
+    #_title: 'SessionEntityCodeForm'
+  requirements:
+    _access: 'TRUE'

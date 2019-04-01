@@ -26,3 +26,11 @@ entity.session_entity.add_form.tools:
   route_name: entity.session_entity.add_form
   parent: tools
   weight: 15
+
+la_pills.session_entity_code:
+  title: 'Session PIN'
+  description: 'Enter session PIN code'
+  route_name: la_pills.session_entity_code
+  parent: main
+  menu_name: main
+  weight: 10
