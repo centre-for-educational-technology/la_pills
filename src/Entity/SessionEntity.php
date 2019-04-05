@@ -49,6 +49,7 @@ use Drupal\Core\Session\AccountInterface;
  *     "allow_anonymous_responses" = "allow_anonymous_responses",
  *     "template" = "template",
  *     "code" = "code",
+ *     "require_name" = "require_name",
  *   },
  *   links = {
  *     "canonical" = "/admin/structure/session_entity/{session_entity}",
@@ -229,6 +230,21 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   /**
    * {@inheritdoc}
    */
+  public function getRequireName() {
+    return (bool) $this->getEntityKey('require_name');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setRequireName($require_name) {
+    $this->set('require_name', $require_name ? TRUE : FALSE);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -305,27 +321,36 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
         'weight' => 0,
       ]);
 
-      $fields['template'] = BaseFieldDefinition::create('list_string')
-        ->setLabel(t('Session template'))
-        ->setDescription(t('Choose what kind of session it will be'))
-        ->setSettings([
-          'max_length' => 50,
-          'text_processing' => 0,
-          'allowed_values_function' => '_la_pills_session_template_allowed_values',
-        ])
-        ->setDefaultValue('')
-        ->setDisplayOptions('view', [
-          'label' => 'above',
-          'type' => 'string',
-          'weight' => -3,
-        ])
-        ->setDisplayOptions('form', [
-          'type' => 'options_buttons',
-          'weight' => -3,
-        ])
-        ->setDisplayConfigurable('form', TRUE)
-        ->setDisplayConfigurable('view', TRUE)
-        ->setRequired(TRUE);
+    $fields['require_name'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Require name'))
+      ->setDescription(t('A boolean indicating whether the LA Pills Session requires anonymous users to provide a name or not.'))
+      ->setDefaultValue(FALSE)
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+        'weight' => 0,
+      ]);
+
+    $fields['template'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Session template'))
+      ->setDescription(t('Choose what kind of session it will be'))
+      ->setSettings([
+        'max_length' => 50,
+        'text_processing' => 0,
+        'allowed_values_function' => '_la_pills_session_template_allowed_values',
+      ])
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => -3,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'options_buttons',
+        'weight' => -3,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(TRUE);
 
     $fields['code'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Unique numeric code'))

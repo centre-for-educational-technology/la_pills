@@ -94,6 +94,13 @@ function la_pills_schema() {
         'default' => NULL,
         'unsigned' => TRUE,
       ],
+      'name' => [
+        'description' => 'Anonymous user name if required or NULL.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => NULL,
+      ],
       'answer' => [
         'description' => 'Answer provided.',
         'type' => 'text',
@@ -250,4 +257,38 @@ function la_pills_update_8003() {
       ->condition('id', $record->id)
       ->execute();
   }
+}
+
+/**
+ * Adds require_name field to session_entity.
+ * Adds name column to session_questionnaire_answer table.
+ */
+function la_pills_update_8004() {
+  $connection = \Drupal::service('database');
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+
+  $spec = [
+    'description' => 'Anonymous user name if required or NULL.',
+    'type' => 'varchar',
+    'length' => 128,
+    'not null' => FALSE,
+    'default' => NULL,
+  ];
+
+  $connection->schema()->addField('session_questionnaire_answer', 'name', $spec);
+
+  $require_name = BaseFieldDefinition::create('boolean')
+    ->setLabel(t('Require name'))
+    ->setDescription(t('A boolean indicating whether the LA Pills Session requires anonymous users to provide a name or not.'))
+    ->setDefaultValue(FALSE)
+    ->setInitialValue(FALSE)
+    ->setDisplayOptions('form', [
+      'type' => 'boolean_checkbox',
+      'weight' => 0,
+    ]);
+
+  $update_manager
+    ->installFieldStorageDefinition('require_name', 'session_entity', 'la_pills', $require_name);
+  $update_manager
+    ->applyUpdates();
 }

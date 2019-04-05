@@ -37,6 +37,34 @@ class SessionEntityQuestionnaireForm extends EntityForm {
   }
 
   /**
+   * Determines if the name field should be shown. The field is only shown once and the data is stored for later use.
+   *
+   * @return boolean
+   *   TRUE if anonymous and name is required and name is not set, FALSE otherwise
+   */
+  private function showNameField() {
+    if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName() && !\Drupal::request()->getSession()->has('la_pills_name')) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Returns a name value provided by an anonymous user if one is set.
+   *
+   * @return mixed
+   *   A name if it is set, NULL otherwise
+   */
+  private function getProvidedName() {
+    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has('la_pills_name')) {
+      return \Drupal::request()->getSession()->get('la_pills_name');
+    }
+
+    return NULL;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -51,6 +79,31 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     }
 
     $this->questionnaire = $session_template_data['questionnaires'][$questionnaire_uuid];
+
+    if ($this->showNameField()) {
+      $form['name'] = [
+        '#title' => $this->t('Name'),
+        '#description' => $this->t('Anonymous user is required to provide a name!'),
+        '#placeholder' => $this->t('Your name'),
+        '#required' => TRUE,
+        '#type' => 'textfield',
+      ];
+    } else if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) {
+      $form['user_data'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => 'la-pills-user-data',
+        ],
+      ];
+      $form['user_data']['label'] = [
+        '#markup' => '<strong>' . $this->t('Name provided by you:') . '</strong>',
+      ];
+      $form['user_data']['name'] = [
+        '#markup' => ' <span>' . $this->getProvidedName() . '</span>',
+      ];
+      // TODO Need to provide a possibility to change the name by resetting the session
+      // Using \Drupal::request()->getSession()->clear(); might be a decent enough solution
+    }
 
     $form['questionnaire'] = [
       '#markup' => '<h2>' . $this->questionnaire['title'] . '</h2>',
@@ -142,6 +195,10 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     $values = $form_state->getValues();
     $records = [];
 
+    if (isset($values['name'])) {
+      \Drupal::request()->getSession()->set('la_pills_name', $values['name']);
+    }
+
     foreach ($this->questionnaire['questions'] as $question) {
       $answers = $values[$question['uuid']];
 
@@ -166,13 +223,14 @@ class SessionEntityQuestionnaireForm extends EntityForm {
           'session_id' => \Drupal::request()->getSession()->getId(),
           'form_build_id' => $values['form_build_id'],
           'user_id' => (\Drupal::currentUser()->isAnonymous()) ? NULL : \Drupal::currentUser()->id(),
+          'name' => (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) ? \Drupal::request()->getSession()->get('la_pills_name') : NULL,
           'answer' => $answer,
           'created' => REQUEST_TIME,
         ];
       }
     }
 
-    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'user_id', 'answer', 'created']);
+    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'user_id', 'name', 'answer', 'created']);
     foreach ($records as $record) {
       $query->values($record);
     }

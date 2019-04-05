@@ -136,4 +136,23 @@ interface SessionEntityInterface extends ContentEntityInterface, EntityChangedIn
    */
   public function getCode();
 
+  /**
+   * Returns the value for name being required in case of anonymous submission.
+   *
+   * @return bool
+   *   TRUE if required, FALSE if not
+   */
+  public function getRequireName();
+
+  /**
+   * Sets value for name being requred in case of anonymous submissions.
+   *
+   * @param bool $require_name
+   *   TRUE to set as rquired, FALSE to set as not required.
+   *
+   * @return \Drupal\la_pills\Entity\SessionEntityInterface
+   *   Entity object
+   */
+  public function setRequireName($require_name);
+
 }

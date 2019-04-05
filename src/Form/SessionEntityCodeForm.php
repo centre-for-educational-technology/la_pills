@@ -94,6 +94,7 @@ class SessionEntityCodeForm extends FormBase {
       '#placeholder' => $this->t('Session PIN code'),
       '#required' => TRUE,
       '#size' => 15,
+      '#maxlength' => 25,
     ];
     $form['code']['submit'] = [
       '#type' => 'submit',
