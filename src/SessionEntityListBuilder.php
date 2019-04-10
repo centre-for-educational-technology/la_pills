@@ -41,7 +41,7 @@ class SessionEntityListBuilder extends EntityListBuilder {
     $row['code'] = '';
     $row['answers'] = '';
     if ($entity->access('update')) {
-      $row['answers'] = RenderableHelper::downloadAnswersLink($entity);
+      $row['answers'] = RenderableHelper::downloadAnswersLink($entity, ['btn-xs']);
       $row['code'] = Markup::create('<strong>' . $entity->getCode() . '</strong>');
     }
     return $row + parent::buildRow($entity);

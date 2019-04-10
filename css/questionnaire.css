@@ -15,10 +15,12 @@
   margin: 10px;
 }
 
-.scale .fieldset-wrapper .form-type-radio {
-  text-align: center;
+.scale .fieldset-wrapper .form-type-radio label.option input.scale.form-radio::before,
+.scale .fieldset-wrapper .form-type-radio label.option input.scale.form-radio::after {
+  position: absolute;
+  top: -25px;
 }
 
-.la-pills-user-data {
-  font-size: 75%;
+.scale .fieldset-wrapper .form-type-radio {
+  text-align: center;
 }

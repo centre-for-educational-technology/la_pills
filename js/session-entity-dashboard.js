@@ -3,7 +3,11 @@
     attach: function (context, settings) {
       if (context !== window.document) return;
 
-      $('table.responses.has-answers', context).addClass('show-more').attr('title', Drupal.t('Click to show more or less'));
+      var hasTooltips = typeof($.fn.tooltip) != 'undefined';
+
+      $('table.responses.has-answers', context)
+        .addClass('show-more')
+        .attr('title', Drupal.t('Click to show more or less'));
       $('table.responses.has-answers > thead').on('click', function() {
         $table = $(this).parents('table');
 
@@ -12,6 +16,12 @@
           $table.find('tbody').show('slow');
         });
       });
+
+      if (hasTooltips) {
+        $('table.responses.has-answers').tooltip({
+          placement: 'top'
+        });
+      }
 
       $.each(settings.laPillsSessionEntityDashboardData, function(questionnaireUuid, questions) {
         $.each(questions, function(questionUuid, data) {

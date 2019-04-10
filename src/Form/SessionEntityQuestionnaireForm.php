@@ -87,12 +87,15 @@ class SessionEntityQuestionnaireForm extends EntityForm {
         '#placeholder' => $this->t('Your name'),
         '#required' => TRUE,
         '#type' => 'textfield',
+        '#wrapper_attributes' => [
+          'class' => ['well'],
+        ],
       ];
     } else if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) {
       $form['user_data'] = [
         '#type' => 'container',
         '#attributes' => [
-          'class' => 'la-pills-user-data',
+          'class' => ['la-pills-user-data', 'alert', 'alert-info'],
         ],
       ];
       $form['user_data']['label'] = [

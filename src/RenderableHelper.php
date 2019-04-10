@@ -19,12 +19,14 @@ class RenderableHelper {
    * @return Drupal\Core\Link
    *   Renderable button-like link for downloading Session Entity answers
    */
-  public static function downloadAnswersLink(SessionEntity $entity) {
+  public static function downloadAnswersLink(SessionEntity $entity, array $classes = []) {
+    $classes = array_merge(['button', 'download-answers-button', 'btn', 'btn-primary'], $classes);
+
     return Link::createFromRoute(
       t('Download answers'),
       'session_entity.download_answers',
       ['session_entity' => $entity->id()],
-      ['query' => ['token' => $entity->uuid()], 'attributes' => ['class' => ['button', 'download-answers-button']]]
+      ['query' => ['token' => $entity->uuid()], 'attributes' => ['class' => $classes]]
     );
   }
 }
