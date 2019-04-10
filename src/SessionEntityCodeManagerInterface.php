@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\la_pills;
+use Drupal\la_pills\Entity\SessionEntityInterface;
 
 /**
  * Interface SessionEntityCodeManagerInterface.
@@ -50,5 +51,18 @@ interface SessionEntityCodeManagerInterface {
    *   Generated unique numeric code
    */
   public function generateUniqueCode(string $table_name, string $column_name, int $length);
+
+  /**
+   * Checks if entity has a unique code. Determines table name based on the
+   * entity provided.
+   *
+   * @param  Drupal\la_pills\Entity\SessionEntityInterface $entity
+   *   SessionEntity instance
+   * @param  string $column_name
+   *   Column name within the table
+   * @return boolean
+   *   TRUE if is unique, FALSE otherwise
+   */
+  public function hasUniqueCode(SessionEntityInterface $entity, string $column_name);
 
 }

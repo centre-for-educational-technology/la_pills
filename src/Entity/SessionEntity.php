@@ -95,6 +95,30 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   /**
    * {@inheritdoc}
    */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
+    if (!$update) {
+      $manager = \Drupal::service('la_pills.session_entity_code_manager');
+      $messenger = \Drupal::service('messenger');
+      $column_name = 'code';
+
+      if (!$manager->hasUniqueCode($this, $column_name)) {
+        $old_code = $this->getCode();
+        $new_code = $manager->generateUniqueCode($this->getEntityType()->getBaseTable(), $column_name, 6);
+        $this->set('code', $new_code);
+        $this->save();
+        $messenger->addMessage(t('The code <strong>@old</strong> was determined not to be unique and was replaced by <strong>@new</strong>.', [
+          '@old' => $old_code,
+          '@new' => $new_code,
+        ]), 'warning');
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function postDelete(EntityStorageInterface $storage_controller, array $entities) {
     parent::postDelete($storage_controller, $entities);
     static::removeAnswersOnDelete($entities);

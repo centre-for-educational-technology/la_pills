@@ -2,6 +2,7 @@
 
 namespace Drupal\la_pills;
 use Drupal\Core\Database\Driver\mysql\Connection;
+use Drupal\la_pills\Entity\SessionEntityInterface;
 
 /**
  * Class SessionEntityCodeManager.
@@ -64,6 +65,22 @@ class SessionEntityCodeManager implements SessionEntityCodeManagerInterface {
      }
 
      return $code;
+   }
+
+   /**
+    * {@inheritdoc}
+    */
+   public function hasUniqueCode(SessionEntityInterface $entity, string $column_name) {
+     $table_name = $entity->getEntityType()->getBaseTable();
+
+     $query = $this->database->select($table_name, 'bt')
+       ->condition("bt.$column_name", $entity->getCode())
+       ->condition("bt.id", $entity->id(), '<>');
+     $query->addExpression('COUNT(*)');
+     $query->countQuery();
+     $count = $query->execute()->fetchField();
+
+     return (int)$count === 0;
    }
 
 }
