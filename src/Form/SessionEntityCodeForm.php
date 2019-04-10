@@ -84,7 +84,7 @@ class SessionEntityCodeForm extends FormBase {
         ],
       ],
       '#attributes' => [
-        'class' => 'session-entity-code',
+        'class' => ['session-entity-code'],
       ],
     ];
     $form['code']['code'] = [
