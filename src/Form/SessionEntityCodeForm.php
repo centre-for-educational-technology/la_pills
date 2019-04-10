@@ -99,6 +99,9 @@ class SessionEntityCodeForm extends FormBase {
     $form['code']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Enter'),
+      '#attributes' => [
+        'class' => ['btn-primary'],
+      ],
     ];
 
     return $form;

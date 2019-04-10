@@ -99,7 +99,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
         ],
       ];
       $form['user_data']['label'] = [
-        '#markup' => '<strong>' . $this->t('Name provided by you:') . '</strong>',
+        '#markup' => '<strong><span class="icon glyphicon glyphicon-user" aria-hidden="true"></span> ' . $this->t('Name provided by you:') . '</strong>',
       ];
       $form['user_data']['name'] = [
         '#markup' => ' <span>' . $this->getProvidedName() . '</span>',
