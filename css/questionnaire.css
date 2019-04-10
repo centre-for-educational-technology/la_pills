@@ -24,3 +24,7 @@
 .scale .fieldset-wrapper .form-type-radio {
   text-align: center;
 }
+
+.la-pills-user-data .la-pills-name-reset {
+  margin-left: 2em;
+}

@@ -5,11 +5,28 @@ namespace Drupal\la_pills\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\la_pills\FetchClass\SessionTemplate;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Url;
+use Drupal\Core\Ajax\RemoveCommand;
+use Drupal\Core\Ajax\RedirectCommand;
 
 /**
  * Class SessionEntityQUestionnaireForm.
  */
 class SessionEntityQuestionnaireForm extends EntityForm {
+
+  /**
+   * Name holder key within a session.
+   *
+   * @var string
+   */
+  const NAME_KEY = 'la_pills_name';
+
+  /**
+   * Questionnaire
+   *
+   * @var array
+   */
   protected $questionnaire;
 
   /**
@@ -43,7 +60,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    *   TRUE if anonymous and name is required and name is not set, FALSE otherwise
    */
   private function showNameField() {
-    if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName() && !\Drupal::request()->getSession()->has('la_pills_name')) {
+    if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName() && !\Drupal::request()->getSession()->has(self::NAME_KEY)) {
       return TRUE;
     }
 
@@ -57,8 +74,8 @@ class SessionEntityQuestionnaireForm extends EntityForm {
    *   A name if it is set, NULL otherwise
    */
   private function getProvidedName() {
-    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has('la_pills_name')) {
-      return \Drupal::request()->getSession()->get('la_pills_name');
+    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has(self::NAME_KEY)) {
+      return \Drupal::request()->getSession()->get(self::NAME_KEY);
     }
 
     return NULL;
@@ -96,6 +113,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
         '#type' => 'container',
         '#attributes' => [
           'class' => ['la-pills-user-data', 'alert', 'alert-info'],
+          'id' => 'la-pills-user-name',
         ],
       ];
       $form['user_data']['label'] = [
@@ -104,8 +122,21 @@ class SessionEntityQuestionnaireForm extends EntityForm {
       $form['user_data']['name'] = [
         '#markup' => ' <span>' . $this->getProvidedName() . '</span>',
       ];
-      // TODO Need to provide a possibility to change the name by resetting the session
-      // Using \Drupal::request()->getSession()->clear(); might be a decent enough solution
+      $form['user_data']['reset_name'] = [
+        '#type' => 'button',
+        '#name' => 'reset_name',
+        '#value' => $this->t('Not your name?'),
+        '#attributes' => [
+          'class' => ['la-pills-name-reset', 'btn', 'btn-xs', 'btn-warning'],
+          'title' => $this->t('Click here to reset the current name! You can enter a new one once that is done.'),
+          'data-toggle' => 'tooltip',
+        ],
+        '#ajax' => [
+          'callback' => [$this, 'resetNameCallback'],
+          'effect' => 'fade',
+        ],
+        '#limit_validation_errors' => [],
+      ];
     }
 
     $form['questionnaire'] = [
@@ -199,7 +230,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     $records = [];
 
     if (isset($values['name'])) {
-      \Drupal::request()->getSession()->set('la_pills_name', $values['name']);
+      \Drupal::request()->getSession()->set(self::NAME_KEY, $values['name']);
     }
 
     foreach ($this->questionnaire['questions'] as $question) {
@@ -226,7 +257,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
           'session_id' => \Drupal::request()->getSession()->getId(),
           'form_build_id' => $values['form_build_id'],
           'user_id' => (\Drupal::currentUser()->isAnonymous()) ? NULL : \Drupal::currentUser()->id(),
-          'name' => (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) ? \Drupal::request()->getSession()->get('la_pills_name') : NULL,
+          'name' => (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) ? \Drupal::request()->getSession()->get(self::NAME_KEY) : NULL,
           'answer' => $answer,
           'created' => REQUEST_TIME,
         ];
@@ -240,6 +271,24 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     $query->execute();
 
     \Drupal::messenger()->addMessage($this->t('Thanks you for responding to this questionnaire. Please proceed to the <a href="@link">session page</a>.', ['@link' => $this->entity->toUrl('canonical', ['absolute' => TRUE,])->toString()]));
+  }
+
+  /**
+   * Name reset ajax callback. Resets the name if present.
+   */
+  public function resetNameCallback() {
+    $response = new AjaxResponse();
+
+    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has(self::NAME_KEY)) {
+      $currentURL = Url::fromRoute('<current>');
+
+      \Drupal::request()->getSession()->remove(self::NAME_KEY);
+
+      $response->addCommand(new RemoveCommand('#la-pills-user-name'));
+      $response->addCommand(new RedirectCommand($currentURL->toString()));
+    }
+
+    return $response;
   }
 
 }
