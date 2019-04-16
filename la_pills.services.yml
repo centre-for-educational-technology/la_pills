@@ -1,5 +1,5 @@
 services:
-  la_pills.sesion_template_manager:
+  la_pills.session_template_manager:
     class: Drupal\la_pills\SessionTemplateManager
     arguments: ['@database', '@uuid']
   la_pills.session_entity_event_subscriber:

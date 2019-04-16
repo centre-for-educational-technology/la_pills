@@ -36,7 +36,7 @@ class SessionTemplateController extends ControllerBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    $session_template_manager = $container->get('la_pills.sesion_template_manager');
+    $session_template_manager = $container->get('la_pills.session_template_manager');
 
     return new static($session_template_manager);
   }

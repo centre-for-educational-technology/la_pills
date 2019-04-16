@@ -101,4 +101,29 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
     ->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function validateTemplate(array $structure) {
+    $errors = [];
+
+    if (isset($structure['context']) && is_array($structure['context']) && count($structure['context']) > 0) {
+      foreach (['title', 'date', 'course', 'program', 'description', 'technologies',] as $key) {
+        if (!array_key_exists($key, $structure['context'])) {
+          $errors[] = t('<strong>Context</strong> is missing a key <strong>@key</key>!', ['@key' => $key,]);
+        }
+      }
+    } else {
+      $errors[] = t('Root key <strong>@key</strong> is missing, not an array or empty!', ['@key' => 'context']);
+    }
+
+    foreach (['goals', 'activities', 'questions', 'questionnaires',] as $key) {
+      if (!(isset($structure[$key]) && is_array($structure[$key]) && count($structure[$key]) > 0)) {
+        $errors[] = t('Root key <strong>@key</strong> is missing, not an array or empty!', ['@key' => $key,]);
+      }
+    }
+
+    return $errors;
+  }
+
 }

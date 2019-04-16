@@ -30,8 +30,23 @@ interface SessionTemplateManagerInterface {
    * Processed parsed template data and inserts into the database
    *
    * @param array $structure
-   *   Temolate structure
+   *   Template structure
    */
   public function addTemplate(array $structure);
+
+  /**
+   * Validates a template structure, checks for some of the required elements
+   * being present.
+   * NB! Validation is rather shallow and does not fully check the structural
+   * integrity on the deepest level. Mostly checks that root level elements are
+   * present and of type array with at least one element present. Context is
+   * the only one checked for all the required keys being present.
+   *
+   * @param  array  $structure
+   *   Template structure
+   *
+   * @return [type]            [description]
+   */
+  public function validateTemplate(array $structure);
 
 }

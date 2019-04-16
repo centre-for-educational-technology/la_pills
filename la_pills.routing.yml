@@ -35,3 +35,13 @@ la_pills.session_entity_code:
     #_title: 'SessionEntityCodeForm'
   requirements:
     _access: 'TRUE'
+
+la_pills.session_template_upload:
+  path: '/admin/config/la_pills/session_template_upload'
+  defaults:
+    _form: '\Drupal\la_pills\Form\SessionTemplateUploadForm'
+    _title: 'Session template upload'
+  options:
+    _admin_route: 'TRUE'
+  requirements:
+    _permission: 'administer site configuration'

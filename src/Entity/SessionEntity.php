@@ -240,7 +240,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
    * {@inheritdoc}
    */
   public function getSessionTemplateData() {
-    $manager = \Drupal::service('la_pills.sesion_template_manager');
+    $manager = \Drupal::service('la_pills.session_template_manager');
     return $manager->getTemplate($this->getEntityKey('template'))->getData();
   }
 
