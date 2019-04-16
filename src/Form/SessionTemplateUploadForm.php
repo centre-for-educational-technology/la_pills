@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\la_pills\SessionTemplateManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * Class SessionTemplateUploadForm.
@@ -104,7 +105,15 @@ class SessionTemplateUploadForm extends FormBase {
 
     if ($file) {
       $data = file_get_contents($file->getFileUri());
-      $parsed = Yaml::parse($data);
+
+      try {
+        $parsed = Yaml::parse($data);
+      } catch(ParseException $e) {
+        $this->messenger->addMessage($this->t('<strong>YAML file parse error!</strong>'), 'error');
+        $this->messenger->addMessage($e->getMessage(), 'error');
+        $file->delete();
+        return;
+      }
 
       if ($parsed && is_array($parsed)) {
         $errors = $this->sessionTemplateManager->validateTemplate($parsed);
