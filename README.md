@@ -34,6 +34,11 @@ roles to have access to pages
     - View unpublished LA Pills Session entities - TEACHER USER
 * **NB!** Uninstall the **Internal Page Cache (page_cache)** module to resolve
 cache issues for Anonymous users
+* Manual changes
+  - Visit the `Basic site settings` configuration page located at
+  `admin/config/system/site-information` and set `Front page` field value to
+  `/la_pills/home`. This should replace the default home page with one specific
+  to LaPills
 
 The module is automatically loading any packaged session templates into the
 database. Please note that it currently only doing that once and it would be

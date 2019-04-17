@@ -54,3 +54,14 @@ session_entity_code:
   css:
     theme:
       css/session-entity-code.css: {}
+home_page:
+  verson: 1.x
+  css:
+    theme:
+      css/home-page.css: {}
+  js:
+    js/home-page.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
