@@ -11,13 +11,13 @@ use Drupal\user\UserInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Defines the LA Pills Session entity.
+ * Defines the data gathering session entity.
  *
  * @ingroup la_pills
  *
  * @ContentEntityType(
  *   id = "session_entity",
- *   label = @Translation("LA Pills Session"),
+ *   label = @Translation("Data gathering session"),
  *   handlers = {
  *     "storage_schema" = "Drupal\la_pills\SessionEntityStorageSchema",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -274,7 +274,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
 
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
-      ->setDescription(t('The user ID of author of the LA Pills Session entity.'))
+      ->setDescription(t('The user ID of author of the data gathering session entity.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
@@ -299,7 +299,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
-      ->setDescription(t('The name of the LA Pills Session entity.'))
+      ->setDescription(t('The name of the data gathering session entity.'))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
@@ -320,7 +320,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Publishing status'))
-      ->setDescription(t('A boolean indicating whether the LA Pills Session is published.'))
+      ->setDescription(t('A boolean indicating whether the data gathering session is published.'))
       ->setDefaultValue(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
@@ -329,7 +329,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
 
     $fields['active'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Availability to participants'))
-      ->setDescription(t('A boolean indicating whether the LA Pills Session is active or inactive. Making session inactive prevents participants from interacting with the session, everything is read-only.'))
+      ->setDescription(t('A boolean indicating whether the data gathering session is active or inactive. Making session inactive prevents participants from interacting with the session, everything is read-only.'))
       ->setDefaultValue(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
@@ -338,7 +338,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
 
     $fields['allow_anonymous_responses'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Allow anonymous responses'))
-      ->setDescription(t('A boolean indicating whether the LA Pills Session allows anonymous answers or requires an authenticated user.'))
+      ->setDescription(t('A boolean indicating whether the data gathering session allows anonymous answers or requires an authenticated user.'))
       ->setDefaultValue(TRUE)
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
@@ -347,7 +347,7 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
 
     $fields['require_name'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Require name'))
-      ->setDescription(t('A boolean indicating whether the LA Pills Session requires anonymous users to provide a name or not.'))
+      ->setDescription(t('A boolean indicating whether the data gathering session requires anonymous users to provide a name or not.'))
       ->setDefaultValue(FALSE)
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',

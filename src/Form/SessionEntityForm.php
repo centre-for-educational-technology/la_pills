@@ -39,13 +39,13 @@ class SessionEntityForm extends ContentEntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        \Drupal::messenger()->addMessage($this->t('Created the %label LA Pills Session.', [
+        \Drupal::messenger()->addMessage($this->t('Created the %label data gathering session.', [
           '%label' => $entity->label(),
         ]));
         break;
 
       default:
-        \Drupal::messenger()->addMessage($this->t('Saved the %label LA Pills Session.', [
+        \Drupal::messenger()->addMessage($this->t('Saved the %label data gathering session.', [
           '%label' => $entity->label(),
         ]));
     }

@@ -1,5 +1,5 @@
 entity.session_entity.add_form:
   route_name: entity.session_entity.add_form
-  title: 'Add LA Pills Session'
+  title: 'Add data gathering session'
   appears_on:
     - entity.session_entity.collection

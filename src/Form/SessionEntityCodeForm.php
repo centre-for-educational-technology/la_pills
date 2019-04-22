@@ -76,6 +76,10 @@ class SessionEntityCodeForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $form['header'] = [
+      '#type' => 'markup',
+      '#markup' => '<h5>' . $this->t('Please enter the numeric code that the teacher will provide for this session') . '</h5>',
+    ];
     $form['code'] = [
       '#type' => 'container',
       '#attached' => [
@@ -89,7 +93,7 @@ class SessionEntityCodeForm extends FormBase {
     ];
     $form['code']['code'] = [
       '#type' => 'textfield',
-      '#title' => 'Session PIN code',
+      '#title' => $this->t('Session PIN code'),
       '#title_display' => 'invisible',
       '#placeholder' => $this->t('Session PIN code'),
       '#required' => TRUE,

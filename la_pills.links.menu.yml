@@ -1,28 +1,28 @@
 
 # LA Pills Session menu items definition
 entity.session_entity.collection:
-  title: 'LA Pills Session list'
+  title: 'Data gathering session list'
   route_name: entity.session_entity.collection
-  description: 'List LA Pills Session entities'
+  description: 'List data gathering Session entities'
   parent: system.admin_structure
   weight: 100
 
 session_entity.admin.structure.settings:
-  title: 'LA Pills Session settings'
-  description: 'Configure LA Pills Session entities'
+  title: 'Data gathering session settings'
+  description: 'Configure data gathering session entities'
   route_name: session_entity.settings
   parent: system.admin_structure
 
 entity.session_entity.collection.tools:
-  title: 'LA Pills Session list'
+  title: 'Data gathering session list'
   route_name: entity.session_entity.collection
-  description: 'List LA Pills Session entities'
+  description: 'List data gathering session entities'
   parent: tools
   weight: 10
 
 entity.session_entity.add_form.tools:
-  title: 'Add LA Pills Session'
-  description: 'Create new LA Pills Session entity'
+  title: 'Add data gathering session'
+  description: 'Create new data gathering session entity'
   route_name: entity.session_entity.add_form
   parent: tools
   weight: 15

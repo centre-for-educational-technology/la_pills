@@ -46,7 +46,7 @@ class SessionEntitySettingsForm extends FormBase {
    *   Form definition array.
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['sessionentity_settings']['#markup'] = 'Settings form for LA Pills Session entities. Manage field settings here.';
+    $form['sessionentity_settings']['#markup'] = 'Settings form for data gathering session entities. Manage field settings here.';
     return $form;
   }
 
