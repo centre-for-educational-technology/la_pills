@@ -56,3 +56,16 @@ la_pills.home_page_controller_view:
     _title: 'Welcome to LaPills 2.0'
   requirements:
     _access: 'TRUE'
+
+session_entity.close:
+  path: '/ajax/admin/structure/session_entity/{session_entity}/close'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionEntityController::closeAjaxCallback'
+  options:
+    parameters:
+      session_entity:
+        type: entity:session_entity
+  methods: [POST]
+  requirements:
+    _csrf_token: 'TRUE'
+    _entity_access: 'session_entity.update'

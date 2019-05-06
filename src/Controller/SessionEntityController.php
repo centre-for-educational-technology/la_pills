@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\la_pills\FetchClass\SessionTemplate;
+use Drupal\Core\Messenger\Messenger;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\RedirectCommand;
 
 /**
  * Class SessionEntityController.
@@ -27,13 +30,21 @@ class SessionEntityController extends ControllerBase {
   protected $connection;
 
   /**
+   * Messenger service
+   *
+   * @var Drupal\Core\Messenger\Messenger
+   */
+  protected $messenger;
+
+  /**
    * Controller constructor
    *
    * @param Drupal\Core\Database\Connection $connection
    *   Database connection
    */
-  public function __construct(Connection $connection) {
+  public function __construct(Connection $connection, Messenger $messenger) {
     $this->connection = $connection;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -41,8 +52,9 @@ class SessionEntityController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     $connection = $container->get('database');
+    $messenger = $container->get('messenger');
 
-    return new static($connection);
+    return new static($connection, $messenger);
   }
 
   /**
@@ -456,6 +468,27 @@ class SessionEntityController extends ControllerBase {
 
     $response->headers->set('Content-Type', 'text/csv');
     $response->headers->set('Content-Disposition','attachment; filename="answers.csv"');
+
+    return $response;
+  }
+
+  /**
+   * Callback for session closing ajax call
+   *
+   * @param  SessionEntity Drupal\la_pills\Entity\SessionEntity $session_entity
+   *   Session Entity object
+   * @return Drupal\Core\Ajax\AjaxResponse
+   *   Ajax response with redirect command if successful
+   */
+  public function closeAjaxCallback(SessionEntity $session_entity) {
+    $response = new AjaxResponse();
+
+    if ($session_entity->isActive()) {
+      $session_entity->setActive(FALSE);
+      $session_entity->save();
+      $this->messenger->addMessage($this->t('Session has been closed. Answers are no longer accepted.'));
+      $response->addCommand(new RedirectCommand($session_entity->toUrl()->toString()));
+    }
 
     return $response;
   }

@@ -10,6 +10,7 @@
 use Drupal\Core\Render\Element;
 use Drupal\la_pills\RenderableHelper;
 use Drupal\Core\Link;
+use Drupal\Core\Url;
 
 /**
  * Prepares variables for LA Pills Session templates.
@@ -31,7 +32,31 @@ function template_preprocess_session_entity(array &$variables) {
   }
 
   if ($session_entity->access('update')) {
-    $variables['actions']['download_answers'] = RenderableHelper::downloadAnswersLink($session_entity)->toRenderable();
+    $variables['actions']['dropdown'] = [
+      '#type' => 'dropbutton',
+      '#links' => [
+        'download_answers' => [
+          'title' => t('Download answers'),
+          'url' => Url::fromRoute('session_entity.download_answers', [
+            'session_entity' => $session_entity->id(),
+          ], [
+            'query' => ['token' => $session_entity->uuid()],
+            'attributes' => ['class' => []],
+          ]),
+        ],
+      ],
+    ];
+    if ($session_entity->isActive()) {
+      $variables['actions']['dropdown']['#links']['close'] = [
+        'title' => t('Close session'),
+        'url' => Url::fromRoute('session_entity.close', [
+          'session_entity' => $session_entity->id(),
+        ]),
+        'attributes' => [
+          'class' => ['use-ajax'],
+        ],
+      ];
+    }
     $variables['code'] = $session_entity->getCode();
   }
 
