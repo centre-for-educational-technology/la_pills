@@ -118,8 +118,8 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
     }
 
     foreach (['goals', 'activities', 'questions', 'questionnaires',] as $key) {
-      if (!(isset($structure[$key]) && is_array($structure[$key]) && count($structure[$key]) > 0)) {
-        $errors[] = t('Root key <strong>@key</strong> is missing, not an array or empty!', ['@key' => $key,]);
+      if (!(isset($structure[$key]) && is_array($structure[$key]))) {
+        $errors[] = t('Root key <strong>@key</strong> is missing or not an array!', ['@key' => $key,]);
       }
     }
 

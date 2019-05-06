@@ -1,27 +1,23 @@
 context:
   title: Generic session
-  date: 
+  date:
   course:
-  program: 
+  program:
   description:
     This is a session with nondescript activities.
   technologies: # Those could use a list structure with short lines of text, current format is multiline without preserving the newlines (structure also allows to preserve the newlines if that would be needed)
     Any.
-goals:
-  -
+goals: []
 # Special notation
 # {{website}} Placeholder for the simple website that will be created to support the teacher and students to follow the session
 # {{Q1}}, {{Q2}}, ... Placeholder for the different questionnaires that will be created to gather information from teacher and students
 # {{dashboard}} Placeholder for the dashboard that will be created to display the learning analytics (for teachers or for students)
-activities:
-  -
+activities: []
 # Question types:
 # Short text
 # Long text
 # Scale
 # Multi-choice
 # Checkboxes
-questions:
-  - 
-questionnaires:
-  - 
+questions: []
+questionnaires: []
