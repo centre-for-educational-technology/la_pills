@@ -18,9 +18,10 @@
 #}
 <div{{ attributes.addClass('session-entity') }}>
   {% if actions %}
-    <div class="actions">
+    <div class="actions btn-group" role="group" aria-label="{{ 'Actions'|t }}">
       {{- actions -}}
     </div>
+    <div style="clear:both;"></div>
   {% endif %}
 
   {% if code %}

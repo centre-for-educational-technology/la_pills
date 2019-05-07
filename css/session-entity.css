@@ -11,7 +11,7 @@
 }
 
 .session-entity .actions {
-  text-align: right;
+  float: right;
 }
 
 .session-entity .unique-access-code {

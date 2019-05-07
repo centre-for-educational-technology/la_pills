@@ -14,8 +14,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\la_pills\FetchClass\SessionTemplate;
 use Drupal\Core\Messenger\Messenger;
+use Drupal\Core\Render\Renderer;
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Ajax\RemoveCommand;
+use Drupal\Core\Ajax\AfterCommand;
 
 /**
  * Class SessionEntityController.
@@ -37,14 +39,22 @@ class SessionEntityController extends ControllerBase {
   protected $messenger;
 
   /**
+   * Renderer service
+   *
+   * @var Drupal\Core\Render\Renderer
+   */
+  protected $renderer;
+
+  /**
    * Controller constructor
    *
    * @param Drupal\Core\Database\Connection $connection
    *   Database connection
    */
-  public function __construct(Connection $connection, Messenger $messenger) {
+  public function __construct(Connection $connection, Messenger $messenger, Renderer $renderer) {
     $this->connection = $connection;
     $this->messenger = $messenger;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -53,8 +63,9 @@ class SessionEntityController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     $connection = $container->get('database');
     $messenger = $container->get('messenger');
+    $renderer = $container->get('renderer');
 
-    return new static($connection, $messenger);
+    return new static($connection, $messenger, $renderer);
   }
 
   /**
@@ -484,10 +495,17 @@ class SessionEntityController extends ControllerBase {
     $response = new AjaxResponse();
 
     if ($session_entity->isActive()) {
+      $status_messages = [
+        '#type' => 'status_messages',
+      ];
+
       $session_entity->setActive(FALSE);
       $session_entity->save();
+
       $this->messenger->addMessage($this->t('Session has been closed. Answers are no longer accepted.'));
-      $response->addCommand(new RedirectCommand($session_entity->toUrl()->toString()));
+
+      $response->addCommand(new RemoveCommand('.button.close-session-button'));
+      $response->addCommand(new AfterCommand('[data-drupal-messages-fallback]', $this->renderer->renderRoot($status_messages)));
     }
 
     return $response;
