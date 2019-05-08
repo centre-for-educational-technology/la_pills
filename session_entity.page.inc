@@ -89,4 +89,11 @@ function template_preprocess_session_entity(array &$variables) {
     'id' => $session_entity->id(),
     'canUpdate' => $session_entity->access('update'),
   ];
+
+  $additional_content = [];
+  \Drupal::moduleHandler()->invokeAll('la_pills_session_entity_view', [&$additional_content, $session_entity]);
+
+  if ($additional_content) {
+    $variables['content']['additional_content'] = $additional_content;
+  }
 }
