@@ -1,0 +1,11 @@
+footer.footer section#block-dropdownlanguage {
+  text-align: right;
+}
+
+footer.footer section#block-dropdownlanguage button.language-link.active-language.btn {
+  min-width: 90px;
+}
+
+footer.footer section#block-dropdownlanguage ul.dropdown-menu {
+  min-width: 115px;
+}

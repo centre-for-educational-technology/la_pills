@@ -27,6 +27,13 @@ function la_pills_theme($existing) {
 }
 
 /**
+ * Implements hook_page_attachments()
+ */
+function la_pills_page_attachments(array &$page) {
+  $page['#attached']['library'][] = 'la_pills/main';
+}
+
+/**
  * Implements hook_user_login().
  */
 function la_pills_user_login($account) {

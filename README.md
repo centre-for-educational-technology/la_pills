@@ -52,3 +52,19 @@ updates that tamper with database (it might be safe to always do that).
 Module should be able to work well enough with any themes, though currently
 using [Bootstrap](https://www.drupal.org/project/bootstrap) might provide the
 best results as visuals are being fine-tuned for that theme specifically.
+
+## Optional modules
+
+* [Redirect after login](https://www.drupal.org/project/redirect_after_login) as
+a means of redirecting specific user role to a certain URL. Currently it is
+suggested to redirect user without permission to create sessions to PIN code
+entry page and the rest of the roles to session list page.
+  - Authenticated: `/session_entity_code`
+  - Teacher: `/admin/structure/session_entity`
+  - Admin: `/admin/structure/session_entity`
+* [Dropdown Language](https://www.drupal.org/project/dropdown_language) as a
+means of adding a language select. It does play well with
+[Bootstrap](https://www.drupal.org/project/bootstrap) theme and our own codebase
+has a **small fix** to pace it to the right and apply small UI tunes if suitable
+theme is active.
+  - UI fix only applies if dropdown element is added to the footer of the page
