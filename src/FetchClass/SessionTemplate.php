@@ -38,4 +38,14 @@ class SessionTemplate {
     return str_replace(' ', '-', strtolower(trim($type)));
   }
 
+  /**
+   * Determines if session template has external dashboard set
+   * @return boolean
+   */
+  public function hasExternalDashboard() {
+    $data = $this->getData();
+
+    return isset($data['dashboard']) && isset($data['dashboard']['url']) && $data['dashboard']['url'];
+  }
+
 }

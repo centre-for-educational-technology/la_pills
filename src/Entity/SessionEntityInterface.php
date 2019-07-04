@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\la_pills\FetchClass\SessionTemplate;
 
 /**
  * Provides an interface for defining LA Pills Session entities.
@@ -122,6 +123,14 @@ interface SessionEntityInterface extends ContentEntityInterface, EntityChangedIn
 
   /**
    * Returns chosen Session Template
+   *
+   * @return Drupal\la_pills\FetchClass\SessionTemplate
+   *   Session Template
+   */
+  public function getSessionTemplate();
+
+  /**
+   * Returns chosen Session Template data
    *
    * @return array
    *   Session Template data structure

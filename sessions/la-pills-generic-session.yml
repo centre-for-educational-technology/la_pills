@@ -21,3 +21,19 @@ activities: []
 # Checkboxes
 questions: []
 questionnaires: []
+# External dashboard visualisation that replaces the default one
+# Should be an object with three properties: url, width, height
+# Only the url property is mandatory, others are optional
+# Url could have a {{dataUrl}} replacement token that would be automatically
+# replaced with the fully qualified URL that the data could be fetched from. The
+# URL would be the same as one used by Download Answers functionality. Please
+# note that URL will be URL encoded so that it could be safely used within the
+# query string (though it could be a part of the URL itself if that is required:
+# /endpoint/{{dataUrl}})
+# Please note that optional parameters will get default values if not provided
+# Example:
+# dashboard:
+#   url: https://some.domain?data-url={{dataUrl}}
+#   width: 100%
+#   height: 700px
+dashboard:

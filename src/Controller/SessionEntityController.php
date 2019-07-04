@@ -18,6 +18,7 @@ use Drupal\Core\Render\Renderer;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\RemoveCommand;
 use Drupal\Core\Ajax\AfterCommand;
+use Drupal\Core\Url;
 
 /**
  * Class SessionEntityController.
@@ -304,13 +305,64 @@ class SessionEntityController extends ControllerBase {
   }
 
   /**
+   * Returns custom dashboard page structure (assumes one is set)
+   * @param  Drupal\la_pills\Entity\SessionEntity $session_entity
+   *   Session Entity
+   * @param  array                                $structure
+   *   Session template data structure
+   * @return array
+   *   Page structure
+   */
+  private function respondWithCustomDashboard(SessionEntity $session_entity, array $structure) {
+    $downloadAnswersUrl = Url::fromRoute('session_entity.download_answers',[
+      'session_entity' => $session_entity->id(),
+    ], [
+      'absolute' => TRUE,
+      'query' =>
+      [
+        'token' => $session_entity->uuid(),
+      ],
+    ])->toString();
+    $encoded = urlencode($downloadAnswersUrl);
+
+    $src = str_replace('{{dataUrl}}', $encoded, $structure['dashboard']['url']);
+
+    $response = [
+      '#type' => 'html_tag',
+      '#tag' => 'iframe',
+      '#attributes' => [
+        'src' => $src,
+        'width' => isset($structure['dashboard']['width']) ? $structure['dashboard']['width'] : '100%',
+        'height' => isset($structure['dashboard']['height']) ? $structure['dashboard']['height'] : '500px',
+        'name' => 'external-dashboard',
+      ],
+    ];
+
+    return $response;
+  }
+
+  /**
    * Returns dashboard page structure
    *
    * @return array
    *   Content structure
    */
-  public function dashboard(SessionEntity $session_entity) {
+  public function dashboard(SessionEntity $session_entity, Request $request) {
     $structure = $session_entity->getSessionTemplateData();
+
+    // TODO See if we could use the hasExternalDashoard() metod of SessionTemplate class
+    if (isset($structure['dashboard']) && isset($structure['dashboard']['url']) && $structure['dashboard']['url']) {
+      $customDashoard = $this->respondWithCustomDashboard($session_entity, $structure);
+
+      $showDefaltDashBoard = $request->get('show-default-dashboard') === 'true';
+
+      if (!$showDefaltDashBoard) {
+        return $customDashoard;
+      } else {
+        $response['iframe'] = $customDashoard;
+      }
+    }
+
     $response['dashboard'] = [
       '#attached' => [
         'library' => [

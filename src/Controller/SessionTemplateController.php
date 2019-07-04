@@ -94,6 +94,24 @@ class SessionTemplateController extends ControllerBase {
       }
     }
 
+    if ($session_template->hasExternalDashboard()) {
+      $response['custom-template'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => [
+            'alert',
+            'alert-info',
+            'text-center',
+          ],
+        ],
+      ];
+      $response['custom-template']['text'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'strong',
+        '#value' => $this->t('This template has custom dashboard!'),
+      ];
+    }
+
     $response['template'] = [
       '#theme' => 'session_template',
       '#template' => $session_template_data,
