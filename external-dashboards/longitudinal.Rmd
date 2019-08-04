@@ -1,0 +1,48 @@
+---
+title: "Longitudinal Data Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+renderText({
+    paste(sep = "",
+          "protocol: ", session$clientData$url_protocol, "\n",
+          "hostname: ", session$clientData$url_hostname, "\n",
+          "pathname: ", session$clientData$url_pathname, "\n",
+          "port: ",     session$clientData$url_port,     "\n",
+          "search: ",   session$clientData$url_search,   "\n"
+    )
+  })
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+
