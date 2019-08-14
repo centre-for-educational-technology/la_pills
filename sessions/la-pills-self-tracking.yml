@@ -1,0 +1,198 @@
+context:
+  title: Self-tracking experiments
+  date: 2019-08-04
+  course:
+  program: 
+  description:
+    This is a very simple kind of session, in which a person gathers longitudinal data daily for their own 
+    self-experimentation and lifelong learning purposes.
+  technologies: # Those could use a list structure with short lines of text, current format is multiline without preserving the newlines (structure also allows to preserve the newlines if that would be needed)
+    Just this platform :)
+goals:
+  -
+    title: You should be able to track your progress and lessons learned
+    short: &G1S Self-tracking
+# Special notation
+# {{website}} Placeholder for the simple website that will be created to support the teacher and students to follow the session
+# {{Q1}}, {{Q2}}, ... Placeholder for the different questionnaires that will be created to gather information from teacher and students
+# {{dashboard}} Placeholder for the dashboard that will be created to display the learning analytics (for teachers or for students)
+activities:
+  -
+    activity: Track yourself 
+    duration: 5-10 #minutes
+    description: |- #preserves newlines
+      At the end of each workday, answer {{Q1}}. To make things easier, it is recommended to create 
+      a shortcut to this page in your desktop, phone or whatever device is most comfortable for you to make this tracking.
+      You can also visualize the data you have introduced so far in the {{dashboard}} (see also the menu link above)
+    resources:
+# Question types:
+# Short text
+# Long text
+# Scale
+# Multi-choice
+# Checkboxes
+questions:
+  - &Q1
+    title: Today was a baseline or experimental day?
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - Baseline
+      - Experimental
+  - &Q2
+    title: Today I have felt cheerful and in good spirits
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - All of the time
+      - Most of the time
+      - More than half of the time
+      - Less than half of the time
+      - Some of the time
+      - At no time
+  - &Q3
+    title: Today I have felt calm and relaxed
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - All of the time
+      - Most of the time
+      - More than half of the time
+      - Less than half of the time
+      - Some of the time
+      - At no time
+  - &Q4
+    title: Today I have felt active and vigorous
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - All of the time
+      - Most of the time
+      - More than half of the time
+      - Less than half of the time
+      - Some of the time
+      - At no time  
+  - &Q5
+    title: Today I woke up feeling fresh and rested
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - All of the time
+      - Most of the time
+      - More than half of the time
+      - Less than half of the time
+      - Some of the time
+      - At no time  
+  - &Q6
+    title: Today has been filled with things that interest me
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - All of the time
+      - Most of the time
+      - More than half of the time
+      - Less than half of the time
+      - Some of the time
+      - At no time  
+  - &Q7
+    title: How long did you do mindfulness meditation in the MORNING? (number, in minutes)
+    type: Short text
+    goals:
+      - *G1S
+  - &Q8
+    title: How long did you do mindfulness meditation in the EVENING? (number, in minutes)
+    type: Short text
+    goals:
+      - *G1S
+  - &Q9
+    title: Was today officially a working day?
+    type: Multi-choice
+    goals:
+      - *G1S
+    options:
+      - YES
+      - NO
+  - &Q10
+    title: How long did you SLEEP today? (number, in hours)
+    type: Short text
+    goals:
+      - *G1S
+  - &Q11
+    title: How long did you WORK today? (number, in hours)
+    type: Short text
+    goals:
+      - *G1S
+  - &Q12
+    title: Overall, how satisfied are you with your PROGRESS today? (from -2, very unsatisfied, to +2, very satisfied)
+    type: Scale
+    min: -2
+    max: 2
+    goals:
+      - *G1S
+  - &Q13
+    title: Please write down a short log entry about your productivity and progress today.
+    type: Long text
+    goals:
+      - *G1S
+  - &Q14
+    title: Please write down a short summary of any other notable events, feelings or ideas from today.
+    type: Long text
+    goals:
+      - *G1S
+questionnaires:
+  -
+    id: Q1
+    title: Daily data
+    questions:
+      -
+        <<: *Q1
+        required: Yes
+      -
+        <<: *Q2
+        required: Yes
+      -
+        <<: *Q3
+        required: Yes
+      -
+        <<: *Q4
+        required: Yes
+      -
+        <<: *Q5
+        required: Yes
+      -
+        <<: *Q6
+        required: Yes
+      -
+        <<: *Q7
+        required: Yes
+      -
+        <<: *Q8
+        required: Yes
+      -
+        <<: *Q9
+        required: Yes
+      -
+        <<: *Q10
+        required: Yes
+      -
+        <<: *Q11
+        required: Yes
+      -
+        <<: *Q12
+        required: Yes
+      -
+        <<: *Q13
+        required: No
+      -
+        <<: *Q14
+        required: No
+dashboard:
+  url: https://lprisan-tlu.shinyapps.io/longitudinal/?data-url={{dataUrl}}
+  width: 100%
+  height: 700px
