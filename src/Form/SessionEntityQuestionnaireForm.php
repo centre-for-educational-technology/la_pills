@@ -139,9 +139,19 @@ class SessionEntityQuestionnaireForm extends EntityForm {
       ];
     }
 
-    $form['questionnaire'] = [
+    $form['questionnaire']['title'] = [
       '#markup' => '<h2>' . $this->questionnaire['title'] . '</h2>',
     ];
+
+    if (isset($this->questionnaire['description']) && $this->questionnaire['description']) {
+      $form['questionnaire']['description'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['well', 'questionnaire-description'],
+        ],
+        '#plain_text' => $this->questionnaire['description'],
+      ];
+    }
 
     $form['questions'] = [
       '#attached' => [

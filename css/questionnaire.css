@@ -28,3 +28,8 @@
 .la-pills-user-data .la-pills-name-reset {
   margin-left: 2em;
 }
+
+.questionnaire-description {
+  white-space: pre-wrap;
+  font-size: 115%;
+}
