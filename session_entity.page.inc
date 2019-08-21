@@ -61,6 +61,9 @@ function template_preprocess_session_entity(array &$variables) {
     '{{dashboard}}' => $session_entity->toLink(t('dashboard'), 'dashboard', [
       'absolute' => TRUE,
     ])->toString(),
+    '{{Dashboard}}' => $session_entity->toLink(t('Dashboard'), 'dashboard', [
+      'absolute' => TRUE,
+    ])->toString(),
   ];
 
   $session_template_data = $session_entity->getSessionTemplateData();

@@ -86,6 +86,7 @@ class SessionTemplateController extends ControllerBase {
     $replacements = [
       '{{website}}' => Link::fromTextAndUrl($current_url->toString(), $current_url)->toString(),
       '{{dashboard}}' => Link::fromTextAndUrl($this->t('dashboard'), $current_url)->toString(),
+      '{{Dashboard}}' => Link::fromTextAndUrl($this->t('Dashboard'), $current_url)->toString(),
     ];
 
     if ($session_template_data['questionnaires']) {
