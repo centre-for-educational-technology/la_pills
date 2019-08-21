@@ -76,7 +76,7 @@ class SessionEntityController extends ControllerBase {
    *   Title text
    */
   public function dashboardTitle() {
-    return 'Dashboard';
+    return $this->t('Dashboard');
   }
 
   /**
@@ -452,7 +452,7 @@ class SessionEntityController extends ControllerBase {
    *   Title text
    */
   public function questionnaireTitle() {
-    return 'Questionnaire';
+    return $this->t('Questionnaire');
   }
 
   /**
@@ -516,7 +516,18 @@ class SessionEntityController extends ControllerBase {
 
     $handle = fopen('php://temp', 'wb');
 
-    fputcsv($handle, ['Session title', 'Questionnaire title', 'Question title', 'Question type', 'Session identifier', 'Form submission identifier', 'User identifier', 'Anonymous user name', 'Answer', 'Created',]);
+    fputcsv($handle, [
+      $this->t('Session title'),
+      $this->t('Questionnaire title'),
+      $this->t('Question title'),
+      $this->t('Question type'),
+      $this->t('Session identifier'),
+      $this->t('Form submission identifier'),
+      $this->t('User identifier'),
+      $this->t('Anonymous user name'),
+      $this->t('Answer'),
+      $this->t('Created'),
+    ]);
 
     $template = $session_entity->getSessionTemplateData();
     $salt = $random->string();

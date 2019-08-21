@@ -91,7 +91,7 @@ class SessionTemplateController extends ControllerBase {
 
     if ($session_template_data['questionnaires']) {
       foreach ($session_template_data['questionnaires'] as $questionnaire) {
-        $replacements['{{' . $questionnaire['id'] . '}}'] = Link::fromTextAndUrl($questionnaire['title'] . ' ' . $this->t('form'), $current_url)->toString();
+        $replacements['{{' . $questionnaire['id'] . '}}'] = Link::fromTextAndUrl($questionnaire['title'], $current_url)->toString();
       }
     }
 

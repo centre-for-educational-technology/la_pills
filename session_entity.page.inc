@@ -69,7 +69,7 @@ function template_preprocess_session_entity(array &$variables) {
   $session_template_data = $session_entity->getSessionTemplateData();
   if ($session_template_data && $session_template_data['questionnaires']) {
     foreach ($session_template_data['questionnaires'] as $questionnaire) {
-      $replacements['{{' . $questionnaire['id'] . '}}'] = Link::createFromRoute($questionnaire['title'] . ' ' . t('form'), 'entity.session_entity.questionnaire', [
+      $replacements['{{' . $questionnaire['id'] . '}}'] = Link::createFromRoute($questionnaire['title'], 'entity.session_entity.questionnaire', [
         'session_entity' => $session_entity->id(),
         'questionnaire_uuid' => $questionnaire['uuid'],
       ], [
