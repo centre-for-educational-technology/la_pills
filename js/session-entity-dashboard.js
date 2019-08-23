@@ -72,11 +72,17 @@
                     ['data'].concat(Object.values(data.counts)),
                   ],
                   types: {
-                    data: 'bar'
+                    data: 'area-step'
                   }
                 },
                 legend: {
                   show: false
+                },
+                axis: {
+                  x: {
+                    type: 'category',
+                    categories: data.options
+                  }
                 }
               });
             });
