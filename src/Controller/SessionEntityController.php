@@ -126,19 +126,29 @@ class SessionEntityController extends ControllerBase {
   /**
    * Returns counts of unique form submissions to all questionnaires that have
    * been answered at least once.
+   * Only uses timestamps as condition if both are present.
    *
    * @param  string $session_entity_uuid
    *   Session Entity UUID
+   * @param  int    $from
+   *   From timestamp
+   * @param  int    $until
+   *   Until timestamp
    *
    * @return array
    *   An array of $questionnaire_uuid => $count
    */
-  private function getAllQuestionnairesSubmissionsCounts(string $session_entity_uuid) {
+  private function getAllQuestionnairesSubmissionsCounts(string $session_entity_uuid, int $from = NULL, int $until = NULL) {
     $query = $this->connection->select('session_questionnaire_answer', 'sqa')
     ->fields('sqa', ['questionnaire_uuid'])
     ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
     ->groupBy('sqa.questionnaire_uuid');
     $query->addExpression('COUNT(DISTINCT sqa.form_build_id)', 'count');
+
+    if ($from && $until) {
+      $query->condition('sqa.created', $from, '>=');
+      $query->condition('sqa.created', $until, '<=');
+    }
 
     $counts = $query->execute()->fetchAll();
 
@@ -176,16 +186,21 @@ class SessionEntityController extends ControllerBase {
    * Returns answer counts for all questions based on their presenc in the
    * database. Only elements that have any answers are present on both question
    * and questionnaire level.
+   * Only uses timestamps as condition if both are present.
    *
    * @param  string $session_entity_uuid
    *   Session Entity UUID
    * @param  array  $question_uuids
    *   Suitable question UUIDs
+   * @param  int    $from
+   *   From timestamp
+   * @param  int    $until
+   *   Until timestamp
    *
    * @return array
    *   Multidimensional array with data $questionnaire_uuid => (array)$question_uuid => (array)$answer => $count
    */
-  private function getAllQuestionsAnswerCounts(string $session_entity_uuid, array $question_uuids) {
+  private function getAllQuestionsAnswerCounts(string $session_entity_uuid, array $question_uuids, int $from = NULL, int $until = NULL) {
     $data = [];
 
     if (sizeof($question_uuids) === 0) {
@@ -198,6 +213,11 @@ class SessionEntityController extends ControllerBase {
     ->condition('sqa.question_uuid', $question_uuids, 'IN')
     ->groupBy('sqa.questionnaire_uuid, sqa.question_uuid, sqa.answer');
     $query->addExpression('COUNT(sqa.answer)', 'count');
+
+    if ($from && $until) {
+      $query->condition('sqa.created', $from, '>=');
+      $query->condition('sqa.created', $until, '<=');
+    }
 
     $counts = $query->execute()->fetchAll();
 
@@ -363,6 +383,12 @@ class SessionEntityController extends ControllerBase {
       }
     }
 
+    $fromDate = $request->get('date_from');
+    $untilDate = $request->get('date_until');
+    $filterForm = \Drupal::formBuilder()->getForm('Drupal\la_pills\Form\DashboardFilterForm');
+
+    $response['form'] = $filterForm;
+
     $response['dashboard'] = [
       '#attached' => [
         'library' => [
@@ -372,10 +398,18 @@ class SessionEntityController extends ControllerBase {
     ];
 
     $jsData = [];
+    $fromDateTimestamp = NULL;
+    $untilDateTimestamp = NULL;
 
-    $submissions_counts = $this->getAllQuestionnairesSubmissionsCounts($session_entity->uuid());
+    if ($fromDate && $untilDate) {
+      $fromDateTimestamp = strtotime($fromDate);
+      // Time is set to the end of the day
+      $untilDateTimestamp = strtotime($untilDate) + strtotime('1 day -1 second', 0);
+    }
+
+    $submissions_counts = $this->getAllQuestionnairesSubmissionsCounts($session_entity->uuid(), $fromDateTimestamp, $untilDateTimestamp);
     $graphable_uuids = $this->extractGraphableQuestionUuids($structure['questionnaires']);
-    $all_graphable_counts = $this->getAllQuestionsAnswerCounts($session_entity->uuid(), $graphable_uuids);
+    $all_graphable_counts = $this->getAllQuestionsAnswerCounts($session_entity->uuid(), $graphable_uuids, $fromDateTimestamp, $untilDateTimestamp);
 
     $questionnaire_index = 0;
     foreach ($structure['questionnaires'] as $questionnaire) {
