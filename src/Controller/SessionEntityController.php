@@ -386,6 +386,7 @@ class SessionEntityController extends ControllerBase {
         '#type' => 'container',
         '#attributes' => [
           'class' => ['questionnaire'],
+          'id' => 'questionnaire-' . $questionnaire['uuid'],
         ],
       ];
       $response[$questionnaire['uuid']]['heading'] = [
@@ -435,6 +436,7 @@ class SessionEntityController extends ControllerBase {
             'type' => $question_type,
             'options' => $options,
             'counts' => $counts,
+            'title' => $question['title'],
           ];
         }
       }

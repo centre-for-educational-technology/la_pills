@@ -24,6 +24,8 @@
       }
 
       $.each(settings.laPillsSessionEntityDashboardData, function(questionnaireUuid, questions) {
+        var meansData = {};
+
         $.each(questions, function(questionUuid, data) {
           var $element = $('#'+data.id, context);
           var graphid = 'graph-' + data.id;
@@ -70,7 +72,7 @@
                     ['data'].concat(Object.values(data.counts)),
                   ],
                   types: {
-                    data: 'area-step'
+                    data: 'bar'
                   }
                 },
                 legend: {
@@ -78,10 +80,74 @@
                 }
               });
             });
+
+            var tmp = [];
+            $.each(data.counts, function(key, value) {
+              tmp.push(key * value);
+            });
+            var totalSum = tmp.reduce(function(total, value) {
+              return total + value;
+            });
+            var totalCount = Object.values(data.counts).reduce(function(total, count) {
+              return total + count;
+            });
+
+            meansData[data.title] = (totalCount > 0) ? totalSum / totalCount : 0;
           } else {
             console.warn('Unhandled graph type:', data.type);
           }
         });
+
+        if (Object.keys(meansData).length > 0) {
+          var $meansElement = $('<div>', {
+            class: 'questionnaire-means well',
+            id: 'questinnaire-' + questionnaireUuid + '-means'
+          });
+          var graphId = 'questionnaire-scale-mean-' + questionnaireUuid;
+          var columns = [];
+          $.each(meansData, function(key, value) {
+            columns.push([key, value]);
+          });
+
+          $('<h3>', {
+            text: Drupal.t('Mean values of questionnaire scale questions')
+          }).appendTo($meansElement);
+
+          $('<div>', {
+            id: graphId,
+            class: 'graph graph-scale-mean'
+          }).css('height', 150 + (25 * columns.length)).appendTo($meansElement).ready(function() {
+            var chart = c3.generate({
+              bindto: '#' + graphId,
+              data: {
+                columns: columns,
+                type: 'bar'
+              },
+              legend: {
+                show: true
+              },
+              axis: {
+                rotated: true,
+                x: {
+                  show: false
+                }
+              },
+              bar: {
+                space: 0.25
+              },
+              tooltip: {
+                grouped: false,
+                format: {
+                  value: function(value, ratio, id, index) {
+                    return Number.isInteger(value) ? value : Number(value).toFixed(1);
+                  }
+                }
+              }
+            });
+          });
+
+          $meansElement.appendTo($('#questionnaire-' + questionnaireUuid, context));
+        }
       });
     }
   };
