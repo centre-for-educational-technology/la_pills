@@ -75,6 +75,8 @@ session_templates.manage:
   defaults:
     _controller: '\Drupal\la_pills\Controller\SessionTemplateController::manage'
     _title: 'Session Template management'
+  options:
+    _admin_route: 'TRUE'
   methods: [GET]
   requirements:
     _permission: 'administer site configuration'
@@ -84,5 +86,7 @@ session_template.delete:
   defaults:
     _form: '\Drupal\la_pills\Form\SessionTemplateDeleteForm'
     _title: 'Delete Session Template'
+  options:
+    _admin_route: 'TRUE'
   requirements:
     _permission: 'administer site configuration'
