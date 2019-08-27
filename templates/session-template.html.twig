@@ -9,11 +9,19 @@
  * Available variables:
  * - template: Session Template data.
  * - replacements: An array of replcements for placeholders.
+ * - actions: Action buttons
  *
  * @ingroup themeable
  */
 #}
 <div{{ attributes.addClass('session-template') }}>
+  {% if actions %}
+    <div class="actions btn-group" role="group" aria-label="{{ 'Actions'|t }}">
+      {{- actions -}}
+    </div>
+    <div style="clear:both;"></div>
+  {% endif %}
+
   {% if template and template['goals'] %}
     <h2>{{ 'Goals'|t }}</h2>
     <ol>

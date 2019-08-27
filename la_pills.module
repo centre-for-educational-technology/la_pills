@@ -21,6 +21,7 @@ function la_pills_theme($existing) {
       'variables' => [
         'template' => NULL,
         'replacements' => [],
+        'actions' => NULL,
       ],
     ],
   ];

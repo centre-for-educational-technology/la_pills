@@ -48,4 +48,14 @@ class SessionTemplate {
     return isset($data['dashboard']) && isset($data['dashboard']['url']) && $data['dashboard']['url'];
   }
 
+  /**
+   * Returns title of the Session Template
+   *
+   * @return string
+   *   Title of the Session Template
+   */
+  public function getTitle() {
+    return $this->getData()['context']['title'];
+  }
+
 }

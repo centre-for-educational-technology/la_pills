@@ -69,3 +69,20 @@ session_entity.close:
   requirements:
     _csrf_token: 'TRUE'
     _entity_access: 'session_entity.update'
+
+session_templates.manage:
+  path: '/admin/config/la_pills/session_templates'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionTemplateController::manage'
+    _title: 'Session Template management'
+  methods: [GET]
+  requirements:
+    _permission: 'administer site configuration'
+
+session_template.delete:
+  path: '/session_template/{session_template}/delete'
+  defaults:
+    _form: '\Drupal\la_pills\Form\SessionTemplateDeleteForm'
+    _title: 'Delete Session Template'
+  requirements:
+    _permission: 'administer site configuration'

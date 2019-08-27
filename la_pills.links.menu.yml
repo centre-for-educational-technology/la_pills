@@ -36,7 +36,13 @@ la_pills.session_entity_code:
   weight: 10
 
 la_pills.session_template_upload:
-  title: 'Session template upload'
-  description: 'Upload new session templates'
+  title: 'Session Template upload'
+  description: 'Upload new Session Templates'
   parent: system.admin_config_system
   route_name: la_pills.session_template_upload
+
+la_pills.session_template.manage:
+  title: 'Session Template management'
+  description: 'Manage existing Session Templates'
+  parent: system.admin_config_system
+  route_name: session_templates.manage
