@@ -3,6 +3,17 @@
     attach: function (context, settings) {
       if (context !== window.document) return;
 
+      /**
+       * Rounds the value in case of float to certain digits or returns it as is
+       * in caae of integer.
+       * @param  {number} value  Numerical value
+       * @param  {int}    digits Number of digits to appear after decimal point
+       * @return {number}        Rounded float or integer value
+       */
+      function numberToIntegerOrFixed(value, digits) {
+        return Number.isInteger(value) ? value : Number(value).toFixed(digits);
+      }
+
       var hasTooltips = typeof($.fn.tooltip) != 'undefined';
 
       $('table.responses.has-answers', context)
@@ -61,32 +72,6 @@
               });
             });
           } else if (data.type === 'scale') {
-            $('<div>', {
-              id: graphid,
-              class: 'graph'
-            }).appendTo($element).ready(function() {
-              var chart = c3.generate({
-                bindto: '#' + graphid,
-                data: {
-                  columns: [
-                    ['data'].concat(Object.values(data.counts)),
-                  ],
-                  types: {
-                    data: 'area-step'
-                  }
-                },
-                legend: {
-                  show: false
-                },
-                axis: {
-                  x: {
-                    type: 'category',
-                    categories: data.options
-                  }
-                }
-              });
-            });
-
             var tmp = [];
             $.each(data.counts, function(key, value) {
               tmp.push(key * value);
@@ -99,6 +84,58 @@
             });
 
             meansData[data.title] = (totalCount > 0) ? totalSum / totalCount : 0;
+
+            var graphData = {
+              bindto: '#' + graphid,
+              data: {
+                columns: [
+                  [Drupal.t('Kokku')].concat(Object.values(data.counts)),
+                ],
+                type: 'area-step'
+              },
+              legend: {
+                show: false
+              },
+              axis: {
+                x: {
+                  type: 'category',
+                  categories: data.options
+                },
+                y: {
+                  tick: {}
+                }
+              },
+              grid: {
+                x: {}
+              }
+            };
+
+            if (totalCount > 0) {
+              graphData.grid.x.lines = [
+                {
+                  value: meansData[data.title] - d3.min(data.options),
+                  text: Drupal.t('Mean value: @value', {
+                    '@value': numberToIntegerOrFixed(meansData[data.title], 1)
+                  }),
+                  position: 'middle',
+                  class: 'mean'
+                }
+              ];
+            }
+
+            if (d3.max(Object.values(data.counts)) < 10) {
+              graphData.axis.y.tick.values = [];
+              for (var i = 0; i<=d3.max(Object.values(data.counts)); i++) {
+                graphData.axis.y.tick.values.push(i);
+              }
+            }
+
+            $('<div>', {
+              id: graphid,
+              class: 'graph scale'
+            }).appendTo($element).ready(function() {
+              var chart = c3.generate(graphData);
+            });
           } else {
             console.warn('Unhandled graph type:', data.type);
           }
@@ -145,7 +182,7 @@
                 grouped: false,
                 format: {
                   value: function(value, ratio, id, index) {
-                    return Number.isInteger(value) ? value : Number(value).toFixed(1);
+                    return numberToIntegerOrFixed(value, 1);
                   }
                 }
               }

@@ -29,3 +29,12 @@ table.responses.has-answers.show-more > tbody {
   max-height: 25px;
   opacity: 0.5;
 }
+
+.c3.graph.scale .c3-xgrid-line.mean line {
+    stroke: black;
+}
+
+.c3.graph.scale .c3-xgrid-line.mean text {
+    fill: black;
+    font-size: 125%;
+}
