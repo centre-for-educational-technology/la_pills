@@ -85,6 +85,11 @@ class SessionTemplateUploadForm extends FormBase {
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Upload'),
+      '#attached' => [
+        'library' => [
+          'core/drupal.form',
+        ],
+      ],
     ];
 
     return $form;

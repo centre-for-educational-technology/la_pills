@@ -167,6 +167,11 @@ class SessionTemplateDeleteForm extends FormBase {
     $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Delete'),
+      '#attached' => [
+        'library' => [
+          'core/drupal.form',
+        ],
+      ],
     ];
     $form['actions']['cancel'] = [
       '#type' => 'link',

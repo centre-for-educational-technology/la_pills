@@ -33,6 +33,11 @@ class DashboardFilterForm extends FormBase {
       '#attributes' => [
         'class' => ['well'],
       ],
+      '#attached' => [
+        'library' => [
+          'core/drupal.form',
+        ],
+      ],
     ];
 
     if ($from && $until) {
