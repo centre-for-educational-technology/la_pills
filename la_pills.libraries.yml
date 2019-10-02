@@ -31,6 +31,8 @@ questionnaire:
     css:
         theme:
             css/questionnaire.css: {}
+    dependencies:
+      - core/drupal.form
 session_entity:
   version: 1.x
   css:
