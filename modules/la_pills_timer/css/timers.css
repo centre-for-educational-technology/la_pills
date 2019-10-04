@@ -1,0 +1,61 @@
+.timer-session-button {
+  display: inline-block;
+  min-width: 40px;
+  border-radius: 20px;
+  min-height: 40px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-indent: -9999px;
+  float: left;
+  margin-right: 15px;
+  text-decoration: none !important;
+  color: #fff !important;
+}
+
+.timer-session-button:hover {
+  text-decoration: none !important;
+  color: #fff !important;
+}
+
+.title-modal-timer {
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.timer-delete-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.timer-delete-actions button {
+  flex: 0 40%;
+}
+
+.timer-color-field {
+  width: 40px !important;
+}
+
+.timer-group-select {
+  background-image: none !important;
+}
+
+.time-timer {
+  display: none;
+}
+
+.la-pills-active-timer {
+  padding: 10px;
+  text-indent: unset;
+}
+
+.la-pills-timer .timer-name {
+  margin-top: 5px;
+  font-size: 18px;
+  display: inline-block;
+}
+
+.la-pills-timer {
+  margin-top: 10px;
+}

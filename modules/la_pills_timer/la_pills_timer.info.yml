@@ -1,0 +1,9 @@
+name: LA Pills Timer
+description: Implements timer functionality for LA Pills 2.0 module.
+package: LAPills
+
+type: module
+core: 8.x
+
+dependencies:
+  - drupal:la_pills

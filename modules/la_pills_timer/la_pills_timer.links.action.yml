@@ -1,0 +1,5 @@
+entity.la_pills_timer_entity.add_form:
+  route_name: entity.la_pills_timer_entity.add_form
+  title: 'Add Timer'
+  appears_on:
+    - system.admin_content

@@ -1,0 +1,23 @@
+{% for timer in elements %}
+  {% if timer['#la_pills_timer_entity'].name %}
+    <div class="la-pills-timer la-pills-timer-{{ timer['#la_pills_timer_entity'].id.0.value }}">
+      <div class="row">
+        <div class="col-sm-9">
+          {{ timer.session_link }}
+          <span class=" timer-name">
+        {{ timer['#la_pills_timer_entity'].name.0.value }}
+      </span>
+        </div>
+        <div class="col-sm-1">
+          {{ timer.export_link }}
+        </div>
+        <div class="col-sm-1">
+          {{ timer.edit_link }}
+        </div>
+        <div class="col-sm-1">
+          {{ timer.remove_link }}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}

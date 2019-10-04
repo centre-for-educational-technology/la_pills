@@ -1,0 +1,55 @@
+la_pills_timer.la_pills_timer_controller_timers:
+  path: '/timers'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::index'
+    _title: 'Timers'
+  requirements:
+    _permission: 'view published la pills timer entities'
+
+la_pills_timer.la_pills_timer_controller_addTimer:
+  path: '/timers/timer/create'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::addTimer'
+    _title: 'Create new timer'
+  requirements:
+    _permission: 'add la pills timer entities'
+
+la_pills_timer.la_pills_timer_controller_editTimer:
+  path: '/timers/timer/{timer_id}/edit'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::updateTimer'
+    _title: 'Edit Timer'
+  requirements:
+    _permission: 'edit la pills timer entities'
+
+la_pills_timer.la_pills_timer_controller_removeTimer:
+  path: '/timers/timer/{timer_id}/delete'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::removeTimer'
+    _title: 'Remove Timer'
+  requirements:
+    _permission: 'delete la pills timer entities'
+
+la_pills_timer.la_pills_timer_controller_sessionTimer:
+  path: '/timers/timer/{timer_id}/session'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionTimer'
+    _title: 'Session Timer'
+  requirements:
+    _permission: 'add la pills timer entities'
+
+la_pills_timer.la_pills_timer_controller_stopAll:
+  path: '/timers/stop-all'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::stopAll'
+    _title: 'Stop all timers'
+  requirements:
+    _permission: 'add la pills timer entities'
+
+la_pills_timer.la_pills_timer_controller_exportTimer:
+  path: '/timers/export/{timer_id}'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::exportTimer'
+    _title: 'Export timer'
+  requirements:
+    _permission: 'view unpublished la pills timer entities'

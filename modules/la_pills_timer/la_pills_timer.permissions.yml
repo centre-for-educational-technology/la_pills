@@ -1,0 +1,24 @@
+add la pills timer entities:
+  title: 'Create new Timer and Timer sessions'
+
+administer la pills timer entities:
+  title: 'Administer LA Pills Timer entities'
+  description: 'Allow to access the administration form to configure LA Pills Timer entities.'
+  restrict access: true
+
+delete la pills timer entities:
+  title: 'Delete Timer and Timer sessions'
+
+edit la pills timer entities:
+  title: 'Edit Timer and Timer sessions'
+
+view published la pills timer entities:
+  title: 'View active Timer and Timer sessions'
+
+view unpublished la pills timer entities:
+  title: 'View inactive Timer and Timer sessions'
+
+administer la pills timer session entities:
+  title: 'Administer La Pills Timer Session entities'
+  description: 'Allow to access the administration form to configure La Pills Timer Session entities.'
+  restrict access: true

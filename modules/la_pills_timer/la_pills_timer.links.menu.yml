@@ -1,0 +1,32 @@
+
+# LA Pills Timer menu items definition
+entity.la_pills_timer_entity.collection:
+  title: 'LA Pills Timer list'
+  route_name: entity.la_pills_timer_entity.collection
+  description: 'List LA Pills Timer entities'
+  parent: system.admin_structure
+  weight: 100
+
+# LA Pills Timer menu items definition
+entity.la_pills_timer_entity.timers:
+  title: 'Timers'
+  route_name: la_pills_timer.la_pills_timer_controller_timers
+  description: 'List LA Pills Timers'
+  parent: system.admin_content
+  weight: 100
+
+# LA Pills Timer menu items definition
+entity.la_pills_timer_entity.timers_add:
+  title: 'Create new timer'
+  route_name: la_pills_timer.la_pills_timer_controller_addTimer
+  description: 'Create new timer item'
+  parent: tools
+  weight: 100
+
+# LA Pills Timer menu items definition
+entity.la_pills_timer_entity.timers_list:
+  title: 'Timers'
+  route_name: la_pills_timer.la_pills_timer_controller_timers
+  description: 'List of timers'
+  parent: tools
+  weight: 100

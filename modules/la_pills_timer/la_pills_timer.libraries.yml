@@ -1,0 +1,11 @@
+main:
+  version: 1.x
+  css:
+    theme:
+      css/timers.css: {}
+  js:
+    js/moment.min.js: {}
+    js/ez.countimer.js: {}
+    js/la_pills_timer_counter.js: {}
+  dependencies:
+    - core/drupal.ajax
