@@ -4,6 +4,7 @@ namespace Drupal\la_pills_timer\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -105,7 +106,10 @@ class LaPillsTimerRemoveForm extends FormBase {
         '#tag' => 'div',
         '#value' => $this
           ->t('Removed.'),
-        '#attributes' => ['class' => ['la-pills-timer', $timer_name]],
+        '#attributes' => [
+            'class' => ['la-pills-timer', $timer_name, 'alert', 'alert-success'],
+            'role' => 'alert',
+        ],
       ];
 
       $response->addCommand(
@@ -113,6 +117,7 @@ class LaPillsTimerRemoveForm extends FormBase {
           '.' . $timer_name,
           $message)
       );
+      $response->addCommand(new InvokeCommand('.' . $timer_name, 'fadeOut', [3000]));
     }
 
     $response->addCommand(new CloseModalDialogCommand());
