@@ -7,7 +7,7 @@ use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 
 /**
@@ -15,7 +15,7 @@ use Drupal\Core\Ajax\CloseModalDialogCommand;
  */
 class LaPillsTimerEditForm extends FormBase {
 
-  public function __construct(EntityTypeManager $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
   }
 

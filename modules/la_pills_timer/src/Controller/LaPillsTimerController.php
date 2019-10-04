@@ -6,7 +6,7 @@ use Drupal\Core\Session\AccountProxy;
 use Drupal\Core\Ajax\AjaxResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Link;
 use Drupal\Core\Ajax\HtmlCommand;
@@ -21,7 +21,7 @@ class LaPillsTimerController extends ControllerBase {
   /**
    * @inheritdoc
    */
-  public function __construct(EntityTypeManager $entity_type_manager, AccountProxy $currentUser) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountProxy $currentUser) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $currentUser;
   }
@@ -186,7 +186,7 @@ class LaPillsTimerController extends ControllerBase {
           $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'addClass', ['la-pills-active-timer']));
           $response->addCommand(new HtmlCommand('.lapills-timer-time-' . $timer_id, '00:00:00'));
           $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'countimer', ['start']));
-          $response->addCommand(new InvokeCommand('.la-pills-timer-' . $timer_id . ' .export-button', 'addClass', ['hidden'])); 
+          $response->addCommand(new InvokeCommand('.la-pills-timer-' . $timer_id . ' .export-button', 'addClass', ['hidden']));
         }
 
         $timer->save();
