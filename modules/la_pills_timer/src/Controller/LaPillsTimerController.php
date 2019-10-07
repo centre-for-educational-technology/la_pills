@@ -53,21 +53,9 @@ class LaPillsTimerController extends ControllerBase {
       [],
       $options);
 
-    $stop_link = Link::createFromRoute(
-      $this->t('Stop all timers'),
-      'la_pills_timer.la_pills_timer_controller_stopAll',
-      [],
-      [
-        'attributes' => [
-          'class' =>['use-ajax', 'btn'],
-        ]
-      ]);
-
-
     $data = [
       '#theme' => 'la_pills_timers',
       '#new_timer' => $link,
-      '#stop_timers' => $stop_link,
     ];
 
     $query_students = \Drupal::entityQuery('la_pills_timer_entity')

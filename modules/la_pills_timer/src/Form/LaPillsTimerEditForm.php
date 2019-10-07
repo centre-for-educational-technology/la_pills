@@ -100,13 +100,27 @@ class LaPillsTimerEditForm extends FormBase {
       ]
     ];
 
+    $form['status'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Status'),
+      '#weight' => 4,
+      '#attributes' => [
+        'title' => $this->t('Mark timer as active'),
+        'data-toggle' => 'tooltip',
+        'checked' => $entity->getStatus() ? TRUE : FALSE,
+        'class' => [
+          'timer-status',
+        ],
+      ],
+    ];
+
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Submit'),
       '#ajax' => [
         'callback' => '::ajaxSumbitForm',
       ],
-      '#weight' => '4',
+      '#weight' => '5',
     ];
 
     return $form;
@@ -139,6 +153,10 @@ class LaPillsTimerEditForm extends FormBase {
       if ($values['group']) {
         $result['group'] = $values['group'];
         $old_group = $timer->get('group')->value;
+      }
+
+      if (isset($values['status'])) {
+        $result['status'] = $values['status'];
       }
 
       foreach ($result as $key => $value) {
@@ -174,7 +192,7 @@ class LaPillsTimerEditForm extends FormBase {
         $response->addCommand(
           new HtmlCommand(
             '.new-timer-' . $group,
-            '<div class="new-timer-teacher"></div>' . render($data) )
+            render($data) )
         );
       } else {
         $response->addCommand(

@@ -34,64 +34,48 @@ function template_preprocess_la_pills_timer_elements(&$variables) {
 
         $options = [
           'attributes' => [
-            'class' =>['use-ajax'],
+            'class' => ['use-ajax',],
             'data-dialog-type' => 'modal',
           ],
         ];
+
+        $remove_link_options = $options;
+        $remove_link_options['attributes']['class'][] = 'text-danger';
 
         $parameters = [
           'timer_id' => $timer_id
         ];
 
-        $duration = $entity->getDuration();
-
-        $hidden = '';
-        if ($entity->getStatus() || $duration == 0) {
-          $hidden = 'hidden';
-        }
-
-        $remove_link = Link::createFromRoute(t('Remove'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $options);
+        $remove_link = Link::createFromRoute(t('Remove'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $remove_link_options);
         $edit_link = Link::createFromRoute(t('Edit'),'la_pills_timer.la_pills_timer_controller_editTimer', $parameters, $options);
-        $export_link = Link::createFromRoute(t('Export'), 'la_pills_timer.la_pills_timer_controller_exportTimer', $parameters, [
-          'attributes' => [
-            'class' => [$hidden, 'export-button'],
+        $change_status = [
+          '#type' => 'checkbox',
+          '#attributes' => [
+            'title' => t('Mark timer as active'),
+            'data-toggle' => 'tooltip',
+            'checked' => $entity->getStatus() ? TRUE : FALSE,
+            'disabled' => 'disabled',
           ],
-        ]);
-
-        $session_option = [
-          'attributes' => [
-            'class' =>[
-              'use-ajax',
-              'timer-session-button',
-              'lapills-timer-time-' . $timer_id
-            ],
-          ]
         ];
 
-        if ($entity->hasField('color') && $entity->get('color')->value) {
-          $session_option['attributes']['style'] = 'background-color: ' . $entity->get('color')->value . ';';
-        }
+        $timer_color = [
+          '#type' => 'html_tag',
+          '#tag' => 'span',
+          '#value' => '',
+          '#attributes' => [
+            'class' => [
+              'timer-color',
+            ],
+            'style' => [
+              'background-color: ' . $entity->get('color')->value,
+            ],
+          ],
+        ];
 
-        if ($entity->getStatus()) {
-          $session_option['attributes']['class'][] = 'la-pills-active-timer';
-        }
-
-        if (gmdate('d', $duration) == '01') {
-          $time = gmdate('H:i:s', $duration);
-        } else {
-          $time = intval(gmdate('d', $duration)) - 1 . gmdate(':H:i:s', $duration);
-        }
-
-        $session_link = Link::createFromRoute(
-          $time,
-          'la_pills_timer.la_pills_timer_controller_sessionTimer',
-          $parameters,
-          $session_option);
-
-        $variables['elements'][$key]['export_link'] = $export_link;
+        $variables['elements'][$key]['change_status'] = $change_status;
         $variables['elements'][$key]['edit_link'] = $edit_link;
         $variables['elements'][$key]['remove_link'] = $remove_link;
-        $variables['elements'][$key]['session_link'] = $session_link;
+        $variables['elements'][$key]['timer_color'] = $timer_color;
       }
     }
   }

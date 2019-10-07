@@ -3,13 +3,13 @@
     <div class="la-pills-timer la-pills-timer-{{ timer['#la_pills_timer_entity'].id.0.value }}">
       <div class="row">
         <div class="col-sm-9">
-          {{ timer.session_link }}
+          {{ timer.timer_color }}
           <span class=" timer-name">
-        {{ timer['#la_pills_timer_entity'].name.0.value }}
-      </span>
+            {{ timer['#la_pills_timer_entity'].name.0.value }}
+          </span>
         </div>
         <div class="col-sm-1">
-          {{ timer.export_link }}
+          {{ timer.change_status }}
         </div>
         <div class="col-sm-1">
           {{ timer.edit_link }}
