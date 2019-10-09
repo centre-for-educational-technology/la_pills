@@ -11,29 +11,20 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\user\UserInterface;
 
 /**
- * Defines the LA Pills Timer entity.
+ * Defines the LA Pills Session Timer entity.
  *
  * @ingroup la_pills_timer
  *
  * @ContentEntityType(
- *   id = "la_pills_timer_entity",
- *   label = @Translation("LA Pills Timer"),
+ *   id = "la_pills_session_timer_entity",
+ *   label = @Translation("LA Pills Session Timer"),
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\la_pills_timer\LaPillsTimerEntityListBuilder",
- *     "views_data" = "Drupal\la_pills_timer\Entity\LaPillsTimerEntityViewsData",
- *   "form" = {
- *       "default" = "Drupal\la_pills_timer\Form\LaPillsTimerEntityForm",
- *       "add" = "Drupal\la_pills_timer\Form\LaPillsTimerEntityForm",
- *       "edit" = "Drupal\la_pills_timer\Form\LaPillsTimerEntityForm",
- *       "delete" = "Drupal\la_pills_timer\Form\LaPillsTimerEntityDeleteForm",
- *     },
- *     "route_provider" = {
- *       "html" = "Drupal\la_pills_timer\LaPillsTimerEntityHtmlRouteProvider",
- *     },
+ *     "list_builder" = "Drupal\la_pills_timer\LaPillsSessionTimerEntityListBuilder",
+ *     "views_data" = "Drupal\la_pills_timer\Entity\LaPillsSessionTimerEntityViewsData",
  *     "access" = "Drupal\la_pills_timer\LaPillsTimerEntityAccessControlHandler",
  *   },
- *   base_table = "la_pills_timer_entity",
+ *   base_table = "la_pills_session_timer_entity",
  *   translatable = FALSE,
  *   admin_permission = "administer la pills timer entities",
  *   entity_keys = {
@@ -41,20 +32,13 @@ use Drupal\user\UserInterface;
  *     "label" = "name",
  *     "uuid" = "uuid",
  *     "uid" = "user_id",
+ *     "sid" = "session_id",
  *     "langcode" = "langcode",
  *     "published" = "status",
  *   },
- *   links = {
- *     "canonical" = "/admin/structure/la_pills_timer_entity/{la_pills_timer_entity}",
- *     "add-form" = "/admin/structure/la_pills_timer_entity/add",
- *     "edit-form" = "/admin/structure/la_pills_timer_entity/{la_pills_timer_entity}/edit",
- *     "delete-form" = "/admin/structure/la_pills_timer_entity/{la_pills_timer_entity}/delete",
- *     "collection" = "/admin/structure/la_pills_timer_entity",
- *   },
- *   field_ui_base_route = "la_pills_timer_entity.settings"
  * )
  */
-class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntityInterface {
+class LaPillsSessionTimerEntity extends ContentEntityBase implements LaPillsSessionTimerEntityInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;
@@ -75,7 +59,23 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
    */
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
     parent::preDelete($storage, $entities);
-    // TODO See if this could just be removed
+
+    foreach ($entities as $entity) {
+      $sessions_query = \Drupal::entityQuery('la_pills_timer_session_entity')
+      ->condition('timer_id', $entity->id());
+
+      $sessions_ids = $sessions_query->execute();
+
+      if ($sessions_ids) {
+        $sessions = \Drupal::entityTypeManager()
+          ->getStorage('la_pills_timer_session_entity')
+          ->loadMultiple($sessions_ids);
+
+        foreach ($sessions as $session) {
+          $session->delete();
+        }
+      }
+    }
   }
 
   /**
@@ -145,11 +145,120 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
     return $this;
   }
 
+  public function getSession() {
+    return $this->get('session_id')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSessionId() {
+    return $this->get('session_id')->target_id;
+  }
+
   /**
    * Getting a group of the current timer.
    */
   public function getTimerGroup() {
     return $this->get('group')->value;
+  }
+
+  /**
+   * Get all sessions current timer.
+   *
+   * @return array|int
+   */
+  public function getSessionsIds() {
+    $sessions = \Drupal::entityQuery('la_pills_timer_session_entity')
+      ->condition('timer_id', $this->id());
+
+    return $sessions->execute();
+  }
+
+  /**
+   * Get duration current timer.
+   *
+   * @return int
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public function getDuration() {
+    $duration = 0;
+
+    $timer_sessions_ids = $this->getSessionsIds();
+
+    if ($timer_sessions_ids) {
+      $timer_sessions = $this->entityTypeManager()
+        ->getStorage('la_pills_timer_session_entity')
+        ->loadMultiple($timer_sessions_ids);
+
+      if ($timer_sessions) {
+
+        foreach ($timer_sessions as $timer_session) {
+          $duration += $timer_session->getDuration();
+        }
+      }
+    }
+
+    return $duration;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function startSession() {
+    $timer_session = $this->entityTypeManager()
+      ->getStorage('la_pills_timer_session_entity')
+      ->create(['timer_id' => $this->id()]);
+    $timer_session->save();
+
+    $this->set('status', TRUE);
+
+    return $this;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function stopSession() {
+    $session_query = \Drupal::entityQuery('la_pills_timer_session_entity')
+      ->condition('timer_id', $this->id())
+      ->sort('created', 'DESC')
+      ->range(0, 1);
+
+    $last_session = $session_query->execute();
+
+    $timer_session = $this->entityTypeManager()
+      ->getStorage('la_pills_timer_session_entity')
+      ->load(key($last_session));
+
+    $timer_session->stopSession();
+    $timer_session->save();
+    $this->set('status', FALSE);
+
+    return $this;
+  }
+
+  public function getCurrentDuration() {
+    $duration = 0;
+
+    if ($this->getStatus()) {
+      // TODO Need to separte fetching of current session
+      $session_query = \Drupal::entityQuery('la_pills_timer_session_entity')
+        ->condition('timer_id', $this->id())
+        ->sort('created', 'DESC')
+        ->range(0, 1);
+
+      $last_session = $session_query->execute();
+
+      $timer_session = $this->entityTypeManager()
+        ->getStorage('la_pills_timer_session_entity')
+        ->load(key($last_session));
+
+      $duration = $timer_session->getDuration();
+    }
+
+    return $duration;
   }
 
   /**
@@ -160,33 +269,23 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
 
     $fields += static::publishedBaseFieldDefinitions($entity_type);
 
+    $fields['session_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Session'))
+      ->setDescription(t('The Session Entity timer belongs to.'))
+      ->setSetting('target_type', 'session_entity')
+      ->setReadOnly(TRUE)
+      ->setRequired(TRUE);
+
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Authored by'))
-      ->setDescription(t('The user ID of author of the LA Pills Timer.'))
-      ->setRevisionable(TRUE)
-      ->setSetting('target_type', 'user')
-      ->setSetting('handler', 'default')
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'author',
-        'weight' => 0,
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'entity_reference_autocomplete',
-        'weight' => 5,
-        'settings' => [
-          'match_operator' => 'CONTAINS',
-          'size' => '60',
-          'autocomplete_type' => 'tags',
-          'placeholder' => '',
-        ],
-      ])
-      ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setLabel(t('Session'))
+      ->setDescription(t('The Session Entity timer belongs to.'))
+      ->setSetting('target_type', 'session_entity')
+      ->setReadOnly(TRUE)
+      ->setRequired(TRUE);
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
-      ->setDescription(t('The name of the LA Pills Timer.'))
+      ->setDescription(t('The name of the LA Pills Session Timer.'))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
@@ -248,7 +347,7 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['status']->setDescription(t('A boolean indicating whether the LA Pills Timer is published.'))
+    $fields['status']->setDescription(t('A boolean indicating whether the LA Pills Session Timer is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
         'weight' => 4,

@@ -12,6 +12,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Symfony\Component\HttpFoundation\Response;
+use Drupal\la_pills\Entity\SessionEntity;
 
 /**
  * Class LaPillsTimerController.
@@ -109,13 +110,13 @@ class LaPillsTimerController extends ControllerBase {
   /**
    * Get elements for output.
    */
-  private function getElements($tids) {
+  private function getElements($tids, $entity_type = 'la_pills_timer_entity') {
     $timers = $this->entityTypeManager
-      ->getStorage('la_pills_timer_entity')
+      ->getStorage($entity_type)
       ->loadMultiple($tids);
 
     $elements = $this->entityTypeManager
-      ->getViewBuilder('la_pills_timer_entity')
+      ->getViewBuilder($entity_type)
       ->viewMultiple($timers);
 
     return $elements;
@@ -151,13 +152,15 @@ class LaPillsTimerController extends ControllerBase {
   /**
    * Callback for starting a timer.
    */
-  public function sessionTimer($timer_id = NULL) {
+  public function sessionTimer(SessionEntity $session_entity, $timer_id = NULL) {
+    // TODO Need to check permissions on Session Entity
     $response = new AjaxResponse();
     if ($timer_id) {
 
       $timer = $this->entityTypeManager
-        ->getStorage('la_pills_timer_entity')
+        ->getStorage('la_pills_session_timer_entity')
         ->load($timer_id);
+      // TODO Need to check if timer belongs to a session
 
       if ($timer) {
         $status = $timer->getStatus();
@@ -187,18 +190,18 @@ class LaPillsTimerController extends ControllerBase {
   /**
    * Callback for stopping all timers.
    */
-  public function stopAll() {
+  public function stopAll(SessionEntity $session_entity) {
     $response = new AjaxResponse();
 
-    $query = \Drupal::entityQuery('la_pills_timer_entity')
-      ->condition('user_id', $this->currentUser->id())
+    $query = \Drupal::entityQuery('la_pills_session_timer_entity')
+      ->condition('session_id', $session_entity->id())
       ->condition('status', TRUE)
       ->sort('created', 'DESC');
     $active_timers_ids = $query->execute();
 
     if ($active_timers_ids) {
       $timers = $this->entityTypeManager
-        ->getStorage('la_pills_timer_entity')
+        ->getStorage('la_pills_session_timer_entity')
         ->loadMultiple($active_timers_ids);
 
       foreach ($timers as $timer) {
@@ -218,6 +221,7 @@ class LaPillsTimerController extends ControllerBase {
    * Callback to generate CSV data about a timer.
    */
   public function exportTimer($timer_id = NULL) {
+    throw \Exception('Needs a different implementation');
     if ($timer_id) {
       $timer = $this->entityTypeManager
         ->getStorage('la_pills_timer_entity')
@@ -278,6 +282,98 @@ class LaPillsTimerController extends ControllerBase {
     }
 
     return $response;
+  }
+
+  private function createSessionTimers(SessionEntity $session_entity) {
+    // TODO Check if timers have not been attached yet
+    $query_timers = \Drupal::entityQuery('la_pills_timer_entity')
+      ->condition('user_id', $this->currentUser->id())
+      ->condition('status', '1')
+      ->sort('created', 'DESC');
+
+    $timers = $this->entityTypeManager
+        ->getStorage('la_pills_timer_entity')
+        ->loadMultiple($query_timers->execute());
+
+    foreach($timers as $timer) {
+      $session_timer = $this->entityTypeManager()
+        ->getStorage('la_pills_session_timer_entity')
+        ->create([
+          'session_id' => $session_entity->id(),
+          'name' => $timer->getName(),
+          'group' => $timer->getTimerGroup(),
+          'color' => $timer->get('color')->value,
+        ]);
+      $session_timer->save();
+    }
+  }
+
+  // TODO Make sure that this function functions as required
+  public function sessionEntityTimers(SessionEntity $session_entity) {
+    //$this->createSessionTimers($session_entity);
+    $stop_link = Link::createFromRoute(
+      $this->t('Stop all timers'),
+      'la_pills_timer.la_pills_timer_controller_stopAll',
+      [
+        'session_entity' => $session_entity->id(),
+      ],
+      [
+        'attributes' => [
+          'class' =>['use-ajax', 'btn'],
+        ]
+      ]);
+
+    $data = [
+      '#theme' => 'la_pills_session_timers',
+      '#stop_timers' => $stop_link,
+    ];
+
+    $query_students = \Drupal::entityQuery('la_pills_session_timer_entity')
+      ->condition('session_id', $session_entity->id())
+      ->condition('group', 'student')
+      ->sort('created', 'DESC');
+    $students_ids = $query_students->execute();
+
+    if (!empty($students_ids)) {
+      $student_elements = $this->getElements($students_ids, 'la_pills_session_timer_entity');
+
+      $data['#student'] = [
+        '#theme' => 'la_pills_session_timer_elements',
+        '#elements' => $student_elements,
+      ];
+    }
+
+    $query_teacher = \Drupal::entityQuery('la_pills_session_timer_entity')
+      ->condition('session_id', $session_entity->id())
+      ->condition('group', 'teacher')
+      ->sort('created', 'DESC');
+    $teacher_ids = $query_teacher->execute();
+
+    if (!empty($teacher_ids)) {
+      $teacher_elements = $this->getElements($teacher_ids, 'la_pills_session_timer_entity');
+
+      $data['#teacher'] = [
+        '#theme' => 'la_pills_session_timer_elements',
+        '#elements' => $teacher_elements,
+      ];
+    }
+
+    $query_other = \Drupal::entityQuery('la_pills_session_timer_entity')
+      ->condition('session_id', $session_entity->id())
+      ->condition('group', 'other')
+      ->sort('created', 'DESC');
+    $other_ids = $query_other->execute();
+
+    if (!empty($other_ids)) {
+      $other_elements = $this->getElements($other_ids, 'la_pills_session_timer_entity');
+
+      $data['#other'] = [
+        '#theme' => 'la_pills_session_timer_elements',
+        '#elements' => $other_elements,
+      ];
+    }
+
+    return $data;
   }
 
 }

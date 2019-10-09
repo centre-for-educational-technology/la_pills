@@ -1,0 +1,42 @@
+{{ attach_library('la_pills_timer/main') }}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-10">
+
+    </div>
+    <div class="col-sm-2">
+      {{ stop_timers }}
+    </div>
+  </div>
+  <div class="groups">
+    <div class="group-student">
+      <h3>{{ 'Student'|t }}</h3>
+      <div class="new-timer-student">
+
+      </div>
+      {% if student %}
+        {{ student }}
+      {% endif %}
+    </div>
+
+    <div class="group-teacher">
+      <h3>{{ 'Teacher'|t }}</h3>
+      <div class="new-timer-teacher">
+
+      </div>
+      {% if teacher %}
+        {{ teacher }}
+      {% endif %}
+    </div>
+
+    <div class="group-other">
+      <h3>{{ 'Other'|t }}</h3>
+      <div class="new-timer-other">
+
+      </div>
+      {% if other %}
+        {{ other }}
+      {% endif %}
+    </div>
+  </div>
+</div>

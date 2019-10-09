@@ -6,9 +6,15 @@
           var $this = $(this);
 
           if ($this.hasClass('la-pills-active-timer')) {
-            $this.countimer({ initHours : 0, initMinutes : 0, initSeconds: 0});
+            var seconds = 0;
+
+            if ($this.data('duration')) {
+              seconds = $this.data('duration');
+            }
+
+            $this.countimer({ initHours : 0, initMinutes : 0, initSeconds: seconds });
           } else {
-            $this.countimer({ initHours : 0, initMinutes : 0, initSeconds: 0});
+            $this.countimer({ initHours : 0, initMinutes : 0, initSeconds: 0 });
             $this.countimer('stop');
           }
         });

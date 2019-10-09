@@ -13,12 +13,22 @@ function la_pills_timer_theme() {
         'teacher' => NULL,
         'other' => NULL,
         'new_timer' => NULL,
-        'stop_timers' => NULL,
       ],
     ],
     'la_pills_timer_elements' => [
       'variables' => ['elements' => NULL]
-    ]
+    ],
+    'la_pills_session_timers' => [
+      'variables' => [
+        'student' => NULL,
+        'teacher' => NULL,
+        'other' => NULL,
+        'stop_timers' => NULL,
+      ],
+    ],
+    'la_pills_session_timer_elements' => [
+      'variables' => ['elements' => NULL]
+    ],
   ];
 }
 
@@ -76,6 +86,62 @@ function template_preprocess_la_pills_timer_elements(&$variables) {
         $variables['elements'][$key]['edit_link'] = $edit_link;
         $variables['elements'][$key]['remove_link'] = $remove_link;
         $variables['elements'][$key]['timer_color'] = $timer_color;
+      }
+    }
+  }
+}
+
+/**
+ * Implements template_preprocess_la_pills_timer_elements().
+ */
+function template_preprocess_la_pills_session_timer_elements(&$variables) {
+  if (!empty($variables['elements'])) {
+    foreach ($variables['elements'] as $key => $element) {
+      if (isset($element['#la_pills_session_timer_entity'])) {
+        $entity = $element['#la_pills_session_timer_entity'];
+        $timer_id = $entity->id();
+        $duration = $entity->getCurrentDuration();
+
+        $parameters = [
+          'session_entity' => $entity->getSessionId(),
+          'timer_id' => $timer_id
+        ];
+
+        $session_option = [
+          'attributes' => [
+            'class' =>[
+              'use-ajax',
+              'timer-session-button',
+              'lapills-timer-time-' . $timer_id
+            ],
+            'data-duration' => $duration,
+          ]
+        ];
+
+        if ($entity->hasField('color') && $entity->get('color')->value) {
+          $session_option['attributes']['style'] = 'background-color: ' . $entity->get('color')->value . ';';
+        }
+
+        if ($entity->getStatus()) {
+          $session_option['attributes']['class'][] = 'la-pills-active-timer';
+        }
+
+        // XXX Timer is unable to show days, it stps with hours
+        // This representation should be similar
+        if (gmdate('d', $duration) == '01') {
+          $time = gmdate('H:i:s', $duration);
+        } else {
+          // This one is a bit strange
+          $time = intval(gmdate('d', $duration)) - 1 . gmdate(':H:i:s', $duration);
+        }
+
+        $session_link = Link::createFromRoute(
+          $time,
+          'la_pills_timer.la_pills_timer_controller_sessionTimer',
+          $parameters,
+          $session_option);
+
+        $variables['elements'][$key]['session_link'] = $session_link;
       }
     }
   }
