@@ -102,7 +102,7 @@ class LaPillsTimerEditForm extends FormBase {
 
     $form['status'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Status'),
+      '#title' => $this->t('Active'),
       '#weight' => 4,
       '#attributes' => [
         'title' => $this->t('Mark timer as active'),

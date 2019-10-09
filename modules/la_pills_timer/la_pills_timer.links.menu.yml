@@ -16,14 +16,6 @@ entity.la_pills_timer_entity.timers:
   weight: 100
 
 # LA Pills Timer menu items definition
-entity.la_pills_timer_entity.timers_add:
-  title: 'Create new timer'
-  route_name: la_pills_timer.la_pills_timer_controller_addTimer
-  description: 'Create new timer item'
-  parent: tools
-  weight: 100
-
-# LA Pills Timer menu items definition
 entity.la_pills_timer_entity.timers_list:
   title: 'Timers'
   route_name: la_pills_timer.la_pills_timer_controller_timers
