@@ -154,6 +154,7 @@ class LaPillsTimerController extends ControllerBase {
    */
   public function sessionTimer(SessionEntity $session_entity, $timer_id = NULL) {
     // TODO Need to check permissions on Session Entity
+    // TODO Need to report back to user if session is already closed
     $response = new AjaxResponse();
     if ($timer_id) {
 

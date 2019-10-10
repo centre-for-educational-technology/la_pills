@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Link;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_theme().
@@ -144,5 +145,101 @@ function template_preprocess_la_pills_session_timer_elements(&$variables) {
         $variables['elements'][$key]['session_link'] = $session_link;
       }
     }
+  }
+}
+
+function _la_pills_timer_session_entity_form_submitted(&$form, FormStateInterface $form_state) {
+  $values = $form_state->getValues();
+
+  if (isset($values['use_timers']) && $values['use_timers']) {
+    $entity = $form_state->getFormObject()->getEntity();
+
+    // TODO Consider moving query to a service
+    $query_session_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
+      ->condition('session_id', $entity->id());
+
+    $session_timers_count = $query_session_timers->count()->execute();
+
+    if ($session_timers_count > 0) {
+      return;
+    }
+
+    $query_timers = \Drupal::entityQuery('la_pills_timer_entity')
+      ->condition('user_id', \Drupal::currentUser()->id())
+      ->condition('status', TRUE)
+      ->sort('created', 'DESC');
+
+    $timers = \Drupal::entityTypeManager()
+        ->getStorage('la_pills_timer_entity')
+        ->loadMultiple($query_timers->execute());
+
+    foreach($timers as $timer) {
+      $session_timer = \Drupal::entityTypeManager()
+        ->getStorage('la_pills_session_timer_entity')
+        ->create([
+          'session_id' => $entity->id(),
+          'name' => $timer->getName(),
+          'group' => $timer->getTimerGroup(),
+          'color' => $timer->get('color')->value,
+        ]);
+      $session_timer->save();
+    }
+  }
+}
+
+function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (in_array($form_id, ['session_entity_add_form', 'session_entity_edit_form'])) {
+    // TODO Check if user is allowed to manage add/remove own timers
+    $entity = $form_state->getFormObject()->getEntity();
+    $entity_has_timers = FALSE;
+    if ($entity->id()) {
+      // TODO Consider moving query to a service
+      $query_session_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
+        ->condition('session_id', $entity->id());
+
+      $session_timers_count = $query_session_timers->count()->execute();
+
+      $entity_has_timers = ($session_timers_count > 0) ? TRUE : FALSE;
+    }
+
+    // TODO Consider moving both queries to a service
+    $query_timers = \Drupal::entityQuery('la_pills_timer_entity')
+      ->condition('user_id', \Drupal::currentUser()->id());
+    $timers_count = $query_timers->count()->execute();
+    $query_active_timers = \Drupal::entityQuery('la_pills_timer_entity')
+      ->condition('user_id', \Drupal::currentUser()->id())
+      ->condition('status', TRUE);
+    $active_timers_count = $query_active_timers->count()->execute();
+
+    $form['la_pills_timer'] = [
+      '#type' => 'container',
+      '#weight' => 50,
+    ];
+    // TODO Make sure that there is a link to the timer management page
+    $form['la_pills_timer']['explanation'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['alert', 'alert-info',],
+      ],
+    ];
+    $form['la_pills_timer']['explanation']['text'] = [
+      '#markup' => t('You have @active timers out of @timers total timers.', [
+        '@active' => $active_timers_count,
+        '@timers' => $timers_count,
+      ]),
+    ];
+    $form['la_pills_timer']['use_timers'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Use timers'),
+      '#attributes' => [
+        'title' => t('Make a copy of your currrently active timers and use those for this session. Please note that this can no longer be changed.'),
+        'data-toggle' => 'tooltip',
+        'checked' => FALSE, // TODO Need to extract the value form form_state if form has been submitted
+        'disabled' => $entity_has_timers || $active_timers_count === 0,
+      ],
+    ];
+
+    // TODO See if we should only attach the handler if checkbox is not disabled
+    $form['actions']['submit']['#submit'][] = '_la_pills_timer_session_entity_form_submitted';
   }
 }
