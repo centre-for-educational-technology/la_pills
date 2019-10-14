@@ -95,6 +95,20 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   /**
    * {@inheritdoc}
    */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    if (!$this->isNew()) {
+      $original = $storage->loadUnchanged($this->id());
+
+      if ($this->isActive() === FALSE && $original->isActive() === TRUE) {
+        \Drupal::moduleHandler()->invokeAll('session_entity_session_close', [$this]);
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
 

@@ -50,17 +50,17 @@ la_pills_timer.la_pills_timer_controller_stopAll:
   requirements:
     _entity_access: 'session_entity.update'
 
-la_pills_timer.la_pills_timer_controller_exportTimer:
-  path: '/timers/export/{timer_id}'
+la_pills_timer.la_pills_timer_controller_exportTimers:
+  path: '/timers/export/{session_entity}'
   defaults:
-    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::exportTimer'
-    _title: 'Export timer'
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::exportTimers'
+    _title: 'Export session entity timers'
   options:
     parameters:
       session_entity:
         type: entity:session_entity
   requirements:
-    _permission: 'view unpublished la pills timer entities'
+    _entity_access: 'session_entity.update'
 
 la_pills_timer.la_pills_timer_controller_sessionEntityTimer:
   path: 'admin/structure/session_entity/{session_entity}/timers'

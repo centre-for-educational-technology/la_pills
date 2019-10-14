@@ -221,97 +221,85 @@ class LaPillsTimerController extends ControllerBase {
   /**
    * Callback to generate CSV data about a timer.
    */
-  public function exportTimer($timer_id = NULL) {
-    throw \Exception('Needs a different implementation');
-    if ($timer_id) {
-      $timer = $this->entityTypeManager
-        ->getStorage('la_pills_timer_entity')
-        ->load($timer_id);
+  public function exportTimers(SessionEntity $session_entity) {
+    if (!$session_entity->access('update')) {
+      return new Response('', Response::HTTP_FORBIDDEN);
+    }
 
-      if ($timer) {
-        $status = $timer->getStatus();
+    // TODO Check if session is closed and disallow the download OR ignore timer
+    // sessions that have not been finished yet
 
-        if (!$status) {
-          $sessions_ids = $timer->getSessionsIds();
+    // TODO This should be a generally available method
+    $query = \Drupal::entityQuery('la_pills_session_timer_entity')
+      ->condition('session_id', $session_entity->id())
+      ->sort('created', 'DESC');
+    $timer_ids = $query->execute();
 
-          $timer_sessions = $this->entityTypeManager()
-            ->getStorage('la_pills_timer_session_entity')
-            ->loadMultiple($sessions_ids);
+    if ($timer_ids) {
+      $timers = $this->entityTypeManager
+        ->getStorage('la_pills_session_timer_entity')
+        ->loadMultiple($timer_ids);
 
-          if ($timer_sessions) {
-            $handle = fopen('php://temp', 'wb');
+      $handle = fopen('php://temp', 'wb');
+      fputcsv($handle, ['Name', 'Group', 'Started', 'Finished', 'Duration', 'Total']);
 
-            fputcsv($handle, ['Name', 'Group', 'Started', 'Finished', 'Duration', 'Total']);
+      foreach ($timers as $timer) {
+        if ($timer) {
+          $status = $timer->getStatus();
 
-            $total = 0;
+          if (!$status) {
+            $sessions_ids = $timer->getSessionsIds();
 
-            foreach ($timer_sessions as $timer_session) {
-              $duration = $timer_session->getDuration();
-              $total += $duration;
+            $timer_sessions = $this->entityTypeManager()
+              ->getStorage('la_pills_timer_session_entity')
+              ->loadMultiple($sessions_ids);
 
-              fputcsv($handle, [
-                $timer->getName(),
-                $timer->get('group')->value,
-                date('d-m-Y h:m:s', $timer_session->getStartTime()),
-                date('d-m-Y h:m:s', $timer_session->getStopTime()),
-                gmdate('H:i:s', $duration),
-                gmdate('H:i:s', $total),
-              ]);
+            if ($timer_sessions) {
+              $total = 0;
+
+              foreach ($timer_sessions as $timer_session) {
+                $duration = $timer_session->getDuration();
+                $total += $duration;
+
+                fputcsv($handle, [
+                  $timer->getName(),
+                  $timer->get('group')->value,
+                  date('d-m-Y h:m:s', $timer_session->getStartTime()),
+                  date('d-m-Y h:m:s', $timer_session->getStopTime()),
+                  gmdate('H:i:s', $duration),
+                  gmdate('H:i:s', $total),
+                ]);
+              }
             }
+          } else {
+            // TODO Might need to handle this situation in some way
+            /*$error = [
+              '#type' => 'html_tag',
+              '#tag' => 'div',
+              '#value' => $this
+                ->t('Please stop timer for export.'),
+              '#attributes' => ['class' => ['alert alert-danger alert-dismissible']],
+            ];
+            $response = new AjaxResponse();
 
-            rewind($handle);
-
-            $response = new Response(stream_get_contents($handle));
-            fclose($handle);
-
-            $response->headers->set('Content-Type', 'text/csv');
-            $response->headers->set('Content-Disposition','attachment; filename="timer.csv"');
+            $response->addCommand(new ReplaceCommand('.la-pills-timer-' . $timer_id . ' .message-export-timer', $error));*/
           }
-        } else {
-          $error = [
-            '#type' => 'html_tag',
-            '#tag' => 'div',
-            '#value' => $this
-              ->t('Please stop timer for export.'),
-            '#attributes' => ['class' => ['alert alert-danger alert-dismissible']],
-          ];
-          $response = new AjaxResponse();
-
-          $response->addCommand(new ReplaceCommand('.la-pills-timer-' . $timer_id . ' .message-export-timer', $error));
         }
       }
+
+      rewind($handle);
+
+      $response = new Response(stream_get_contents($handle));
+      fclose($handle);
+
+      $response->headers->set('Content-Type', 'text/csv');
+      $response->headers->set('Content-Disposition','attachment; filename="session_entity_timers.csv"');
     }
 
     return $response;
   }
 
-  private function createSessionTimers(SessionEntity $session_entity) {
-    // TODO Check if timers have not been attached yet
-    $query_timers = \Drupal::entityQuery('la_pills_timer_entity')
-      ->condition('user_id', $this->currentUser->id())
-      ->condition('status', '1')
-      ->sort('created', 'DESC');
-
-    $timers = $this->entityTypeManager
-        ->getStorage('la_pills_timer_entity')
-        ->loadMultiple($query_timers->execute());
-
-    foreach($timers as $timer) {
-      $session_timer = $this->entityTypeManager()
-        ->getStorage('la_pills_session_timer_entity')
-        ->create([
-          'session_id' => $session_entity->id(),
-          'name' => $timer->getName(),
-          'group' => $timer->getTimerGroup(),
-          'color' => $timer->get('color')->value,
-        ]);
-      $session_timer->save();
-    }
-  }
-
-  // TODO Make sure that this function functions as required
   public function sessionEntityTimers(SessionEntity $session_entity) {
-    //$this->createSessionTimers($session_entity);
     $stop_link = Link::createFromRoute(
       $this->t('Stop all timers'),
       'la_pills_timer.la_pills_timer_controller_stopAll',
@@ -320,13 +308,25 @@ class LaPillsTimerController extends ControllerBase {
       ],
       [
         'attributes' => [
-          'class' =>['use-ajax', 'btn'],
-        ]
-      ]);
+        'class' =>['use-ajax', 'btn'],
+      ]
+    ]);
+    $download_link = Link::createFromRoute(
+      $this->t('Download data'),
+      'la_pills_timer.la_pills_timer_controller_exportTimers',
+      [
+        'session_entity' => $session_entity->id(),
+      ],
+      [
+        'attributes' => [
+        'class' =>['btn', 'btn-primary',],
+      ]
+    ]);
 
     $data = [
       '#theme' => 'la_pills_session_timers',
       '#stop_timers' => $stop_link,
+      '#download_data' => $download_link,
     ];
 
     $query_students = \Drupal::entityQuery('la_pills_session_timer_entity')

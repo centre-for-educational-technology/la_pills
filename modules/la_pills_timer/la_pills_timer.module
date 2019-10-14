@@ -2,6 +2,8 @@
 
 use Drupal\Core\Link;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Implements hook_theme().
@@ -25,6 +27,7 @@ function la_pills_timer_theme() {
         'teacher' => NULL,
         'other' => NULL,
         'stop_timers' => NULL,
+        'download_data' => NULL,
       ],
     ],
     'la_pills_session_timer_elements' => [
@@ -172,23 +175,28 @@ function _la_pills_timer_session_entity_form_submitted(&$form, FormStateInterfac
     $timers = \Drupal::entityTypeManager()
         ->getStorage('la_pills_timer_entity')
         ->loadMultiple($query_timers->execute());
-
-    foreach($timers as $timer) {
-      $session_timer = \Drupal::entityTypeManager()
-        ->getStorage('la_pills_session_timer_entity')
-        ->create([
-          'session_id' => $entity->id(),
-          'name' => $timer->getName(),
-          'group' => $timer->getTimerGroup(),
-          'color' => $timer->get('color')->value,
-        ]);
-      $session_timer->save();
+    if ($timers) {
+      foreach($timers as $timer) {
+        $session_timer = \Drupal::entityTypeManager()
+          ->getStorage('la_pills_session_timer_entity')
+          ->create([
+            'session_id' => $entity->id(),
+            'name' => $timer->getName(),
+            'group' => $timer->getTimerGroup(),
+            'color' => $timer->get('color')->value,
+          ]);
+        $session_timer->save();
+      }
+      // TODO Consider showing a message about the timers
     }
   }
 }
 
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
 function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  if (in_array($form_id, ['session_entity_add_form', 'session_entity_edit_form'])) {
+  if (in_array($form_id, ['session_entity_add_form', 'session_entity_edit_form',])) {
     // TODO Check if user is allowed to manage add/remove own timers
     $entity = $form_state->getFormObject()->getEntity();
     $entity_has_timers = FALSE;
@@ -215,7 +223,6 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
       '#type' => 'container',
       '#weight' => 50,
     ];
-    // TODO Make sure that there is a link to the timer management page
     $form['la_pills_timer']['explanation'] = [
       '#type' => 'container',
       '#attributes' => [
@@ -223,9 +230,10 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
       ],
     ];
     $form['la_pills_timer']['explanation']['text'] = [
-      '#markup' => t('You have @active timers out of @timers total timers.', [
+      '#markup' => t('You have @active active timers out of @total total timers. Please access <a href=":url" target="_blank">timer configuration page</a> to make changes.', [
         '@active' => $active_timers_count,
-        '@timers' => $timers_count,
+        '@total' => $timers_count,
+        ':url' => Url::fromRoute('la_pills_timer.la_pills_timer_controller_timers')->toString(),
       ]),
     ];
     $form['la_pills_timer']['use_timers'] = [
@@ -234,12 +242,52 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
       '#attributes' => [
         'title' => t('Make a copy of your currrently active timers and use those for this session. Please note that this can no longer be changed.'),
         'data-toggle' => 'tooltip',
-        'checked' => FALSE, // TODO Need to extract the value form form_state if form has been submitted
+        'checked' => FALSE,
         'disabled' => $entity_has_timers || $active_timers_count === 0,
       ],
     ];
 
     // TODO See if we should only attach the handler if checkbox is not disabled
     $form['actions']['submit']['#submit'][] = '_la_pills_timer_session_entity_form_submitted';
+  }
+}
+
+function la_pills_timer_session_entity_predelete(EntityInterface $entity) {
+  // TODO Consider maing the process a lo more resource friendly by either
+  // running the delete according to the drupal API logic within a cron job or
+  // using direct database queries to delete all the data, bypassing the API
+  $query_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
+    ->condition('session_id', $entity->id());
+  $timers = \Drupal::entityTypeManager()
+    ->getStorage('la_pills_session_timer_entity')
+    ->loadMultiple($query_timers->execute());
+
+  if ($timers) {
+    foreach($timers as $timer) {
+      // TODO Deal with possible permission issues, if there are any
+      $timer->delete();
+    }
+  }
+}
+
+function la_pills_timer_session_entity_session_close(EntityInterface $entity) {
+  // TODO Might need to check if session entity is provided
+  // TODO This is a repatition of an existing code, need to only have it in one place
+  $query = \Drupal::entityQuery('la_pills_session_timer_entity')
+    ->condition('session_id', $entity->id())
+    ->condition('status', TRUE)
+    ->sort('created', 'DESC');
+  $active_timers_ids = $query->execute();
+
+  if ($active_timers_ids) {
+    $timers = \Drupal::entityTypeManager()
+      ->getStorage('la_pills_session_timer_entity')
+      ->loadMultiple($active_timers_ids);
+
+    foreach ($timers as $timer) {
+      $timer_id = $timer->id();
+      $timer->stopSession();
+      $timer->save();
+    }
   }
 }
