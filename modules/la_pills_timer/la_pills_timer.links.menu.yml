@@ -17,8 +17,8 @@ entity.la_pills_timer_entity.timers:
 
 # LA Pills Timer menu items definition
 entity.la_pills_timer_entity.timers_list:
-  title: 'Timers'
+  title: 'Configure timers'
   route_name: la_pills_timer.la_pills_timer_controller_timers
-  description: 'List of timers'
+  description: 'Manage your own timers'
   parent: tools
   weight: 100

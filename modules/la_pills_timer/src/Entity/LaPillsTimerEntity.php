@@ -66,7 +66,7 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
     parent::preCreate($storage_controller, $values);
     $values += [
       'user_id' => \Drupal::currentUser()->id(),
-      'status' => FALSE,
+      'status' => TRUE,
     ];
   }
 

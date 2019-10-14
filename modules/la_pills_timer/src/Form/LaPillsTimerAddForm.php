@@ -95,7 +95,7 @@ class LaPillsTimerAddForm extends FormBase {
       '#attributes' => [
         'title' => $this->t('Mark timer as active'),
         'data-toggle' => 'tooltip',
-        'checked' => FALSE,
+        'checked' => TRUE,
         'class' => [
           'timer-status',
         ],
