@@ -1,0 +1,4 @@
+services:
+  la_pills_timer.manager:
+    class: Drupal\la_pills_timer\LaPillsTimerManager
+    arguments: ['@entity_type.manager', '@current_user']

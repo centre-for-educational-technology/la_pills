@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 /**
  * Implements hook_theme().
  */
-function la_pills_timer_theme() {
+function la_pills_timer_theme() : array {
   return [
     'la_pills_timers' => [
       'variables' => [
@@ -39,7 +39,7 @@ function la_pills_timer_theme() {
 /**
  * Implements template_preprocess_la_pills_timer_elements().
  */
-function template_preprocess_la_pills_timer_elements(&$variables) {
+function template_preprocess_la_pills_timer_elements(&$variables) : void {
   if (!empty($variables['elements'])) {
     foreach ($variables['elements'] as $key => $element) {
       if (isset($element['#la_pills_timer_entity'])) {
@@ -98,7 +98,7 @@ function template_preprocess_la_pills_timer_elements(&$variables) {
 /**
  * Implements template_preprocess_la_pills_timer_elements().
  */
-function template_preprocess_la_pills_session_timer_elements(&$variables) {
+function template_preprocess_la_pills_session_timer_elements(&$variables) : void {
   if (!empty($variables['elements'])) {
     foreach ($variables['elements'] as $key => $element) {
       if (isset($element['#la_pills_session_timer_entity'])) {
@@ -151,30 +151,30 @@ function template_preprocess_la_pills_session_timer_elements(&$variables) {
   }
 }
 
-function _la_pills_timer_session_entity_form_submitted(&$form, FormStateInterface $form_state) {
+/**
+ * Callback for Session Entity create/edit form being submitted. Would only be
+ * called if it is possible to attach timers.
+ *
+ * @param array             $form
+ *   From structure
+ * @param FormStateInterface $form_state
+ *   Form state object
+ */
+function _la_pills_timer_session_entity_form_submitted(array &$form, FormStateInterface $form_state) : void {
   $values = $form_state->getValues();
 
   if (isset($values['use_timers']) && $values['use_timers']) {
+    $timer_manager = \Drupal::service('la_pills_timer.manager');
     $entity = $form_state->getFormObject()->getEntity();
 
-    // TODO Consider moving query to a service
-    $query_session_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
-      ->condition('session_id', $entity->id());
+    $entity_timers_count = $timer_manager->getSessionEntityTimersCount($entity);
 
-    $session_timers_count = $query_session_timers->count()->execute();
-
-    if ($session_timers_count > 0) {
+    if ($entity_timers_count > 0) {
       return;
     }
 
-    $query_timers = \Drupal::entityQuery('la_pills_timer_entity')
-      ->condition('user_id', \Drupal::currentUser()->id())
-      ->condition('status', TRUE)
-      ->sort('created', 'DESC');
+    $timers = getCurrentUserActiveTimers();
 
-    $timers = \Drupal::entityTypeManager()
-        ->getStorage('la_pills_timer_entity')
-        ->loadMultiple($query_timers->execute());
     if ($timers) {
       foreach($timers as $timer) {
         $session_timer = \Drupal::entityTypeManager()
@@ -187,7 +187,6 @@ function _la_pills_timer_session_entity_form_submitted(&$form, FormStateInterfac
           ]);
         $session_timer->save();
       }
-      // TODO Consider showing a message about the timers
     }
   }
 }
@@ -195,34 +194,42 @@ function _la_pills_timer_session_entity_form_submitted(&$form, FormStateInterfac
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
-function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  if (in_array($form_id, ['session_entity_add_form', 'session_entity_edit_form',])) {
-    // TODO Check if user is allowed to manage add/remove own timers
+function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterface $form_state, $form_id) : void {
+  if (in_array($form_id, ['session_entity_add_form', 'session_entity_edit_form',]) && \Drupal::currentUser()->hasPermission('add la pills timer entities')) {
+    $timer_manager = \Drupal::service('la_pills_timer.manager');
     $entity = $form_state->getFormObject()->getEntity();
-    $entity_has_timers = FALSE;
-    if ($entity->id()) {
-      // TODO Consider moving query to a service
-      $query_session_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
-        ->condition('session_id', $entity->id());
-
-      $session_timers_count = $query_session_timers->count()->execute();
-
-      $entity_has_timers = ($session_timers_count > 0) ? TRUE : FALSE;
-    }
-
-    // TODO Consider moving both queries to a service
-    $query_timers = \Drupal::entityQuery('la_pills_timer_entity')
-      ->condition('user_id', \Drupal::currentUser()->id());
-    $timers_count = $query_timers->count()->execute();
-    $query_active_timers = \Drupal::entityQuery('la_pills_timer_entity')
-      ->condition('user_id', \Drupal::currentUser()->id())
-      ->condition('status', TRUE);
-    $active_timers_count = $query_active_timers->count()->execute();
 
     $form['la_pills_timer'] = [
       '#type' => 'container',
       '#weight' => 50,
+      '#attributes' => [
+        'class' => ['well',],
+      ],
     ];
+
+    if ($entity->id()) {
+      $entity_timers_count = $timer_manager->getSessionEntityTimersCount($entity);
+
+      if ($entity_timers_count > 0) {
+        $form['la_pills_timer']['explanation'] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['alert', 'alert-info',],
+          ],
+        ];
+        $form['la_pills_timer']['explanation']['text'] = [
+          '#markup' => t('Data gathering session has @count timers attached to it.', [
+            '@count' => $entity_timers_count,
+          ]),
+        ];
+
+        return;
+      }
+    }
+
+    $timers_count = $timer_manager->getCurrentUserTimerCount();
+    $active_timers_count = $timer_manager->getCurrentUserActiveTimerCount();
+
     $form['la_pills_timer']['explanation'] = [
       '#type' => 'container',
       '#attributes' => [
@@ -239,28 +246,26 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
     $form['la_pills_timer']['use_timers'] = [
       '#type' => 'checkbox',
       '#title' => t('Use timers'),
+      '#default_value' => $entity->id() ? 0 : 1,
       '#attributes' => [
         'title' => t('Make a copy of your currrently active timers and use those for this session. Please note that this can no longer be changed.'),
         'data-toggle' => 'tooltip',
-        'checked' => FALSE,
-        'disabled' => $entity_has_timers || $active_timers_count === 0,
       ],
     ];
 
-    // TODO See if we should only attach the handler if checkbox is not disabled
     $form['actions']['submit']['#submit'][] = '_la_pills_timer_session_entity_form_submitted';
   }
 }
 
-function la_pills_timer_session_entity_predelete(EntityInterface $entity) {
+/**
+ * Implements hook_ENTITY_TYPE_predelete().
+ */
+function la_pills_timer_session_entity_predelete(EntityInterface $entity) : void {
   // TODO Consider maing the process a lo more resource friendly by either
   // running the delete according to the drupal API logic within a cron job or
   // using direct database queries to delete all the data, bypassing the API
-  $query_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
-    ->condition('session_id', $entity->id());
-  $timers = \Drupal::entityTypeManager()
-    ->getStorage('la_pills_session_timer_entity')
-    ->loadMultiple($query_timers->execute());
+  $timer_manager = \Drupal::service('la_pills_timer.manager');
+  $timers = $timer_manager->getSessionEntityTimers($entity);
 
   if ($timers) {
     foreach($timers as $timer) {
@@ -270,24 +275,10 @@ function la_pills_timer_session_entity_predelete(EntityInterface $entity) {
   }
 }
 
-function la_pills_timer_session_entity_session_close(EntityInterface $entity) {
-  // TODO Might need to check if session entity is provided
-  // TODO This is a repatition of an existing code, need to only have it in one place
-  $query = \Drupal::entityQuery('la_pills_session_timer_entity')
-    ->condition('session_id', $entity->id())
-    ->condition('status', TRUE)
-    ->sort('created', 'DESC');
-  $active_timers_ids = $query->execute();
-
-  if ($active_timers_ids) {
-    $timers = \Drupal::entityTypeManager()
-      ->getStorage('la_pills_session_timer_entity')
-      ->loadMultiple($active_timers_ids);
-
-    foreach ($timers as $timer) {
-      $timer_id = $timer->id();
-      $timer->stopSession();
-      $timer->save();
-    }
-  }
+/**
+ * Implements hook_session_entity_session_close().
+ */
+function la_pills_timer_session_entity_session_close(EntityInterface $entity) : void {
+  $timer_manager = \Drupal::service('la_pills_timer.manager');
+  $timer_manager->stopAllActiveTimers($entity);
 }
