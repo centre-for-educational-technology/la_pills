@@ -13,6 +13,7 @@ use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Symfony\Component\HttpFoundation\Response;
 use Drupal\la_pills\Entity\SessionEntity;
+use Drupal\Core\Ajax\AlertCommand;
 
 /**
  * Class LaPillsTimerController.
@@ -39,7 +40,7 @@ class LaPillsTimerController extends ControllerBase {
 
   /**
    * Returns all identifiers for all timers that belong to current user and are
-   * part of a certain group.
+   * part of a certain group. Identifiers are sorted by creation date.
    *
    * @param  stirng $group
    *   Group identifier
@@ -54,7 +55,18 @@ class LaPillsTimerController extends ControllerBase {
       ->execute();
   }
 
-  private function getSessionEntityIdsForGroup(SessionEntity $entity, string $group) {
+  /**
+   * Returns all identifiers for all session timers that belong to a session and
+   * are part of a certain group. Identifiers are sorted by creation date.
+   *
+   * @param  SessionEntity $entity
+   *   Session entity instance
+   * @param  string        $group
+   *   Group identifier
+   * @return array
+   *   An array of identifiers
+   */
+  private function getSessionEntityIdsForGroup(SessionEntity $entity, string $group) : array {
     return \Drupal::entityQuery('la_pills_session_timer_entity')
       ->condition('session_id', $entity->id())
       ->condition('group', $group)
@@ -64,8 +76,15 @@ class LaPillsTimerController extends ControllerBase {
 
   /**
    * Get elements for output.
+   *
+   * @param  array  $tids
+   *   Array of identifiers
+   * @param  string $entity_type
+   *   Entity type
+   * @return array
+   *   An array of objects
    */
-  private function getElements(array $tids, string $entity_type = 'la_pills_timer_entity') {
+  private function getElements(array $tids, string $entity_type = 'la_pills_timer_entity') : array {
     $timers = $this->entityTypeManager
       ->getStorage($entity_type)
       ->loadMultiple($tids);
@@ -148,9 +167,8 @@ class LaPillsTimerController extends ControllerBase {
   public function sessionTimer(SessionEntity $session_entity, $timer_id = NULL) {
     $response = new AjaxResponse();
 
-    if (!($session_entity->can('update') && $session_entity->isActive())) {
-      // TODO It might make sense to also stop the running timer on the UI side
-      $response->addCommand(new AlertCommand($this->t('ADD MESSAGE HERE')));
+    if (!($session_entity->access('update') && $session_entity->isActive())) {
+      $response->addCommand(new AlertCommand($this->t('Activity can only be logged for active sessions.')));
 
       return $response;
     }
@@ -193,10 +211,16 @@ class LaPillsTimerController extends ControllerBase {
     $timer_manager = \Drupal::service('la_pills_timer.manager');
     $response = new AjaxResponse();
 
+    if (!($session_entity->access('update') && $session_entity->isActive())) {
+      $response->addCommand(new AlertCommand($this->t('Activity can only be logged for active sessions.')));
+
+      return $response;
+    }
+
     $stopped_timers = $timer_manager->stopAllActiveTimers($session_entity);
 
     if ($stopped_timers) {
-      foreach ($timers as $timer) {
+      foreach ($stopped_timers as $timer) {
         $timer_id = $timer->id();
         $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'removeClass', ['la-pills-active-timer']));
         $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'countimer', ['stop']));
@@ -211,10 +235,6 @@ class LaPillsTimerController extends ControllerBase {
    * Callback to generate CSV data about a timer.
    */
   public function exportTimers(SessionEntity $session_entity) {
-    if (!$session_entity->access('update')) {
-      return new Response('', Response::HTTP_FORBIDDEN);
-    }
-
     // TODO Check if session is closed and disallow the download OR ignore timer
     // sessions that have not been finished yet
 
@@ -256,17 +276,8 @@ class LaPillsTimerController extends ControllerBase {
               }
             }
           } else {
-            // TODO Might need to handle this situation in some way
-            /*$error = [
-              '#type' => 'html_tag',
-              '#tag' => 'div',
-              '#value' => $this
-                ->t('Please stop timer for export.'),
-              '#attributes' => ['class' => ['alert alert-danger alert-dismissible']],
-            ];
-            $response = new AjaxResponse();
-
-            $response->addCommand(new ReplaceCommand('.la-pills-timer-' . $timer_id . ' .message-export-timer', $error));*/
+            // TODO We might need to handle this situation in some way. Current
+            // code would just ignore the timers that are still active.
           }
         }
       }
@@ -283,10 +294,23 @@ class LaPillsTimerController extends ControllerBase {
     return $response;
   }
 
+  /**
+   * Sesson entity activity logging page
+   *
+   * @param  SessionEntity $session_entity
+   *   Session entity object
+   * @return mixed
+   *   An array with page structure or HTTP_FORBIDDEN response
+   */
   public function sessionEntityTimers(SessionEntity $session_entity) {
-    // TODO This page should only show anthing if there are timers for current session
+    $timer_manager = \Drupal::service('la_pills_timer.manager');
+
+    if ($timer_manager->getSessionEntityTimersCount($session_entity) === 0) {
+      return new Response('', Response::HTTP_FORBIDDEN);
+    }
+
     $stop_link = Link::createFromRoute(
-      $this->t('Stop all timers'),
+      $this->t('Stop all logging'),
       'la_pills_timer.la_pills_timer_controller_stopAll',
       [
         'session_entity' => $session_entity->id(),

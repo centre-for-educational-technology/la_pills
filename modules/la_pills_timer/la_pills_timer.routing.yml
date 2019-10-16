@@ -2,7 +2,7 @@ la_pills_timer.la_pills_timer_controller_timers:
   path: '/timers'
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::index'
-    _title: 'Timers'
+    _title: 'Activity log'
   requirements:
     _permission: 'view published la pills timer entities'
 
@@ -66,7 +66,7 @@ la_pills_timer.la_pills_timer_controller_sessionEntityTimer:
   path: 'admin/structure/session_entity/{session_entity}/timers'
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionEntityTimers'
-    _title: 'Timers'
+    _title: 'Activity logging'
   options:
     parameters:
       session_entity:

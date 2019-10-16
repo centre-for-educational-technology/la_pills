@@ -3,7 +3,7 @@
 use Drupal\Core\Link;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\la_pills\Entity\SessionEntityInterface;
 
 /**
  * Implements hook_theme().
@@ -173,7 +173,7 @@ function _la_pills_timer_session_entity_form_submitted(array &$form, FormStateIn
       return;
     }
 
-    $timers = getCurrentUserActiveTimers();
+    $timers = $timer_manager->getCurrentUserActiveTimers();
 
     if ($timers) {
       foreach($timers as $timer) {
@@ -237,7 +237,7 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
       ],
     ];
     $form['la_pills_timer']['explanation']['text'] = [
-      '#markup' => t('You have @active active timers out of @total total timers. Please access <a href=":url" target="_blank">timer configuration page</a> to make changes.', [
+      '#markup' => t('You have @active active timers out of @total total timers. Please access <a href=":url" target="_blank">activity log configuration page</a> to make changes.', [
         '@active' => $active_timers_count,
         '@total' => $timers_count,
         ':url' => Url::fromRoute('la_pills_timer.la_pills_timer_controller_timers')->toString(),
@@ -245,8 +245,9 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
     ];
     $form['la_pills_timer']['use_timers'] = [
       '#type' => 'checkbox',
-      '#title' => t('Use timers'),
+      '#title' => t('Enable activity logging'),
       '#default_value' => $entity->id() ? 0 : 1,
+      '#disabled' => $active_timers_count > 0 ? FALSE : TRUE,
       '#attributes' => [
         'title' => t('Make a copy of your currrently active timers and use those for this session. Please note that this can no longer be changed.'),
         'data-toggle' => 'tooltip',
@@ -260,7 +261,7 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
 /**
  * Implements hook_ENTITY_TYPE_predelete().
  */
-function la_pills_timer_session_entity_predelete(EntityInterface $entity) : void {
+function la_pills_timer_session_entity_predelete(SessionEntityInterface $entity) : void {
   // TODO Consider maing the process a lo more resource friendly by either
   // running the delete according to the drupal API logic within a cron job or
   // using direct database queries to delete all the data, bypassing the API
@@ -278,7 +279,31 @@ function la_pills_timer_session_entity_predelete(EntityInterface $entity) : void
 /**
  * Implements hook_session_entity_session_close().
  */
-function la_pills_timer_session_entity_session_close(EntityInterface $entity) : void {
+function la_pills_timer_session_entity_session_close(SessionEntityInterface $entity) : void {
   $timer_manager = \Drupal::service('la_pills_timer.manager');
   $timer_manager->stopAllActiveTimers($entity);
+}
+
+/**
+ * Implements hook_la_pills_session_entity_view_alter().
+ */
+function la_pills_timer_la_pills_session_entity_view_alter(array &$content, SessionEntityInterface $session_entity) : void {
+  // TODO See if this clashes with caching
+  $timer_manager = \Drupal::service('la_pills_timer.manager');
+  if ($session_entity->access('update') && $timer_manager->getSessionEntityTimersCount($session_entity)) {
+    $content['alerts']['timers_attached'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['alert', 'alert-info',],
+      ],
+      '#weight' => -5,
+    ];
+    $content['alerts']['timers_attached']['text'] = [
+      '#markup' => t('You have activated activity logging. Please log your activities <a href=":url">here</a>.', [
+        ':url' => Url::fromRoute('la_pills_timer.la_pills_timer_controller_sessionEntityTimer', [
+          'session_entity' => $session_entity->id(),
+        ])->toString(),
+      ]),
+    ];
+  }
 }

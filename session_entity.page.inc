@@ -26,9 +26,11 @@ function template_preprocess_session_entity(array &$variables) {
   $session_entity = $variables['elements']['#session_entity'];
 
   // Helpful $content variable for templates.
+  /*
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
+  */
 
   if ($session_entity->access('update')) {
     $variables['actions']['download_answers'] = RenderableHelper::downloadAnswersLink($session_entity)->toRenderable();
@@ -81,10 +83,12 @@ function template_preprocess_session_entity(array &$variables) {
     }
   }
 
-  $variables['content']['session_template'] = [
+  $content['#sorted'] = FALSE;
+  $content['session_template'] = [
     '#theme' => 'session_template',
     '#template' => $session_template_data,
     '#replacements' => $replacements,
+    '#weight' => 5,
   ];
 
   $variables['#attached']['library'][] = 'la_pills/session_entity';
@@ -93,10 +97,11 @@ function template_preprocess_session_entity(array &$variables) {
     'canUpdate' => $session_entity->access('update'),
   ];
 
-  $additional_content = [];
-  \Drupal::moduleHandler()->invokeAll('la_pills_session_entity_view', [&$additional_content, $session_entity]);
+  \Drupal::moduleHandler()->alter('la_pills_session_entity_view', $content, $session_entity);
 
-  if ($additional_content) {
-    $variables['content']['additional_content'] = $additional_content;
+  if ($content) {
+    foreach (Element::children($content, TRUE) as $key) {
+      $variables['content'][$key] = $content[$key];
+    }
   }
 }

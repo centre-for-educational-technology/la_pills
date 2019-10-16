@@ -34,14 +34,6 @@
   {% endif %}
 
   {% if content %}
-    {% if content['session_template'] %}
-      {{- content['session_template'] -}}
-    {% endif %}
-
-    {% if content['additional_content'] %}
-      <div class="session-entity-additional-content">
-        {{- content['additional_content'] -}}
-      </div>
-    {% endif %}
+    {{- content -}}
   {% endif %}
 </div>

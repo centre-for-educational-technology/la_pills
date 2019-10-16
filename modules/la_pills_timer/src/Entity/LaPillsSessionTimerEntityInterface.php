@@ -63,4 +63,20 @@ interface LaPillsSessionTimerEntityInterface extends ContentEntityInterface, Ent
    */
   public function setCreatedTime($timestamp);
 
+  public function getSession();
+
+  public function getSessionId();
+
+  public function getTimerGroup();
+
+  public function getSessionsIds();
+
+  public function getDuration();
+
+  public function startSession();
+
+  public function stopSession();
+
+  public function getCurrentDuration();
+
 }

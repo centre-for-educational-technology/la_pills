@@ -11,7 +11,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 /**
  * Implements hook_theme()
  */
-function la_pills_theme($existing) {
+function la_pills_theme() {
   return [
     'session_entity' => [
       'render element' => 'elements',
