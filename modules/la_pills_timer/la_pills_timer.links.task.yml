@@ -19,3 +19,11 @@ entity.la_pills_timer_entity.delete_form:
   base_route:  entity.la_pills_timer_entity.canonical
   title: Delete
   weight: 10
+
+# TODO See if an issue involving caching could be resolved
+# Menu will not be shown if user decides to attach timers after creation
+entity.session_entity.timers:
+  route_name: la_pills_timer.la_pills_timer_controller_sessionEntityTimers
+  base_route: entity.session_entity.canonical
+  title: 'Activity logging'
+  weight: 25

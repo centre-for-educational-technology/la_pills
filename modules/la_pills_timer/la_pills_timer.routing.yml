@@ -3,6 +3,8 @@ la_pills_timer.la_pills_timer_controller_timers:
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::index'
     _title: 'Activity log'
+  options:
+    no_cache: 'TRUE'
   requirements:
     _permission: 'view published la pills timer entities'
 
@@ -15,20 +17,28 @@ la_pills_timer.la_pills_timer_controller_addTimer:
     _permission: 'add la pills timer entities'
 
 la_pills_timer.la_pills_timer_controller_editTimer:
-  path: '/timers/timer/{timer_id}/edit'
+  path: '/timers/timer/{timer}/edit'
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::updateTimer'
     _title: 'Edit Timer'
+  options:
+    parameters:
+      timer:
+        type: entity:la_pills_timer_entity
   requirements:
-    _permission: 'edit la pills timer entities'
+    _entity_access: 'timer.update'
 
 la_pills_timer.la_pills_timer_controller_removeTimer:
-  path: '/timers/timer/{timer_id}/delete'
+  path: '/timers/timer/{timer}/delete'
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::removeTimer'
     _title: 'Remove Timer'
+  options:
+    parameters:
+      timer:
+        type: entity:la_pills_timer_entity
   requirements:
-    _permission: 'delete la pills timer entities'
+    _entity_access: 'timer.delete'
 
 la_pills_timer.la_pills_timer_controller_sessionTimer:
   path: '/timers/session_entity/{session_entity}/timer/{timer_id}/session'
@@ -62,7 +72,7 @@ la_pills_timer.la_pills_timer_controller_exportTimers:
   requirements:
     _entity_access: 'session_entity.update'
 
-la_pills_timer.la_pills_timer_controller_sessionEntityTimer:
+la_pills_timer.la_pills_timer_controller_sessionEntityTimers:
   path: 'admin/structure/session_entity/{session_entity}/timers'
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionEntityTimers'
@@ -72,4 +82,4 @@ la_pills_timer.la_pills_timer_controller_sessionEntityTimer:
       session_entity:
         type: entity:session_entity
   requirements:
-    _entity_access: 'session_entity.update'
+    _custom_access: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionEntityTimersAccess'

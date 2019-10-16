@@ -93,4 +93,8 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
     return [];
   }
 
+  public function canAccessSessionEntityTimersPage(SessionEntity $entity) {
+    return $entity->access('update') && $this->getSessionEntityTimersCount($entity);
+  }
+
 }

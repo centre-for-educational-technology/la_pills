@@ -14,6 +14,9 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Symfony\Component\HttpFoundation\Response;
 use Drupal\la_pills\Entity\SessionEntity;
 use Drupal\Core\Ajax\AlertCommand;
+use Drupal\la_pills_timer\Entity\LaPillsTimerEntity;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Access\AccessResult;
 
 /**
  * Class LaPillsTimerController.
@@ -146,18 +149,18 @@ class LaPillsTimerController extends ControllerBase {
   /**
    * Callback for updating a timer.
    */
-  public function updateTimer($timer_id = NULL) {
+  public function updateTimer(LaPillsTimerEntity $timer) {
     $form = \Drupal::formBuilder()
-      ->getForm('\Drupal\la_pills_timer\Form\LaPillsTimerEditForm', $timer_id);
+      ->getForm('\Drupal\la_pills_timer\Form\LaPillsTimerEditForm', $timer->id());
     return $form;
   }
 
   /**
    * Callback for removing a timer.
    */
-  public function removeTimer($timer_id = NULL) {
+  public function removeTimer(LaPillsTimerEntity $timer) {
     $form = \Drupal::formBuilder()
-      ->getForm('\Drupal\la_pills_timer\Form\LaPillsTimerRemoveForm', $timer_id);
+      ->getForm('\Drupal\la_pills_timer\Form\LaPillsTimerRemoveForm', $timer->id());
     return $form;
   }
 
@@ -352,6 +355,26 @@ class LaPillsTimerController extends ControllerBase {
     }
 
     return $data;
+  }
+
+  /**
+   * Custom access check for session entity timers local task
+   *
+   * @param  AccountInterface $account
+   *   Current account
+   * @param  SessionEntity    $session_entity
+   *   Session entity
+   * @return AccessResult
+   *   AccessResultAllowed or AccessResultForbidden
+   */
+  public function sessionEntityTimersAccess(AccountInterface $account, SessionEntity $session_entity) : AccessResult {
+    $timer_manager = \Drupal::service('la_pills_timer.manager');
+
+    if ($timer_manager->canAccessSessionEntityTimersPage($session_entity)) {
+      return AccessResult::allowed();
+    }
+
+    return AccessResult::forbidden();
   }
 
 }

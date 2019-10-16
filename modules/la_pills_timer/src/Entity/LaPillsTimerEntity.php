@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the LA Pills Timer entity.
@@ -143,6 +144,13 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
   public function setOwner(UserInterface $account) {
     $this->set('user_id', $account->id());
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOwner(AccountInterface $account) {
+    return $this->getOwnerId() === $account->id();
   }
 
   /**

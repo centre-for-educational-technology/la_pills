@@ -27,9 +27,15 @@ class LaPillsTimerEntityAccessControlHandler extends EntityAccessControlHandler 
         return AccessResult::allowedIfHasPermission($account, 'view published la pills timer entities');
 
       case 'update':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
         return AccessResult::allowedIfHasPermission($account, 'edit la pills timer entities');
 
       case 'delete':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
         return AccessResult::allowedIfHasPermission($account, 'delete la pills timer entities');
     }
 

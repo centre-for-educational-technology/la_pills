@@ -57,7 +57,7 @@ function template_preprocess_la_pills_timer_elements(&$variables) : void {
         $remove_link_options['attributes']['class'][] = 'text-danger';
 
         $parameters = [
-          'timer_id' => $timer_id
+          'timer' => $timer_id,
         ];
 
         $remove_link = Link::createFromRoute(t('Remove'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $remove_link_options);
@@ -290,7 +290,8 @@ function la_pills_timer_session_entity_session_close(SessionEntityInterface $ent
 function la_pills_timer_la_pills_session_entity_view_alter(array &$content, SessionEntityInterface $session_entity) : void {
   // TODO See if this clashes with caching
   $timer_manager = \Drupal::service('la_pills_timer.manager');
-  if ($session_entity->access('update') && $timer_manager->getSessionEntityTimersCount($session_entity)) {
+
+  if ($timer_manager->canAccessSessionEntityTimersPage($session_entity)) {
     $content['alerts']['timers_attached'] = [
       '#type' => 'container',
       '#attributes' => [
@@ -300,7 +301,7 @@ function la_pills_timer_la_pills_session_entity_view_alter(array &$content, Sess
     ];
     $content['alerts']['timers_attached']['text'] = [
       '#markup' => t('You have activated activity logging. Please log your activities <a href=":url">here</a>.', [
-        ':url' => Url::fromRoute('la_pills_timer.la_pills_timer_controller_sessionEntityTimer', [
+        ':url' => Url::fromRoute('la_pills_timer.la_pills_timer_controller_sessionEntityTimers', [
           'session_entity' => $session_entity->id(),
         ])->toString(),
       ]),
