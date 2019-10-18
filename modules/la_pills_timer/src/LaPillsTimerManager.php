@@ -27,14 +27,30 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
     $this->currentUser = $current_user;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getSessionEntityTimersCount(SessionEntity $entity) : int {
     $query_session_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
-      ->condition('session_id', $entity->id())
-      ->sort('created', 'DESC');
+      ->condition('session_id', $entity->id());
 
     return $query_session_timers->count()->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getSessionEntityActiveTimersCount(SessionEntity $entity) : int {
+    $query_session_timers = \Drupal::entityQuery('la_pills_session_timer_entity')
+      ->condition('session_id', $entity->id())
+      ->condition('status', TRUE);
+
+    return $query_session_timers->count()->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSessionEntityTimers(SessionEntity $entity) : array {
     $query = \Drupal::entityQuery('la_pills_session_timer_entity')
       ->condition('session_id', $entity->id());
@@ -44,6 +60,9 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
       ->loadMultiple($query->execute());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getCurrentUserTimerCount() : int {
     $query_timers = \Drupal::entityQuery('la_pills_timer_entity')
       ->condition('user_id', $this->currentUser->id());
@@ -51,6 +70,9 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
     return $query_timers->count()->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getCurrentUserActiveTimerCount() : int {
     $query_active_timers = \Drupal::entityQuery('la_pills_timer_entity')
       ->condition('user_id', \Drupal::currentUser()->id())
@@ -58,7 +80,10 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
     return $query_active_timers->count()->execute();
   }
 
-  public function getCurrentUserActiveTimers() {
+  /**
+   * {@inheritdoc}
+   */
+  public function getCurrentUserActiveTimers() : array {
     $query = \Drupal::entityQuery('la_pills_timer_entity')
       ->condition('user_id', $this->currentUser->id())
       ->condition('status', TRUE)
@@ -69,6 +94,9 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
       ->loadMultiple($query->execute());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function stopAllActiveTimers(SessionEntity $entity) : array {
     $query = \Drupal::entityQuery('la_pills_session_timer_entity')
       ->condition('session_id', $entity->id())
@@ -93,7 +121,10 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
     return [];
   }
 
-  public function canAccessSessionEntityTimersPage(SessionEntity $entity) {
+  /**
+   * {@inheritdoc}
+   */
+  public function canAccessSessionEntityTimersPage(SessionEntity $entity) : bool {
     return $entity->access('update') && $this->getSessionEntityTimersCount($entity);
   }
 

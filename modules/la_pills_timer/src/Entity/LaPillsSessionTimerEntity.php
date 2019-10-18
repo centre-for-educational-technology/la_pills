@@ -145,12 +145,21 @@ class LaPillsSessionTimerEntity extends ContentEntityBase implements LaPillsSess
     return $this;
   }
 
+  /**
+   * Returns data gathering session
+   *
+   * @return Drupal\la_pills\Entity\SessionEntity
+   *   Data gathering session object
+   */
   public function getSession() {
     return $this->get('session_id')->entity;
   }
 
   /**
-   * {@inheritdoc}
+   * Returns data gathering session identifier
+   *
+   * @return int
+   *   Data gathering session identifier
    */
   public function getSessionId() {
     return $this->get('session_id')->target_id;
@@ -239,11 +248,16 @@ class LaPillsSessionTimerEntity extends ContentEntityBase implements LaPillsSess
     return $this;
   }
 
+  /**
+   * Returns duration for currently active session or zero
+   *
+   * @return int
+   *   Duration or 0
+   */
   public function getCurrentDuration() {
     $duration = 0;
 
     if ($this->getStatus()) {
-      // TODO Need to separte fetching of current session
       $session_query = \Drupal::entityQuery('la_pills_timer_session_entity')
         ->condition('timer_id', $this->id())
         ->sort('created', 'DESC')

@@ -17,6 +17,8 @@ use Drupal\Core\Ajax\AlertCommand;
 use Drupal\la_pills_timer\Entity\LaPillsTimerEntity;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\la_pills_timer\Entity\LaPillsSessionTimerEntity;
+use Drupal\Core\Ajax\RedirectCommand;
 
 /**
  * Class LaPillsTimerController.
@@ -167,41 +169,32 @@ class LaPillsTimerController extends ControllerBase {
   /**
    * Callback for starting a timer.
    */
-  public function sessionTimer(SessionEntity $session_entity, $timer_id = NULL) {
+  public function sessionTimer(SessionEntity $session_entity, LaPillsSessionTimerEntity $timer) {
     $response = new AjaxResponse();
 
     if (!($session_entity->access('update') && $session_entity->isActive())) {
-      $response->addCommand(new AlertCommand($this->t('Activity can only be logged for active sessions.')));
+      $response->addCommand(new AlertCommand($this->t('Activity can only be logged for active data gathering sessions.')));
 
       return $response;
     }
 
-    if ($timer_id) {
+    if ($timer && $timer->getSessionId() === $session_entity->id()) {
+      $status = $timer->getStatus();
+      $timer_id = $timer->id();
 
-      $timer = $this->entityTypeManager
-        ->getStorage('la_pills_session_timer_entity')
-        ->load($timer_id);
-
-      if ($timer && $timer->getSessionId() === $session_entity->id()) {
-        $status = $timer->getStatus();
-
-        if ($status) {
-          $timer->stopSession();
-          $response->addCommand(new HtmlCommand('.lapills-timer-time-' . $timer_id, '00:00:00'));
-          $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'removeClass', ['la-pills-active-timer']));
-          $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'countimer', ['stop']));
-          $response->addCommand(new InvokeCommand('.la-pills-timer-' . $timer_id . ' .export-button', 'removeClass', ['hidden']));
-
-        } else {
-          $timer->startSession();
-          $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'addClass', ['la-pills-active-timer']));
-          $response->addCommand(new HtmlCommand('.lapills-timer-time-' . $timer_id, '00:00:00'));
-          $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'countimer', ['start']));
-          $response->addCommand(new InvokeCommand('.la-pills-timer-' . $timer_id . ' .export-button', 'addClass', ['hidden']));
-        }
-
-        $timer->save();
+      if ($status) {
+        $timer->stopSession();
+        $response->addCommand(new HtmlCommand('.lapills-timer-time-' . $timer_id, '00:00:00'));
+        $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'removeClass', ['la-pills-active-timer']));
+        $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'countimer', ['stop']));
+      } else {
+        $timer->startSession();
+        $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'addClass', ['la-pills-active-timer']));
+        $response->addCommand(new HtmlCommand('.lapills-timer-time-' . $timer_id, '00:00:00'));
+        $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'countimer', ['start']));
       }
+
+      $timer->save();
     }
 
     return $response;
@@ -215,7 +208,7 @@ class LaPillsTimerController extends ControllerBase {
     $response = new AjaxResponse();
 
     if (!($session_entity->access('update') && $session_entity->isActive())) {
-      $response->addCommand(new AlertCommand($this->t('Activity can only be logged for active sessions.')));
+      $response->addCommand(new AlertCommand($this->t('Activity can only be logged for active data gathering sessions.')));
 
       return $response;
     }
@@ -227,7 +220,6 @@ class LaPillsTimerController extends ControllerBase {
         $timer_id = $timer->id();
         $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'removeClass', ['la-pills-active-timer']));
         $response->addCommand(new InvokeCommand('.lapills-timer-time-' . $timer_id, 'countimer', ['stop']));
-        $response->addCommand(new InvokeCommand('.la-pills-timer-' . $timer_id . ' .export-button', 'removeClass', ['hidden']));
       }
     }
 
@@ -238,22 +230,35 @@ class LaPillsTimerController extends ControllerBase {
    * Callback to generate CSV data about a timer.
    */
   public function exportTimers(SessionEntity $session_entity) {
-    // TODO Check if session is closed and disallow the download OR ignore timer
-    // sessions that have not been finished yet
-
+    $request = \Drupal::request();
     $timer_manager = \Drupal::service('la_pills_timer.manager');
+
+    if ($timer_manager->getSessionEntityActiveTimersCount($session_entity)) {
+      $response = new AjaxResponse();
+
+      $response->addCommand(new AlertCommand($this->t('Please deactivate any active logging activities and try again.')));
+
+      return $response;
+    } else if ($request->isXmlHttpRequest()) {
+      $response = new AjaxResponse();
+
+      $response->addCommand(new RedirectCommand($request->getUri()));
+
+      return $response;
+    }
 
     $timers = $timer_manager->getSessionEntityTimers($session_entity);
 
     if ($timers) {
 
       $handle = fopen('php://temp', 'wb');
-      fputcsv($handle, ['Name', 'Group', 'Started', 'Finished', 'Duration', 'Total']);
+      fputcsv($handle, [$this->t('Name'), $this->t('Group'), $this->t('Started'), $this->t('Finished'), $this->t('Duration'), $this->t('Total'),]);
 
       foreach ($timers as $timer) {
         if ($timer) {
           $status = $timer->getStatus();
 
+          // This check does not make much sense as export is only allowed if no active timers re present
           if (!$status) {
             $sessions_ids = $timer->getSessionsIds();
 
@@ -273,14 +278,11 @@ class LaPillsTimerController extends ControllerBase {
                   $timer->get('group')->value,
                   date('d-m-Y h:m:s', $timer_session->getStartTime()),
                   date('d-m-Y h:m:s', $timer_session->getStopTime()),
-                  gmdate('H:i:s', $duration),
-                  gmdate('H:i:s', $total),
+                  gmdate('H:i:s', $duration), // TODO Might need a fix to handle persions longer than one day
+                  gmdate('H:i:s', $total), // TODO Might need a fix to handle persions longer than one day
                 ]);
               }
             }
-          } else {
-            // TODO We might need to handle this situation in some way. Current
-            // code would just ignore the timers that are still active.
           }
         }
       }
@@ -291,7 +293,7 @@ class LaPillsTimerController extends ControllerBase {
       fclose($handle);
 
       $response->headers->set('Content-Type', 'text/csv');
-      $response->headers->set('Content-Disposition','attachment; filename="session_entity_timers.csv"');
+      $response->headers->set('Content-Disposition','attachment; filename="data_gathering_session_activity_log.csv"');
     }
 
     return $response;
@@ -331,7 +333,7 @@ class LaPillsTimerController extends ControllerBase {
       ],
       [
         'attributes' => [
-        'class' =>['btn', 'btn-primary',],
+        'class' =>['btn', 'btn-primary', 'use-ajax',],
       ]
     ]);
 

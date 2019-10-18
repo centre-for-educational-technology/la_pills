@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides an interface for defining LA Pills Timer entities.
@@ -62,5 +63,24 @@ interface LaPillsTimerEntityInterface extends ContentEntityInterface, EntityChan
    *   The called LA Pills Timer entity.
    */
   public function setCreatedTime($timestamp);
+
+  /**
+   * Determines if provided account is an owner of this timer
+   *
+   * @param  AccountInterface $account
+   *   User account
+   *
+   * @return boolean
+   *   TRUE if is an owner, FALSE otherwise
+   */
+  public function isOwner(AccountInterface $account);
+
+  /**
+   * Returns timer grouping
+   *
+   * @return string
+   *   Timer group value
+   */
+  public function getTimerGroup();
 
 }

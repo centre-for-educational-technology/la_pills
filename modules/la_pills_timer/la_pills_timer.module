@@ -108,7 +108,7 @@ function template_preprocess_la_pills_session_timer_elements(&$variables) : void
 
         $parameters = [
           'session_entity' => $entity->getSessionId(),
-          'timer_id' => $timer_id
+          'timer' => $timer_id
         ];
 
         $session_option = [
@@ -130,13 +130,10 @@ function template_preprocess_la_pills_session_timer_elements(&$variables) : void
           $session_option['attributes']['class'][] = 'la-pills-active-timer';
         }
 
-        // XXX Timer is unable to show days, it stps with hours
-        // This representation should be similar
         if (gmdate('d', $duration) == '01') {
           $time = gmdate('H:i:s', $duration);
         } else {
-          // This one is a bit strange
-          $time = intval(gmdate('d', $duration)) - 1 . gmdate(':H:i:s', $duration);
+          $time = floor($duration / 3600) . gmdate(':i:s', $duration);
         }
 
         $session_link = Link::createFromRoute(
@@ -270,7 +267,6 @@ function la_pills_timer_session_entity_predelete(SessionEntityInterface $entity)
 
   if ($timers) {
     foreach($timers as $timer) {
-      // TODO Deal with possible permission issues, if there are any
       $timer->delete();
     }
   }

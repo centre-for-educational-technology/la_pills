@@ -41,7 +41,7 @@ la_pills_timer.la_pills_timer_controller_removeTimer:
     _entity_access: 'timer.delete'
 
 la_pills_timer.la_pills_timer_controller_sessionTimer:
-  path: '/timers/session_entity/{session_entity}/timer/{timer_id}/session'
+  path: '/timers/session_entity/{session_entity}/timer/{timer}/session'
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionTimer'
     _title: 'Session Timer'
@@ -49,6 +49,8 @@ la_pills_timer.la_pills_timer_controller_sessionTimer:
     parameters:
       session_entity:
         type: entity:session_entity
+      timer:
+        type: entity:la_pills_session_timer_entity
   requirements:
     _entity_access: 'session_entity.update'
 

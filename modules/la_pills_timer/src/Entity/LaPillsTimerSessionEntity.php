@@ -181,6 +181,7 @@ class LaPillsTimerSessionEntity extends ContentEntityBase implements LaPillsTime
       ->setLabel(t('Timer session stop'))
       ->setDescription(t('Stopping the timer session.'));
 
+    // TODO It might make sense to use an integer field for this
     $fields['duration'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Duration'))
       ->setDescription(t('Timer session duration.'));

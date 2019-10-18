@@ -74,14 +74,6 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
   /**
    * {@inheritdoc}
    */
-  public static function preDelete(EntityStorageInterface $storage, array $entities) {
-    parent::preDelete($storage, $entities);
-    // TODO See if this could just be removed
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getName() {
     return $this->get('name')->value;
   }
@@ -154,7 +146,7 @@ class LaPillsTimerEntity extends ContentEntityBase implements LaPillsTimerEntity
   }
 
   /**
-   * Getting a group of the current timer.
+   * {@inheritdoc}
    */
   public function getTimerGroup() {
     return $this->get('group')->value;

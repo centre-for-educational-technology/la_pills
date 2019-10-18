@@ -46,4 +46,23 @@ interface LaPillsTimerSessionEntityInterface extends ContentEntityInterface, Ent
    */
   public function isActive();
 
+  /**
+   * Stops current session. Sets end time and duration.
+   *
+   * @return $this
+   *   Timer session
+   */
+  public function stopSession();
+
+  /**
+   * Calculates duration between start time and provided stop timestamp value.
+   *
+   * @param  int $stop
+   *   Stop timestamp in seconds
+   *
+   * @return int
+   *   Duration
+   */
+  public function calculateDuration($stop = NULL);
+
 }
