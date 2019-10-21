@@ -6,8 +6,8 @@ Please do not use it in production environment.
 
 ## System requirements
 
-* Drupal 8 (8.6.x or newer)
-* PHP 7.0 or newer
+* Drupal 8 (8.7.x or newer)
+* PHP 7.1 or newer
 
 ## Usage and running in development
 
@@ -41,17 +41,29 @@ cache issues for Anonymous users
   to LaPills
 
 The module is automatically loading any packaged session templates into the
-database. Please note that it currently only doing that once and it would be
-needed to **deactivate**, **uninstall** and **reinstall** the module to start
-afresh in case of any changes.
-That is the currently suggested course of action after any significant code
-updates that tamper with database (it might be safe to always do that).
+database. It is also possible to upload new templates later through the
+administration interface. Existing templates could also be removed, along with
+any data gathering session entities that have been based on that template.
+
+### Sub-modules
+
+* LA Pills Timer - a module that provides activity logging functionality to
+data gathering sessions. A user with sufficient permissions could create
+activities to be tracked. The ones that are currently active could be attached
+to a newly created or an existing session (copies are made). Later on session
+owner could use those for the activity tracking effort.
+  - Install the module and configure permissions
+  - Currently recommended permissions are (TEACHER is an example role that would
+    be creating content)
+    - Create new Timer and Timer sessions - TEACHER USER
+    - View active Timer and Timer sessions - TEACHER USER
+    - View inactive Timer and Timer sessions - TEACHER USER
 
 ## Themes
 
-Module should be able to work well enough with any themes, though currently
-using [Bootstrap](https://www.drupal.org/project/bootstrap) might provide the
-best results as visuals are being fine-tuned for that theme specifically.
+[Bootstrap](https://www.drupal.org/project/bootstrap) theme is a must as large
+parts of the UI are based on visual elements and capabilities provided by the
+Bootstrap component library.
 
 ## Optional modules
 

@@ -91,7 +91,7 @@ class LaPillsTimerRemoveForm extends FormBase {
     return $response->addCommand(new CloseModalDialogCommand());
   }
 
-  public function ajaxDeleteForm(array &$form, FormStateInterface $form_state, &$timer_id = NULL) {
+  public function ajaxDeleteForm(array &$form, FormStateInterface $form_state, $timer_id = NULL) {
     $response = new AjaxResponse();
     $timer_id = $form_state->getValue('timer_id');
 
