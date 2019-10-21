@@ -48,7 +48,7 @@ class LaPillsTimerRemoveForm extends FormBase {
 
     $form['description'] = [
       '#type' => 'markup',
-      '#markup' => '<span class="title-modal-timer">' . $this->t('Make sure that you really need to delete this timer. This operation cannot be reverted, all timer data will be removed') . '</span>',
+      '#markup' => '<span class="title-modal-timer">' . $this->t('Make sure that you really need to delete this activity. This operation cannot be reverted.') . '</span>',
       '#weight' => '-10',
     ];
 

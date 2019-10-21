@@ -42,7 +42,7 @@ class LaPillsTimerAddForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['description'] = [
       '#type' => 'markup',
-      '#markup' => '<span class="title-modal-timer">' . $this->t('Please specify Name, Color and Category and press Create for creation of new timer') . '</span>',
+      '#markup' => '<span class="title-modal-timer">' . $this->t('Please specify Name, Color and Category and press Submit for creation of new activity') . '</span>',
       '#weight' => '-10',
     ];
 
@@ -61,7 +61,7 @@ class LaPillsTimerAddForm extends FormBase {
 
     $form['group'] = [
       '#type' => 'select',
-      '#title' => t('Group'),
+      '#title' => $this->t('Group'),
       '#options' => [
         'student' => $this->t('Student'),
         'teacher' => $this->t('Teacher'),
@@ -78,7 +78,7 @@ class LaPillsTimerAddForm extends FormBase {
 
     $form['color'] = [
       '#type' => 'color',
-      '#title' => t('Color'),
+      '#title' => $this->t('Color'),
       '#default_value' => '#ffffff',
       '#weight' => '3',
       '#attributes' => [
@@ -93,7 +93,7 @@ class LaPillsTimerAddForm extends FormBase {
       '#title' => $this->t('Active'),
       '#weight' => 4,
       '#attributes' => [
-        'title' => $this->t('Mark timer as active'),
+        'title' => $this->t('Mark as active'),
         'data-toggle' => 'tooltip',
         'checked' => TRUE,
         'class' => [

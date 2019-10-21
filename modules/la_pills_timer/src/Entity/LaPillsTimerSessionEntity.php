@@ -31,6 +31,8 @@ use Drupal\user\UserInterface;
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid",
+ *     "tid" = "timer_id",
+ *     "sid" = "session_id",
  *     "uid" = "user_id",
  *     "langcode" = "langcode",
  *     "published" = "status",
@@ -144,8 +146,15 @@ class LaPillsTimerSessionEntity extends ContentEntityBase implements LaPillsTime
 
     $fields['timer_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Timer'))
-      ->setDescription(t('The parent timer.'))
-      ->setSetting('target_type', 'la_pills_timer_entity')
+      ->setDescription(t('The parent session timer.'))
+      ->setSetting('target_type', 'la_pills_session_timer_entity')
+      ->setReadOnly(TRUE)
+      ->setRequired(TRUE);
+
+    $fields['session_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Session'))
+      ->setDescription(t('The Session Entity timer belongs to.'))
+      ->setSetting('target_type', 'session_entity')
       ->setReadOnly(TRUE)
       ->setRequired(TRUE);
 

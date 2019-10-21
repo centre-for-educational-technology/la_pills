@@ -113,7 +113,7 @@ class LaPillsTimerController extends ControllerBase {
     ];
 
     $link = Link::createFromRoute(
-      $this->t('Create new timer'),
+      $this->t('Create new activity'),
       'la_pills_timer.la_pills_timer_controller_addTimer',
       [],
       $options);
@@ -278,8 +278,8 @@ class LaPillsTimerController extends ControllerBase {
                   $timer->get('group')->value,
                   date('d-m-Y h:m:s', $timer_session->getStartTime()),
                   date('d-m-Y h:m:s', $timer_session->getStopTime()),
-                  gmdate('H:i:s', $duration), // TODO Might need a fix to handle persions longer than one day
-                  gmdate('H:i:s', $total), // TODO Might need a fix to handle persions longer than one day
+                  gmdate('H:i:s', $duration), // TODO Might need a fix to handle periods longer than one day
+                  gmdate('H:i:s', $total), // TODO Might need a fix to handle periods longer than one day
                 ]);
               }
             }

@@ -7,5 +7,6 @@ main:
     js/moment.min.js: {}
     js/ez.countimer.js: {}
     js/la_pills_timer_counter.js: {}
+    js/la_pills_timer_beforeunload.js: {}
   dependencies:
     - core/drupal.ajax

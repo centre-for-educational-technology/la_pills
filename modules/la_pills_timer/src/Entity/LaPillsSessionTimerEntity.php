@@ -32,6 +32,7 @@ use Drupal\user\UserInterface;
  *     "label" = "name",
  *     "uuid" = "uuid",
  *     "uid" = "user_id",
+ *     "tid" = "timer_id",
  *     "sid" = "session_id",
  *     "langcode" = "langcode",
  *     "published" = "status",
@@ -218,7 +219,7 @@ class LaPillsSessionTimerEntity extends ContentEntityBase implements LaPillsSess
   public function startSession() {
     $timer_session = $this->entityTypeManager()
       ->getStorage('la_pills_timer_session_entity')
-      ->create(['timer_id' => $this->id()]);
+      ->create(['timer_id' => $this->id(), 'session_id' => $this->getSessionId(),]);
     $timer_session->save();
 
     $this->set('status', TRUE);
@@ -283,14 +284,38 @@ class LaPillsSessionTimerEntity extends ContentEntityBase implements LaPillsSess
 
     $fields += static::publishedBaseFieldDefinitions($entity_type);
 
-    $fields['session_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Session'))
-      ->setDescription(t('The Session Entity timer belongs to.'))
-      ->setSetting('target_type', 'session_entity')
+    $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Authored by'))
+      ->setDescription(t('The user ID of author of the LA Pills Timer.'))
+      ->setRevisionable(TRUE)
+      ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default')
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'author',
+        'weight' => 0,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'entity_reference_autocomplete',
+        'weight' => 5,
+        'settings' => [
+          'match_operator' => 'CONTAINS',
+          'size' => '60',
+          'autocomplete_type' => 'tags',
+          'placeholder' => '',
+        ],
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['timer_id'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Timer'))
+      ->setDescription(t('The timer copied from.'))
+      ->setSetting('target_type', 'la_pills_timer_entity')
       ->setReadOnly(TRUE)
       ->setRequired(TRUE);
 
-    $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
+    $fields['session_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Session'))
       ->setDescription(t('The Session Entity timer belongs to.'))
       ->setSetting('target_type', 'session_entity')

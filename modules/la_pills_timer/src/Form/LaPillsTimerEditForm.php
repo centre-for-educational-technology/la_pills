@@ -42,7 +42,7 @@ class LaPillsTimerEditForm extends FormBase {
 
     $form['description'] = [
       '#type' => 'markup',
-      '#markup' => '<span class="title-modal-timer">' . $this->t('Please edit Name, Color and Category and press Save for applying changes to the current timer') . '</span>',
+      '#markup' => '<span class="title-modal-timer">' . $this->t('Please edit Name, Color and Category and press Submit for applying changes to the current activity') . '</span>',
       '#weight' => '-10',
     ];
 
@@ -105,7 +105,7 @@ class LaPillsTimerEditForm extends FormBase {
       '#title' => $this->t('Active'),
       '#weight' => 4,
       '#attributes' => [
-        'title' => $this->t('Mark timer as active'),
+        'title' => $this->t('Mark as active'),
         'data-toggle' => 'tooltip',
         'checked' => $entity->getStatus() ? TRUE : FALSE,
         'class' => [

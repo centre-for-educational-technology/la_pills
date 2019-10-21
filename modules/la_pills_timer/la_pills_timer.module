@@ -177,6 +177,7 @@ function _la_pills_timer_session_entity_form_submitted(array &$form, FormStateIn
         $session_timer = \Drupal::entityTypeManager()
           ->getStorage('la_pills_session_timer_entity')
           ->create([
+            'timer_id' => $timer->id(),
             'session_id' => $entity->id(),
             'name' => $timer->getName(),
             'group' => $timer->getTimerGroup(),
@@ -184,6 +185,8 @@ function _la_pills_timer_session_entity_form_submitted(array &$form, FormStateIn
           ]);
         $session_timer->save();
       }
+      // TODO Need to invalidate local_task cache for an entity
+      //\Drupal\Core\Cache\Cache::invalidateTags(['local_task']);
     }
   }
 }
@@ -215,7 +218,7 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
           ],
         ];
         $form['la_pills_timer']['explanation']['text'] = [
-          '#markup' => t('Data gathering session has @count timers attached to it.', [
+          '#markup' => t('Data gathering session has @count activities attached to it.', [
             '@count' => $entity_timers_count,
           ]),
         ];
@@ -234,7 +237,7 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
       ],
     ];
     $form['la_pills_timer']['explanation']['text'] = [
-      '#markup' => t('You have @active active timers out of @total total timers. Please access <a href=":url" target="_blank">activity log configuration page</a> to make changes.', [
+      '#markup' => t('You have @active active activities to be tracked out of @total total activities. Please access <a href=":url" target="_blank">activity log configuration page</a> to make changes.', [
         '@active' => $active_timers_count,
         '@total' => $timers_count,
         ':url' => Url::fromRoute('la_pills_timer.la_pills_timer_controller_timers')->toString(),
@@ -246,7 +249,7 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
       '#default_value' => $entity->id() ? 0 : 1,
       '#disabled' => $active_timers_count > 0 ? FALSE : TRUE,
       '#attributes' => [
-        'title' => t('Make a copy of your currrently active timers and use those for this session. Please note that this can no longer be changed.'),
+        'title' => t('Make a copy of your currrently enabled activities and use those for this session. Please note that this can no longer be changed.'),
         'data-toggle' => 'tooltip',
       ],
     ];
@@ -259,7 +262,7 @@ function la_pills_timer_form_session_entity_form_alter(&$form, FormStateInterfac
  * Implements hook_ENTITY_TYPE_predelete().
  */
 function la_pills_timer_session_entity_predelete(SessionEntityInterface $entity) : void {
-  // TODO Consider maing the process a lo more resource friendly by either
+  // TODO Consider making the process a lot more resource friendly by either
   // running the delete according to the drupal API logic within a cron job or
   // using direct database queries to delete all the data, bypassing the API
   $timer_manager = \Drupal::service('la_pills_timer.manager');
@@ -284,7 +287,6 @@ function la_pills_timer_session_entity_session_close(SessionEntityInterface $ent
  * Implements hook_la_pills_session_entity_view_alter().
  */
 function la_pills_timer_la_pills_session_entity_view_alter(array &$content, SessionEntityInterface $session_entity) : void {
-  // TODO See if this clashes with caching
   $timer_manager = \Drupal::service('la_pills_timer.manager');
 
   if ($timer_manager->canAccessSessionEntityTimersPage($session_entity)) {
