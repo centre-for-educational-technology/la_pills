@@ -1,7 +1,7 @@
 <?php
 
 namespace Drupal\la_pills_timer;
-use Drupal\webprofiler\Entity\EntityManagerWrapper;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\la_pills\Entity\SessionEntity;
 
@@ -11,9 +11,9 @@ use Drupal\la_pills\Entity\SessionEntity;
 class LaPillsTimerManager implements LaPillsTimerManagerInterface {
 
   /**
-   * Drupal\webprofiler\Entity\EntityManagerWrapper definition.
+   * Drupal\Core\Entity\EntityTypeManagerInterface definition.
    *
-   * @var \Drupal\webprofiler\Entity\EntityManagerWrapper
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
@@ -22,7 +22,7 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
   /**
    * Constructs a new LaPillsTimerManager object.
    */
-  public function __construct(EntityManagerWrapper $entity_type_manager, AccountInterface $current_user) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
   }
