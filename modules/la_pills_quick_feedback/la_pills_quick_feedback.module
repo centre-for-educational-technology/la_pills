@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ * Contains la_pills_quick_feedback.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Entity\ContentEntityInterface;
+
+/**
+ * Implements hook_help().
+ */
+function la_pills_quick_feedback_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the la_pills_quick_feedback module.
+    case 'help.page.la_pills_quick_feedback':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Qucik Feedback functionality for LaPills Session.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Callback that returns options for all available question types.
+ * @param Drupal\Core\Field\BaseFieldDefinition     $definition
+ *   Field sefinition
+ * @param Drupal\Core\Entity\ContentEntityInterface $entity
+ *   Entity
+ * @param bool                                      $cacheable
+ *   Cache definition
+ * @return array
+ *   An array of options
+ */
+function _la_pills_quick_feedback_question_type_allowed_values(BaseFieldDefinition $definition, ContentEntityInterface $entity = NULL, $cacheable) {
+  return [
+    'short-text' => t('Short text'),
+    'long-text' => t('Long text'),
+    'scale' => t('Scale'),
+    'multi-choice' => t('Multi-choice'),
+    'checkboxes' => t('Checkboxes'),
+  ];
+}
+
+/**
+ * Callback that returns options for all available icons.
+ * Icon data taken from: https://gist.github.com/sakalauskas/b0c5049d5dc349713a82f1cb2a30b2fa
+ * @param Drupal\Core\Field\BaseFieldDefinition     $definition
+ *   Field sefinition
+ * @param Drupal\Core\Entity\ContentEntityInterface $entity
+ *   Entity
+ * @param bool                                      $cacheable
+ *   Cache definition
+ * @return array
+ *   An array of options
+ */
+function _la_pills_quick_feedback_icon_allowed_values(BaseFieldDefinition $definition, ContentEntityInterface $entity = NULL, $cacheable) {
+  $options = [];
+  $data = json_decode(file_get_contents(__DIR__ . '/icon-options.json'));
+
+  foreach ($data as $single) {
+    $options[$single] = ucwords(str_replace('-', ' ', substr(explode(' ', $single, 2)[1], 3)));
+  }
+
+  return $options;
+}

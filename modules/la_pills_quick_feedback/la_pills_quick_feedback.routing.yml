@@ -1,0 +1,8 @@
+
+la_pills_quick_feedback.la_pills_quick_feedback_controller_index:
+  path: '/quick-feedback'
+  defaults:
+    _controller: '\Drupal\la_pills_quick_feedback\Controller\LaPillsQuickFeedbackController::index'
+    _title: 'Quick Feedback'
+  requirements:
+    _permission: 'view published lapills question entity entities'

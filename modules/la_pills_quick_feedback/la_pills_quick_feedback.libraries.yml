@@ -1,0 +1,12 @@
+fontawesome:
+  remote: https://fontawesome.com/
+  version: 5.11.2
+  license:
+    name: Font Awesome Free License
+    url: https://fontawesome.com/license
+    gpl-compatible: true
+  js:
+    /libraries/fontawesome/js/all.min.js: {}
+  css:
+    theme:
+      /libraries/fontawesome/css/all.min.css: {}

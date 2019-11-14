@@ -1,0 +1,5 @@
+entity.la_pills_question_entity.add_form:
+  route_name: entity.la_pills_question_entity.add_form
+  title: 'Add LaPills Question Entity'
+  appears_on:
+    - entity.la_pills_question_entity.collection

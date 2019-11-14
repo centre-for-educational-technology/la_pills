@@ -1,0 +1,21 @@
+# LaPills Question Entity routing definition
+la_pills_question_entity.settings_tab:
+  route_name: la_pills_question_entity.settings
+  title: 'Settings'
+  base_route: la_pills_question_entity.settings
+
+entity.la_pills_question_entity.canonical:
+  route_name: entity.la_pills_question_entity.canonical
+  base_route: entity.la_pills_question_entity.canonical
+  title: 'View'
+
+entity.la_pills_question_entity.edit_form:
+  route_name: entity.la_pills_question_entity.edit_form
+  base_route: entity.la_pills_question_entity.canonical
+  title: 'Edit'
+
+entity.la_pills_question_entity.delete_form:
+  route_name:  entity.la_pills_question_entity.delete_form
+  base_route:  entity.la_pills_question_entity.canonical
+  title: Delete
+  weight: 10

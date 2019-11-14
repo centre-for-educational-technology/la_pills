@@ -1,0 +1,20 @@
+add lapills question entity entities:
+  title: 'Create new LaPills Question Entity entities'
+
+administer lapills question entity entities:
+  title: 'Administer LaPills Question Entity entities'
+  description: 'Allow to access the administration form to configure LaPills Question Entity entities.'
+  restrict access: true
+
+delete lapills question entity entities:
+  title: 'Delete LaPills Question Entity entities'
+
+edit lapills question entity entities:
+  title: 'Edit LaPills Question Entity entities'
+
+view published lapills question entity entities:
+  title: 'View published LaPills Question Entity entities'
+
+view unpublished lapills question entity entities:
+  title: 'View unpublished LaPills Question Entity entities'
+
