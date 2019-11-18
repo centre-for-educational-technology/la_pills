@@ -152,7 +152,7 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'author',
-        'weight' => 0,
+        'weight' => 10,
       ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
@@ -179,11 +179,11 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'string',
-        'weight' => -5,
+        'weight' => 0,
       ])
       ->setDisplayOptions('form', [
         'type' => 'options_select',
-        'weight' => -5,
+        'weight' => 0,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
@@ -200,11 +200,11 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'string',
-        'weight' => -5,
+        'weight' => 1,
       ])
       ->setDisplayOptions('form', [
         'type' => 'string_textfield',
-        'weight' => -5,
+        'weight' => 1,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
@@ -221,15 +221,32 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'string',
-        'weight' => -5,
+        'weight' => 2,
       ])
       ->setDisplayOptions('form', [
         'type' => 'string_textfield',
-        'weight' => -5,
+        'weight' => 2,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setRequired(TRUE);
+
+    $fields['description'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Description'))
+      ->setDescription(t('The description of the LaPills Question Entity entity.'))
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'basic_string',
+        'weight' => 3,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textarea',
+        'weight' => 3,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(FALSE);
 
     $fields['type'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Question type'))
@@ -243,11 +260,11 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'string',
-        'weight' => -5,
+        'weight' => 4,
       ])
       ->setDisplayOptions('form', [
         'type' => 'options_select',
-        'weight' => -5,
+        'weight' => 4,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
@@ -260,7 +277,7 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
     $fields['status']->setDescription(t('A boolean indicating whether the LaPills Question Entity is published.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
-        'weight' => -5,
+        'weight' => 5,
       ]);
 
     $fields['created'] = BaseFieldDefinition::create('created')

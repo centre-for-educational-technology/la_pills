@@ -16,6 +16,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\PrependCommand;
 use Drupal\Core\Ajax\RestripeCommand;
 use Drupal\Core\Ajax\BeforeCommand;
+use Drupal\Core\Ajax\RemoveCommand;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Markup;
@@ -123,6 +124,9 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
     /* @var \Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntity $entity */
     $form = parent::buildForm($form, $form_state);
 
+    $form['status']['#access'] = FALSE;
+    $form['user_id']['#access'] = FALSE;
+
     if ($this->getRequest()->isXmlHttpRequest()) {
       $form['ajax_messages'] = [
         '#type' => 'container',
@@ -157,6 +161,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
           ':input[name="type"]' => ['value' => 'scale'],
         ],
       ],
+      '#weight' => $form['type']['#weight'],
     ];
     $form['range']['range_min'] = [
       '#type' => 'number',
@@ -198,6 +203,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
           ],
         ],
       ],
+      '#weight' => $form['type']['#weight'],
     ];
     $form['options']['options'] = [
       '#tree' => TRUE,
@@ -441,6 +447,10 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
             '#quick-feedback-items > tbody',
             render($row)
           )
+        );
+        // XXX This one does not remove a parent elemnt tr, but a child element td
+        $response->addCommand(
+          new RemoveCommand('#quick-feedback-items > tbody > tr > td.empty.message')
         );
         break;
 
