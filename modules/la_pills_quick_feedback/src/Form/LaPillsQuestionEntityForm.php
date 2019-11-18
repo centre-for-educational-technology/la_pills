@@ -15,7 +15,7 @@ use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\PrependCommand;
 use Drupal\Core\Ajax\RestripeCommand;
-use Drupal\views\Ajax\ScrollTopCommand;
+use Drupal\Core\Ajax\BeforeCommand;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Markup;
@@ -66,6 +66,57 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
   }
 
   /**
+   * Returns entity options
+   *
+   * @return array
+   *   Entity options or an empty array
+   */
+  private function getEntityOptions() {
+    $data = $this->entity->get('data')->getValue();
+
+    return $data[0]['options'] ?? [];
+  }
+
+  /**
+   * Returns entity options count. Defaults to four if options are empty
+   * @return int
+   *   Options counr or four if empty
+   */
+  private function getEntityOptionsCount() {
+    $data = $this->entity->get('data')->getValue();
+
+    if (isset($data[0]['options']) && count($data[0]['options']) > 0) {
+      return count($data[0]['options']);
+    }
+
+    return 4;
+  }
+
+  /**
+   * Returns range min value
+   *
+   * @return mixed
+   *   Min value or empty string
+   */
+  private function getEntityRangeMin() {
+    $data = $this->entity->get('data')->getValue();
+
+    return $data[0]['range']['min'] ?? '';
+  }
+
+  /**
+   * Returns range max value
+   *
+   * @return mixed
+   *   Max value or empty string
+   */
+  private function getEntityRangeMax() {
+    $data = $this->entity->get('data')->getValue();
+
+    return $data[0]['range']['max'] ?? '';
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -73,6 +124,15 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
     $form = parent::buildForm($form, $form_state);
 
     if ($this->getRequest()->isXmlHttpRequest()) {
+      $form['ajax_messages'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'id' => 'result-message',
+        ],
+        '#weight' => -50,
+      ];
+
+      // Set ajaxSave action and disable any submit callbacks
       $form['actions']['submit']['#ajax'] = [
         'callback' => '::ajaxSave',
       ];
@@ -81,16 +141,149 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
       if (isset($form['actions']['delete'])) {
         $form['actions']['delete']['#access'] = FALSE;
       }
-      $form['ajax_messages'] = [
-        '#type' => 'container',
-        '#attributes' => [
-          'id' => 'result-message',
+    }
+
+    if (!$this->entity->isNew()) {
+      $form['type']['widget']['#disabled'] = TRUE;
+    }
+
+    $form['range'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Range'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#states' => [
+        'visible' => [
+          ':input[name="type"]' => ['value' => 'scale'],
         ],
-        '#weight' => -50,
+      ],
+    ];
+    $form['range']['range_min'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Min'),
+      '#attributes' => [
+        'id' => 'range-min',
+      ],
+      '#states' => [
+        'enabled' => [
+          ':input[name="type"]' => ['value' => 'scale'],
+        ],
+      ],
+      '#default_value' => $this->getEntityRangeMin(),
+    ];
+    $form['range']['range_max'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Max'),
+      '#attributes' => [
+        'id' => 'range-max',
+      ],
+      '#states' => [
+        'enabled' => [
+          ':input[name="type"]' => ['value' => 'scale'],
+        ],
+      ],
+      '#default_value' => $this->getEntityRangeMax(),
+    ];
+
+    $form['options'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'options-container',
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="type"]' => [
+            ['value' => 'multi-choice'],
+            ['value' => 'checkboxes'],
+          ],
+        ],
+      ],
+    ];
+    $form['options']['options'] = [
+      '#tree' => TRUE,
+      '#type' => 'fieldset',
+      '#title' => $this->t('Options'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#attributes' => [
+        'id' => 'options-wrapper',
+      ],
+    ];
+    $form['options']['add_new_option'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add new option'),
+      '#submit' => array('::addNewOption'),
+      '#attributes' => [
+        'class' => ['btn', 'btn-sm',],
+      ],
+      '#ajax' => [
+        'callback' => '::ajaxAddNewOption',
+        'wrapper' => 'options-wrapper',
+      ],
+      '#limit_validation_errors' => [],
+    ];
+
+    $num_options = $form_state->get('num_options');
+
+    if (empty($num_options)) {
+      $num_options = $this->getEntityOptionsCount();
+      $form_state->set('num_options', $num_options);
+    }
+
+    $options = $this->getEntityOptions();
+
+    for ($i = 0; $i < $num_options; $i++) {
+      $form['options']['options'][$i] = [
+        '#type' => 'textfield',
+        '#placeholder' => $this->t('Option (leave empty to remove)'),
+        '#default_value' => $options[$i] ?? '',
+        '#states' => [
+          'enabled' => [
+            ':input[name="type"]' => [
+              ['value' => 'multi-choice'],
+              ['value' => 'checkboxes'],
+            ],
+          ],
+        ],
       ];
     }
 
     return $form;
+  }
+
+  /**
+   * Fills additional entity data if correct type is selected
+   *
+   * @param  array              $form
+   *   Array with form structure
+   * @param  FormStateInterface $form_state
+   *   Form state object
+   */
+  private function fillEntityData(array &$form, FormStateInterface $form_state) {
+    $entity = $this->entity;
+
+    $type = $form_state->getValue('type')[0]['value'] ?? '';
+
+    if ($type === 'scale') {
+      $entity->set('data', [
+        'range' => [
+          'min' => $form_state->getValue('range_min'),
+          'max' => $form_state->getValue('range_max'),
+        ],
+      ]);
+    } else if ($type === 'multi-choice' || $type === 'checkboxes') {
+      $data = [
+        'options' => [],
+      ];
+
+      foreach ($form_state->getValue('options') as $option) {
+        if (!empty(trim($option))) {
+          $data['options'][] = $option;
+        }
+      }
+
+      $entity->set('data', $data);
+    }
   }
 
   /**
@@ -99,6 +292,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
 
+    $this->fillEntityData($form, $form_state);
     $status = parent::save($form, $form_state);
 
     switch ($status) {
@@ -116,6 +310,14 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
     $form_state->setRedirect('entity.la_pills_question_entity.canonical', ['la_pills_question_entity' => $entity->id()]);
   }
 
+  /**
+   * Builds a table row renderable for an Entity
+   *
+   * @param  LaPillsQuestionEntityInterface $entity
+   *   LaPillsQuestionEntity instance
+   * @return array
+   *   Renderable for entity table row
+   */
   private function buildTableRow(LaPillsQuestionEntityInterface $entity) {
     $link_options = [
       'attributes' => [
@@ -194,6 +396,16 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
     return $renderable;
   }
 
+  /**
+   * Handled form submit in case of AJAX
+   *
+   * @param  array              $form
+   *   Array with form structure
+   * @param  FormStateInterface $form_state
+   *   Form state instance
+   * @return AjaxResponse
+   *   AJAX response with multiple commands
+   */
   public function ajaxSave(array &$form, FormStateInterface $form_state) {
     $entity = $this->entity;
     $response = new AjaxResponse();
@@ -212,30 +424,32 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
       \Drupal::messenger()->deleteAll();
 
       $response->addCommand(new HtmlCommand('#result-message', $rendered));
-      $response->addCommand(new ScrollTopCommand('#drupal-modal--dialog'));
 
       return $response;
     }
 
+    $this->fillEntityData($form, $form_state);
     $status = parent::save($form, $form_state);
 
     $response->addCommand(new CloseModalDialogCommand());
 
     switch ($status) {
       case SAVED_NEW:
+        $row = $this->buildTableRow($entity);
         $response->addCommand(
           new PrependCommand(
             '#quick-feedback-items > tbody',
-            render($this->buildTableRow($entity))
+            render($row)
           )
         );
         break;
 
       default:
+        $row = $this->buildTableRow($entity);
         $response->addCommand(
           new ReplaceCommand(
             '#quick-feedback-item-' . $entity->id(),
-            render($this->buildTableRow($entity))
+            render($row)
           )
         );
     }
@@ -243,6 +457,34 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
     $response->addCommand(new RestripeCommand('#quick-feedback-items'));
 
     return $response;
+  }
+
+  /**
+   * Increments number of options by one
+   *
+   * @param array              $form
+   *   Array with form strcuture
+   * @param FormStateInterface $form_state
+   *   Form state instance
+   */
+  public function addNewOption(array &$form, FormStateInterface $form_state) {
+    $num_options = $form_state->get('num_options');
+    $form_state->set('num_options', $num_options + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback for adding a new option
+   *
+   * @param  array              $form
+   *   Array with form structure
+   * @param  FormStateInterface $form_state
+   *   Form sate instance
+   * @return array
+   *   Form renderable part with options wrapper
+   */
+  public function ajaxAddNewOption(array &$form, FormStateInterface $form_state) {
+    return $form['options']['options'];
   }
 
 }
