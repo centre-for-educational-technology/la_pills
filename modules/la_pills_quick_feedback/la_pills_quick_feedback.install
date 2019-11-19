@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function la_pills_quick_feedback_schema() {
+  $schema['user_active_question'] = [
+    'description' => 'Stores data about active questions for a user.',
+    'fields' => [
+      'user_id' => [
+        'description' => 'Unique user identifier.',
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+      'question_id' => [
+        'description' => 'Unique question identifier.',
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ],
+      'created' => [
+        'description' => 'Creation time unix timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'unique keys' => [
+      'user_question' => [
+        'user_id',
+        'question_id',
+      ],
+    ],
+    'indexes' => [
+      'user_id' => [
+        'user_id'
+      ],
+      'question_id' => [
+        'question_id',
+      ],
+      'created' => [
+        'created',
+      ],
+    ],
+  ];
+
+  return $schema;
+}

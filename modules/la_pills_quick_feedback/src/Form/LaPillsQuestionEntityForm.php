@@ -378,10 +378,19 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
       '#tag' => 'td',
     ];
     $renderable['active']['active'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'question-' . $entity->id() . '-active-inactive-wrapper',
+      ],
+    ];
+    $renderable['active']['active']['active'] = [
       '#type' => 'checkbox',
+      '#checked' => $entity->isActive(),
       '#attributes' => [
         'title' => $this->t('Mark question as active'),
         'data-toggle' => 'tooltip',
+        'class' => ['question-active-inactive'],
+        'data-id' => $entity->id(),
       ],
     ];
     $renderable['actions'] = [

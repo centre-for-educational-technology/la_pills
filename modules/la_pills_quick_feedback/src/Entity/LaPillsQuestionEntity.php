@@ -137,6 +137,15 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
   /**
    * {@inheritdoc}
    */
+  public function isActive(bool $buypass_cache = FALSE) {
+    $manager = \Drupal::service('la_pills_quick_feedback.question_manager');
+
+    return $manager->isActiveQuestion($this, $buypass_cache);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

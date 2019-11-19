@@ -15,6 +15,16 @@ use Drupal\Core\Ajax\RemoveCommand;
  */
 class LaPillsQuestionEntityDeleteForm extends ContentEntityDeleteForm {
 
+  /**
+   * AJAX removal callback.
+   *
+   * @param  array              $form
+   *   An array with renderable form structure
+   * @param  FormStateInterface $form_state
+   *   FormState ofject
+   * @return AjaxResponse
+   *   AjaxResponse object with commands
+   */
   public function ajaxRemove(array $form, FormStateInterface $form_state) {
     $entity = $this->getEntity();
     $entity->delete();

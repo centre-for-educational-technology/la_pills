@@ -4,10 +4,14 @@ namespace Drupal\la_pills_quick_feedback\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Database\Driver\mysql\Connection;
 use Drupal\Core\Session\AccountProxy;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Markup;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
+use Drupal\Core\Ajax\ReplaceCommand;
 
 /**
  * Class LaPillsQuickFeedbackController.
@@ -17,9 +21,10 @@ class LaPillsQuickFeedbackController extends ControllerBase {
   /**
    * @inheritdoc
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountProxy $currentUser) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountProxy $currentUser, Connection $database) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $currentUser;
+    $this->database = $database;
   }
 
   /**
@@ -28,8 +33,38 @@ class LaPillsQuickFeedbackController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('database')
     );
+  }
+
+  /**
+   * Returns renderable for active or inactive checkbox.
+   *
+   * @param  LaPillsQuestionEntityInterface $question
+   *   Question entity
+   * @return array
+   *   An array with renderable structure
+   */
+  private function activeRenderable(LaPillsQuestionEntityInterface $question) {
+    $renderable = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'question-' . $question->id() . '-active-inactive-wrapper',
+      ],
+    ];
+    $renderable['active'] = [
+      '#type' => 'checkbox',
+      '#checked' => $question->isActive(),
+      '#attributes' => [
+        'title' => $this->t('Mark question as active'),
+        'data-toggle' => 'tooltip',
+        'class' => ['question-active-inactive'],
+        'data-id' => $question->id(),
+      ],
+    ];
+
+    return $renderable;
   }
 
   /**
@@ -77,7 +112,8 @@ class LaPillsQuickFeedbackController extends ControllerBase {
       ],
       '#attached' => [
         'library' => [
-          'la_pills_quick_feedback/fontawesome'
+          'la_pills_quick_feedback/question_active_inactive',
+          'la_pills_quick_feedback/fontawesome',
         ],
       ],
     ];
@@ -106,21 +142,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
         $data['questions'][$key]['prompt'] = $question->prompt->view(['label' => 'hidden',]);
         $data['questions'][$key]['type'] = $question->type->view(['label' => 'hidden',]);
 
-        $data['questions'][$key]['active'] = [
-          '#type' => 'checkbox',
-          '#attributes' => [
-            'title' => $this->t('Mark question as active'),
-            'data-toggle' => 'tooltip',
-          ],
-          '#ajax' => [
-            'callback' => array($this, 'findUsers'),
-            'event' => 'click',
-            'progress' => [
-              'type' => 'throbber',
-              'message' => NULL,
-            ],
-          ],
-        ];
+        $data['questions'][$key]['active'] = $this->activeRenderable($question);
 
         $data['questions'][$key]['actions'] = [
           '#type' => 'container',
@@ -138,8 +160,45 @@ class LaPillsQuickFeedbackController extends ControllerBase {
     return $data;
   }
 
-  public function findUsers() {
+  /**
+   * AJAX callback to make a question active or inactive for current user.
+   *
+   * @param  LaPillsQuestionEntityInterface $question
+   *   Question entity
+   * @return AjaxResponse
+   *   AjaxRespone with actions
+   */
+  public function ajaxQuestionActiveInactive(LaPillsQuestionEntityInterface $question) {
+    $response = new AjaxResponse();
 
+    if ($question->isActive()) {
+      $this->database->delete('user_active_question')
+        ->condition('user_id', $this->currentUser->id())
+        ->condition('question_id', $question->id())
+        ->execute();
+    } else {
+      $this->database->insert('user_active_question')
+        ->fields([
+          'user_id' => $this->currentUser->id(),
+          'question_id' => $question->id(),
+          'created' => REQUEST_TIME,
+        ])
+        ->execute();
+    }
+
+    $renderable = $this->activeRenderable($question);
+    // Override #checked value with active value fetched fresh from the database,
+    // bypassing any caches
+    $renderable['active']['#checked'] = $question->isActive(TRUE);
+
+    $response->addCommand(
+      new ReplaceCommand(
+        '#question-' . $question->id() . '-active-inactive-wrapper',
+        render($renderable)
+      )
+    );
+
+    return $response;
   }
 
 }

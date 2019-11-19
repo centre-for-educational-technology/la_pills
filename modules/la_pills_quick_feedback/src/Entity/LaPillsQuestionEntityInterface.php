@@ -56,4 +56,21 @@ interface LaPillsQuestionEntityInterface extends ContentEntityInterface, EntityC
    */
   public function setCreatedTime($timestamp);
 
+  /**
+   * Determines if curently logged in user has marked question as active.
+   *
+   * @return boolean
+   *   Active for current user or not
+   */
+  /**
+   * Determines if curently logged in user has marked question as active. Allows
+   * to bypass usage of static cache.
+   *
+   * @param  boolean $buypass_cache
+   *   Determines if static cache should be bypassed, defaults to FALSE
+   * @return boolean
+   *   TRUE if active, FALSE if not
+   */
+  public function isActive(bool $buypass_cache = FALSE);
+
 }

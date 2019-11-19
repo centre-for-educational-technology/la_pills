@@ -10,3 +10,10 @@ fontawesome:
   css:
     theme:
       /libraries/fontawesome/css/all.min.css: {}
+question_active_inactive:
+  version: 1.x
+  js:
+    js/question_active_inactive.js: {}
+  dependencies:
+    - core/drupal.ajax
+    - core/drupalSettings

@@ -1,0 +1,7 @@
+services:
+  logger.channel.la_pills_quick_feedback:
+    parent: logger.channel_base
+    arguments: ['la_pills_quick_feedback']
+  la_pills_quick_feedback.question_manager:
+    class: Drupal\la_pills_quick_feedback\LaPillsQuestionManager
+    arguments: ['@current_user', '@database']

@@ -6,3 +6,14 @@ la_pills_quick_feedback.la_pills_quick_feedback_controller_index:
     _title: 'Quick Feedback'
   requirements:
     _permission: 'view published lapills question entity entities'
+
+la_pills_quick_feedback.la_pills_quick_feedback_controller_ajaxQuestionActiveInactive:
+  path: '/quick-feedback/ajax/{question}/active-inactive'
+  defaults:
+    _controller: '\Drupal\la_pills_quick_feedback\Controller\LaPillsQuickFeedbackController::ajaxQuestionActiveInactive'
+  options:
+    parameters:
+      question:
+        type: entity:la_pills_question_entity
+  requirements:
+    _entity_access: 'question.update'
