@@ -119,6 +119,12 @@ class LaPillsQuickFeedbackController extends ControllerBase {
     ];
 
     if ($questions) {
+      $preview_link_options = $link_options;
+      $preview_link_options['attributes']['class'][] = 'btn';
+      $preview_link_options['attributes']['class'][] = 'btn-info';
+      $preview_link_options['attributes']['title'] = $this->t('Preview');
+      $preview_link_options['attributes']['data-toggle'] = 'tooltip';
+
       $edit_link_options = $link_options;
       $edit_link_options['attributes']['class'][] = 'btn';
       $edit_link_options['attributes']['class'][] = 'btn-success';
@@ -152,6 +158,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
             'aria-label' => $this->t('Actions'),
           ],
         ];
+        $data['questions'][$key]['actions']['preview'] = Link::createFromRoute(Markup::create('<i class="fas fa-eye"></i>'), 'entity.la_pills_question_entity.canonical', ['la_pills_question_entity' => $question->id(),], $preview_link_options)->toRenderable();
         $data['questions'][$key]['actions']['edit'] = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'), 'entity.la_pills_question_entity.edit_form', ['la_pills_question_entity' => $question->id(),], $edit_link_options)->toRenderable();
         $data['questions'][$key]['actions']['remove'] = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'), 'entity.la_pills_question_entity.delete_form', ['la_pills_question_entity' => $question->id(),], $remove_link_options)->toRenderable();
       }

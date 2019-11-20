@@ -24,7 +24,9 @@ function template_preprocess_la_pills_question_entity(array &$variables) {
   $la_pills_question_entity = $variables['elements']['#la_pills_question_entity'];
 
   // Helpful $content variable for templates.
-  foreach (Element::children($variables['elements']) as $key) {
+  /*foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
-  }
+  }*/
+
+  $variables['content']['preview'] = \Drupal::formBuilder()->getForm('Drupal\la_pills_quick_feedback\Form\QuestionPreviewForm', $la_pills_question_entity);
 }

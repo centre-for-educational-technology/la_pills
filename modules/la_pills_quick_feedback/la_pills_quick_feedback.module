@@ -26,6 +26,19 @@ function la_pills_quick_feedback_help($route_name, RouteMatchInterface $route_ma
 }
 
 /**
+ * Implements hook_theme()
+ */
+function la_pills_quick_feedback_theme() {
+  return [
+    'la_pills_question_entity' => [
+      'render element' => 'elements',
+      'file' => 'la_pills_question_entity.page.inc',
+      'template' => 'la_pills_question_entity',
+    ],
+  ];
+}
+
+/**
  * Callback that returns options for all available question types.
  * @param Drupal\Core\Field\BaseFieldDefinition     $definition
  *   Field sefinition

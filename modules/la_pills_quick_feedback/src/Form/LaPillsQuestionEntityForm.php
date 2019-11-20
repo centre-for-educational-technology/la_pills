@@ -331,6 +331,13 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
         'data-dialog-type' => 'modal',
       ],
     ];
+
+    $preview_link_options = $link_options;
+    $preview_link_options['attributes']['class'][] = 'btn';
+    $preview_link_options['attributes']['class'][] = 'btn-info';
+    $preview_link_options['attributes']['title'] = $this->t('Preview');
+    $preview_link_options['attributes']['data-toggle'] = 'tooltip';
+
     $edit_link_options = $link_options;
     $edit_link_options['attributes']['class'][] = 'btn';
     $edit_link_options['attributes']['class'][] = 'btn-success';
@@ -405,6 +412,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
         'aria-label' => $this->t('Actions'),
       ],
     ];
+    $renderable['actions']['actions']['preview'] = Link::createFromRoute(Markup::create('<i class="fas fa-eye"></i>'), 'entity.la_pills_question_entity.canonical', ['la_pills_question_entity' => $entity->id(),], $preview_link_options)->toRenderable();
     $renderable['actions']['actions']['edit'] = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'), 'entity.la_pills_question_entity.edit_form', ['la_pills_question_entity' => $entity->id(),], $edit_link_options)->toRenderable();
     $renderable['actions']['actions']['remove'] = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'), 'entity.la_pills_question_entity.delete_form', ['la_pills_question_entity' => $entity->id(),], $remove_link_options)->toRenderable();
 

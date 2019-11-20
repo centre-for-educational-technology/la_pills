@@ -17,3 +17,7 @@ question_active_inactive:
   dependencies:
     - core/drupal.ajax
     - core/drupalSettings
+question_preview:
+  version: 1.x
+  js:
+    js/question_preview.js: {}
