@@ -221,7 +221,7 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
    * {@inheritdoc}
    */
   public function getData() {
-    return $this->get('data')->getValue()[0];
+    return $this->get('data')->getValue()[0] ?? [];
   }
 
   /**

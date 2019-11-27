@@ -117,7 +117,7 @@ class LaPillsQuestionnaireEntity extends ContentEntityBase implements LaPillsQue
    * {@inheritdoc}
    */
   public function getQuestions() {
-    return $this->get('questions')->getValue()[0];
+    return $this->get('questions')->getValue()[0] ?? [];
   }
 
   /**
