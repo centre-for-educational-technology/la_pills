@@ -259,6 +259,44 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
   }
 
   /**
+   * {@inheritdoc}
+   *
+   * Extends original method and adds validation for range and options fields,
+   * provided that suitable question type has been chosen.
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+
+    $type = $form_state->getValue('type')[0]['value'] ?? '';
+
+    if ($type === 'scale') {
+      $min = $form_state->getValue('range_min');
+      $max = $form_state->getValue('range_max');
+
+      if (!is_numeric($min)) {
+        $form_state->setErrorByName('range_min', t('Range minimum is required and should be a number'));
+      }
+
+      if (!is_numeric($max)) {
+        $form_state->setErrorByName('range_max', t('Range maximum is required and should be a number'));
+      }
+
+      if ((int)$max <= (int)$min) {
+        $form_state->setErrorByName('range_max', t('Range maximum can not be smaller or equal to minimum'));
+      }
+    } else if ($type === 'multi-choice' || $type === 'checkboxes') {
+      $options = $form_state->getValue('options');
+      $options = array_filter($options, function($option) {
+        return !empty(trim($option));
+      });
+
+      if (empty($options)) {
+        $form_state->setErrorByName('options', t('At least one option is required'));
+      }
+    }
+  }
+
+  /**
    * Fills additional entity data if correct type is selected
    *
    * @param  array              $form
