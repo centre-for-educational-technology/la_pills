@@ -108,31 +108,13 @@ function _la_pills_quick_feedback_session_entity_form_submitted(array &$form, Fo
       $data = [];
 
       foreach ($questions as $question) {
-        $data[$question->uuid()] = [
-          'uuid' => $question->uuid(),
-          'type' => $question->getType(),
-          'icon' => $question->getIcon(),
-          'short_name' => $question->getShortName(),
-          'title' => $question->getPrompt(),
-          'description' => $question->getDescription(),
-        ];
-
-        if ($question->getType() === 'scale') {
-          $question_data = $question->getData();
-
-          $data[$question->uuid()]['min'] = $question_data['range']['min'];
-          $data[$question->uuid()]['max'] = $question_data['range']['max'];
-        } else if ($question->getType() === 'multi-choice' || $question->getType() === 'checkboxes') {
-          $question_data = $question->getData();
-
-          $data[$question->uuid()]['options'] = $question_data['options'];
-        }
+        $data[$question->uuid()] = $question->getQuesionDataForQuestionnaire();
       }
 
       $questionnaire = \Drupal::entityTypeManager()
         ->getStorage('la_pills_questionnaire_entity')
         ->create([
-          'name' => '',
+          'name' => 'Quick Feedback',
           'session_id' => $entity->id(),
           'questions' => $data,
         ]);
@@ -212,8 +194,13 @@ function la_pills_quick_feedback_form_session_entity_form_alter(&$form, FormStat
  * Implements hook_ENTITY_TYPE_predelete().
  */
 function la_pills_quick_feedback_session_entity_predelete(SessionEntityInterface $entity) : void {
-  // TODO Make sure that any data about session quick feedbck questionnaire is
-  // removed
+  $manager = \Drupal::service('la_pills_quick_feedback.manager');
+
+  $questionnaire = $manager->getQuickFeedbackQuestionnaire($session_entity);
+
+  if ($questionnaire) {
+    $questionnaire->delete();
+  }
 }
 
 /**

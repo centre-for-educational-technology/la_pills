@@ -138,6 +138,20 @@ class LaPillsQuestionnaireEntity extends ContentEntityBase implements LaPillsQue
   /**
    * {@inheritdoc}
    */
+  public function getSession() {
+    return $this->get('session_id')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSessionId() {
+    return $this->get('session_id')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

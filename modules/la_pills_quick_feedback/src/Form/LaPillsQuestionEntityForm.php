@@ -73,21 +73,22 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
    *   Entity options or an empty array
    */
   private function getEntityOptions() {
-    $data = $this->entity->get('data')->getValue();
+    $data = $this->entity->getData();
 
-    return $data[0]['options'] ?? [];
+    return $data['options'] ?? [];
   }
 
   /**
    * Returns entity options count. Defaults to four if options are empty
+   *
    * @return int
    *   Options counr or four if empty
    */
   private function getEntityOptionsCount() {
-    $data = $this->entity->get('data')->getValue();
+    $data = $this->entity->getData();
 
-    if (isset($data[0]['options']) && count($data[0]['options']) > 0) {
-      return count($data[0]['options']);
+    if (isset($data['options']) && count($data['options']) > 0) {
+      return count($data['options']);
     }
 
     return 4;
@@ -100,9 +101,9 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
    *   Min value or empty string
    */
   private function getEntityRangeMin() {
-    $data = $this->entity->get('data')->getValue();
+    $data = $this->entity->getData();
 
-    return $data[0]['range']['min'] ?? '';
+    return $data['range']['min'] ?? '';
   }
 
   /**
@@ -112,9 +113,9 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
    *   Max value or empty string
    */
   private function getEntityRangeMax() {
-    $data = $this->entity->get('data')->getValue();
+    $data = $this->entity->getData();
 
-    return $data[0]['range']['max'] ?? '';
+    return $data['range']['max'] ?? '';
   }
 
   /**
@@ -262,7 +263,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
    *
    * @param  array              $form
    *   Array with form structure
-   * @param  FormStateInterface $form_state
+   * @param  Drupal\Core\Form\FormStateInterface $form_state
    *   Form state object
    */
   private function fillEntityData(array &$form, FormStateInterface $form_state) {
@@ -288,7 +289,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
         }
       }
 
-      $entity->set('data', $data);
+      $entity->setData($data);
     }
   }
 
@@ -319,7 +320,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
   /**
    * Builds a table row renderable for an Entity
    *
-   * @param  LaPillsQuestionEntityInterface $entity
+   * @param  Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface $entity
    *   LaPillsQuestionEntity instance
    * @return array
    *   Renderable for entity table row
@@ -363,7 +364,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
     ];
     $renderable['icon']['icon'] = [
       '#type' => 'markup',
-      '#markup' => '<i class="' . $entity->get('icon')->value . '"></i>'
+      '#markup' => '<i class="' . $entity->getIcon() . '"></i>'
     ];
     $renderable['short_name'] = [
       '#type' => 'html_tag',
@@ -424,9 +425,10 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
    *
    * @param  array              $form
    *   Array with form structure
-   * @param  FormStateInterface $form_state
+   * @param  Drupal\Core\Form\FormStateInterface $form_state
    *   Form state instance
-   * @return AjaxResponse
+   *
+   * @return Drupal\Core\Ajax\AjaxResponse
    *   AJAX response with multiple commands
    */
   public function ajaxSave(array &$form, FormStateInterface $form_state) {
@@ -491,7 +493,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
    *
    * @param array              $form
    *   Array with form strcuture
-   * @param FormStateInterface $form_state
+   * @param Drupal\Core\Form\FormStateInterface $form_state
    *   Form state instance
    */
   public function addNewOption(array &$form, FormStateInterface $form_state) {
@@ -505,8 +507,9 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
    *
    * @param  array              $form
    *   Array with form structure
-   * @param  FormStateInterface $form_state
+   * @param  Drupal\Core\Form\FormStateInterface $form_state
    *   Form sate instance
+   *
    * @return array
    *   Form renderable part with options wrapper
    */

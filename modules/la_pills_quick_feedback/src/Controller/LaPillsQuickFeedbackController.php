@@ -71,7 +71,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
    * Index.
    *
    * @return string
-   *   Return Hello string.
+   *   Renderable page structure.
    */
   public function index() {
     $link_options = [

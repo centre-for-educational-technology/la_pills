@@ -123,7 +123,7 @@ trait SessionEntityQuestionnaireFormTrait {
   }
 
   // TODO Add docstring
-  public function createQuestionRenderable(array $question) {
+  public static function createQuestionRenderable(array $question) {
     $structure = [
       '#title' => $question['title'],
       '#required' => ($question['required'] === 'Yes') ? TRUE : FALSE

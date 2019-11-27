@@ -20,9 +20,9 @@ class LaPillsQuestionEntityDeleteForm extends ContentEntityDeleteForm {
    *
    * @param  array              $form
    *   An array with renderable form structure
-   * @param  FormStateInterface $form_state
+   * @param  Drupal\Core\Form\FormStateInterface $form_state
    *   FormState ofject
-   * @return AjaxResponse
+   * @return Drupal\Core\Ajax\AjaxResponse
    *   AjaxResponse object with commands
    */
   public function ajaxRemove(array $form, FormStateInterface $form_state) {
@@ -36,6 +36,17 @@ class LaPillsQuestionEntityDeleteForm extends ContentEntityDeleteForm {
     return $response;
   }
 
+  /**
+   * AJAX calcel action callback.
+   *
+   * @param  array              $form
+   *   An array with renderable form structure
+   * @param  Drupal\Core\Form\FormStateInterface $form_state
+   *   FormState object.
+   *
+   * @return Drupal\Core\Ajax\AjaxResponse
+   *   AjaxResponse object with dialog close command.
+   */
   public function ajaxCancel(array $form, FormStateInterface $form_state) {
     $response = new AjaxResponse();
     $response->addCommand(new CloseModalDialogCommand());

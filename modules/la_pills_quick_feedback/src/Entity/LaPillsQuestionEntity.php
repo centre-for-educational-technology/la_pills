@@ -206,7 +206,13 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
    * {@inheritdoc}
    */
   public function setType($type) {
-    // TODO It might make sense to only allow values from the list
+    $manager = \Drupal::service('la_pills_quick_feedback.manager');
+    $types = $manager->getQuestionTypes();
+
+    if (!array_key_exists($type, $types)) {
+      throw new LaPillsQuestionTypeException('Unsupported question type: ' . $type);
+    }
+
     $this->set('type', $type);
     return $this;
   }
@@ -240,6 +246,33 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
     $manager = \Drupal::service('la_pills_quick_feedback.manager');
 
     return $manager->isActiveQuestion($this, $buypass_cache);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getQuesionDataForQuestionnaire() {
+    $structure = [
+      'uuid' => $this->uuid(),
+      'type' => $this->getType(),
+      'icon' => $this->getIcon(),
+      'short_name' => $this->getShortName(),
+      'title' => $this->getPrompt(),
+      'description' => $this->getDescription(),
+    ];
+
+    if ($this->getType() === 'scale') {
+      $question_data = $this->getData();
+
+      $structure['min'] = $question_data['range']['min'];
+      $structure['max'] = $question_data['range']['max'];
+    } else if ($this->getType() === 'multi-choice' || $this->getType() === 'checkboxes') {
+      $question_data = $this->getData();
+
+      $structure['options'] = $question_data['options'];
+    }
+
+    return $structure;
   }
 
   /**

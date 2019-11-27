@@ -43,8 +43,10 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
     $this->database = $database;
   }
 
-  // TODO Add docstring
-  public function getQuestionTypes($translate = TRUE) {
+  /**
+   * {@inheritdoc}
+   */
+  public function getQuestionTypes($translate = TRUE) : array {
     if ($translate) {
       return [
         'short-text' => $this->t('Short text'),
@@ -109,6 +111,9 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
     return in_array($question->id(), $this->getActiveQuestions());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getQuestionsCount() : int {
     $query_questions = \Drupal::entityQuery('la_pills_question_entity')
       ->condition('user_id', $this->currentUser->id());
@@ -116,6 +121,9 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
     return $query_questions->count()->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getQuickFeedbackQuestionnaire(SessionEntityInterface $session_entity) {
     $id = \Drupal::entityQuery('la_pills_questionnaire_entity')
       ->condition('session_id', $session_entity->id())
@@ -131,6 +139,9 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
       ->load(array_values($id)[0]);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function hasQuickFeedbackQuestionnaire(SessionEntityInterface $session_entity) : bool {
     return \Drupal::entityQuery('la_pills_questionnaire_entity')
       ->condition('session_id', $session_entity->id())

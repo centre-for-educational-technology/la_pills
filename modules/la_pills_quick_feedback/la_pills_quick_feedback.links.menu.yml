@@ -7,11 +7,11 @@ entity.la_pills_question_entity.collection:
   parent: system.admin_structure
   weight: 100
 
-la_pills_question_entity.admin.structure.settings:
-  title: 'LaPills Question Entity settings'
-  description: 'Configure LaPills Question Entity entities'
-  route_name: la_pills_question_entity.settings
-  parent: system.admin_structure
+#la_pills_question_entity.admin.structure.settings:
+#  title: 'LaPills Question Entity settings'
+#  description: 'Configure LaPills Question Entity entities'
+#  route_name: la_pills_question_entity.settings
+#  parent: system.admin_structure
 
 entity.la_pills_question_entity.quick_feedback:
   title: 'Configure quick feedback'

@@ -56,4 +56,50 @@ interface LaPillsQuestionnaireEntityInterface extends ContentEntityInterface, En
    */
   public function setCreatedTime($timestamp);
 
+  /**
+   * Gets questions. The strcture of resembles the one of a Session Template
+   * questionnaire questions with some additional keys. This is a copy from
+   * active questions for the user during the creation of the questionnaire.
+   *
+   * @return array
+   *   Questions data structure.
+   */
+  public function getQuestions();
+
+  /**
+   * Sets sets questions.
+   *
+   * @param array $data
+   *   Questions data structure.
+   *
+   * @return \Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionnaireEntityInterface
+   *   The called LaPills Questionnaire Entity entity.
+   */
+  public function setQuestions(array $data);
+
+  /**
+   * Returns count of questions.
+   *
+   * @return int
+   *   Questions count.
+   */
+  public function getQuestionCount();
+
+  /**
+   * Gets Session Entity that questionnaire is related to.
+   *
+   * @return Drupal\la_pills\Entity\SessionEntityInterface
+   *   Session Entity.
+   */
+  public function getSession();
+
+  /**
+   * Returns an identifier for the Session Entity that the questionnaire is
+   * related to.
+   *
+   * @return int
+   *   Session Entity unique identifier.
+   */
+  public function getSessionId();
+
 }
