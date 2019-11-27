@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the LaPills Question Entity entity.
@@ -77,16 +78,16 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
   /**
    * {@inheritdoc}
    */
-  public function getName() {
-    return $this->get('name')->value;
-  }
+  public static function postDelete(EntityStorageInterface $storage_controller, array $entities) {
+    parent::postDelete($storage_controller, $entities);
 
-  /**
-   * {@inheritdoc}
-   */
-  public function setName($name) {
-    $this->set('name', $name);
-    return $this;
+    $connection = \Drupal::service('database');
+
+    return $connection->delete('user_active_question')
+    ->condition('question_id', array_map(function($entity) {
+      return $entity->id();
+    }, $entities), 'IN')
+    ->execute();
   }
 
   /**
@@ -137,8 +138,106 @@ class LaPillsQuestionEntity extends ContentEntityBase implements LaPillsQuestion
   /**
    * {@inheritdoc}
    */
+  public function getIcon() {
+    return $this->get('icon')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setIcon($icon) {
+    $this->set('icon', $icon);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getShortName() {
+    return $this->get('short_name')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setShortName($short_name) {
+    $this->set('short_name', $short_name);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPrompt() {
+    return $this->get('prompt')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setPrompt($prompt) {
+    $this->set('prompt', $prompt);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    return $this->get('description')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription($description) {
+    $this->set('description', $description);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getType() {
+    return $this->get('type')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setType($type) {
+    // TODO It might make sense to only allow values from the list
+    $this->set('type', $type);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getData() {
+    return $this->get('data')->getValue()[0];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setData(array $data) {
+    $this->set('data', $data);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOwner(AccountInterface $account) {
+    return $this->getOwnerId() === $account->id();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function isActive(bool $buypass_cache = FALSE) {
-    $manager = \Drupal::service('la_pills_quick_feedback.question_manager');
+    $manager = \Drupal::service('la_pills_quick_feedback.manager');
 
     return $manager->isActiveQuestion($this, $buypass_cache);
   }

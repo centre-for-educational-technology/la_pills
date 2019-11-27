@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides an interface for defining LaPills Question Entity entities.
@@ -17,25 +18,6 @@ interface LaPillsQuestionEntityInterface extends ContentEntityInterface, EntityC
   /**
    * Add get/set methods for your configuration properties here.
    */
-
-  /**
-   * Gets the LaPills Question Entity name.
-   *
-   * @return string
-   *   Name of the LaPills Question Entity.
-   */
-  public function getName();
-
-  /**
-   * Sets the LaPills Question Entity name.
-   *
-   * @param string $name
-   *   The LaPills Question Entity name.
-   *
-   * @return \Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface
-   *   The called LaPills Question Entity entity.
-   */
-  public function setName($name);
 
   /**
    * Gets the LaPills Question Entity creation timestamp.
@@ -56,12 +38,41 @@ interface LaPillsQuestionEntityInterface extends ContentEntityInterface, EntityC
    */
   public function setCreatedTime($timestamp);
 
+  public function getIcon();
+
+  public function setIcon($icon);
+
+  public function getShortName();
+
+  public function setShortName($short_name);
+
+  public function getPrompt();
+
+  public function setPrompt($prompt);
+
+  public function getDescription();
+
+  public function setDescription($description);
+
+  public function getType();
+
+  public function setType($type);
+
+  public function getData();
+
+  public function setData(array $data);
+
   /**
-   * Determines if curently logged in user has marked question as active.
+   * Determines if provided account is an owner of this timer
+   *
+   * @param  AccountInterface $account
+   *   User account
    *
    * @return boolean
-   *   Active for current user or not
+   *   TRUE if is an owner, FALSE otherwise
    */
+  public function isOwner(AccountInterface $account);
+
   /**
    * Determines if curently logged in user has marked question as active. Allows
    * to bypass usage of static cache.

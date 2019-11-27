@@ -33,9 +33,17 @@ class LaPillsQuestionEntityAccessControlHandler extends EntityAccessControlHandl
 
       case 'update':
 
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
+
         return AccessResult::allowedIfHasPermission($account, 'edit lapills question entity entities');
 
       case 'delete':
+
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
 
         return AccessResult::allowedIfHasPermission($account, 'delete lapills question entity entities');
     }

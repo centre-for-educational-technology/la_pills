@@ -1,0 +1,241 @@
+<?php
+
+namespace Drupal\la_pills\Form;
+
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\RemoveCommand;
+use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Url;
+use Drupal\la_pills\FetchClass\SessionTemplate;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Class SessionEn.
+ */
+trait SessionEntityQuestionnaireFormTrait {
+
+  /**
+   * Questionnaire
+   *
+   * @var array
+   */
+  protected $questionnaire;
+
+  public static function getNameKey() {
+    return 'la_pills_name';
+  }
+
+  /**
+   * Determines if current user is allowed to answer the questionnaire
+   *
+   * @return boolean
+   */
+  public function canAnswer() {
+    if(!($this->entity->isPublished() && $this->entity->isActive())) {
+      return FALSE;
+    }
+
+    if (!$this->entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * Determines if the name field should be shown. The field is only shown once and the data is stored for later use.
+   *
+   * @return boolean
+   *   TRUE if anonymous and name is required and name is not set, FALSE otherwise
+   */
+  public function showNameField() {
+    if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName() && !\Drupal::request()->getSession()->has(self::getNameKey())) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Returns a name value provided by an anonymous user if one is set.
+   *
+   * @return mixed
+   *   A name if it is set, NULL otherwise
+   */
+  public function getProvidedName() {
+    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has(self::getNameKey())) {
+      return \Drupal::request()->getSession()->get(self::getNameKey());
+    }
+
+    return NULL;
+  }
+
+  // TODO Add a docstring
+  public function addNameFieldToForm(array &$form) {
+    if ($this->showNameField()) {
+      $form['name'] = [
+        '#title' => $this->t('Name'),
+        '#description' => $this->t('Anonymous user is required to provide a name!'),
+        '#placeholder' => $this->t('Your name'),
+        '#required' => TRUE,
+        '#type' => 'textfield',
+        '#wrapper_attributes' => [
+          'class' => ['well'],
+        ],
+      ];
+    } else if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) {
+      $form['user_data'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['la-pills-user-data', 'alert', 'alert-info'],
+          'id' => 'la-pills-user-name',
+        ],
+      ];
+      $form['user_data']['label'] = [
+        '#markup' => '<strong><span class="icon glyphicon glyphicon-user" aria-hidden="true"></span> ' . $this->t('Name provided by you:') . '</strong>',
+      ];
+      $form['user_data']['name'] = [
+        '#markup' => ' <span>' . $this->getProvidedName() . '</span>',
+      ];
+      $form['user_data']['reset_name'] = [
+        '#type' => 'button',
+        '#name' => 'reset_name',
+        '#value' => $this->t('Not your name?'),
+        '#attributes' => [
+          'class' => ['la-pills-name-reset', 'btn', 'btn-xs', 'btn-warning'],
+          'title' => $this->t('Click here to reset the current name! You can enter a new one once that is done.'),
+          'data-toggle' => 'tooltip',
+        ],
+        '#ajax' => [
+          'callback' => [$this, 'resetNameCallback'],
+          'effect' => 'fade',
+        ],
+        '#limit_validation_errors' => [],
+      ];
+    }
+  }
+
+  // TODO Add docstring
+  public function forceStartSession() {
+    if (\Drupal::currentUser()->isAnonymous() && !\Drupal::request()->getSession()) {
+      \Drupal::service('session_manager')->start();
+    }
+  }
+
+  // TODO Add docstring
+  public function createQuestionRenderable(array $question) {
+    $structure = [
+      '#title' => $question['title'],
+      '#required' => ($question['required'] === 'Yes') ? TRUE : FALSE
+    ];
+
+    switch(SessionTemplate::processQuestionType($question['type'])) {
+      case 'short-text':
+      $structure['#type'] = 'textfield';
+      break;
+      case 'long-text':
+      $structure['#type'] = 'textarea';
+      $structure['#rows'] = 5;
+      break;
+      case 'scale':
+      $range = range($question['min'], $question['max']);
+      $structure['#type'] = 'radios';
+      $structure['#options'] = array_combine($range, $range);
+      $structure['#attributes']['class'] = ['scale'];
+      break;
+      case 'multi-choice':
+      $structure['#type'] = 'radios';
+      $structure['#options'] = array_combine($question['options'], $question['options']);
+      break;
+      case 'checkboxes':
+      $structure['#type'] = 'checkboxes';
+      $structure['#options'] = array_combine($question['options'], $question['options']);
+      break;
+    }
+
+    return $structure;
+  }
+
+  /**
+   * Name reset ajax callback. Resets the name if present.
+   */
+  public function resetNameCallback() {
+    $response = new AjaxResponse();
+
+    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has(self::getNameKey())) {
+      $currentURL = Url::fromRoute('<current>');
+
+      \Drupal::request()->getSession()->remove(self::getNameKey());
+
+      $response->addCommand(new RemoveCommand('#la-pills-user-name'));
+      $response->addCommand(new RedirectCommand($currentURL->toString()));
+    }
+
+    return $response;
+  }
+
+  // TODO Add docstring
+  abstract public function getQuestions();
+
+  // TODO Add docstring
+  abstract public function getQuestionnaireUuid();
+
+  // TODO Add docstring
+  public function storeNameValue(FormStateInterface $form_state) {
+    if ($form_state->hasValue('name')) {
+      \Drupal::request()->getSession()->set(self::getNameKey(), $form_state->getValue('name'));
+    }
+  }
+
+  // TODO Add docstring
+  public function storeQuestionnaireAnswers(FormStateInterface $form_state) {
+    $connection = \Drupal::database();
+
+    $values = $form_state->getValues();
+    $records = [];
+
+    foreach ($this->getQuestions() as $question) {
+      $answers = $values[$question['uuid']];
+
+      if (is_array($answers)) {
+        // Remove any unchecked value for 'checkboxes' case
+        foreach($answers as $key => $value) {
+          if ($key !== $value && $value === 0) {
+            unset($answers[$key]);
+          }
+        }
+      }
+
+      if (!is_array($answers)) {
+        $answers = [$answers];
+      }
+
+      foreach($answers as $answer) {
+        // Do not store NULL values into the database. That would only happen
+        // for certain questions types that do not require an answer. Example:
+        // scale, multi-choice, checkboxes
+        if (is_null($answer)) {
+          continue;
+        }
+
+        $records[] = [
+          'session_entity_uuid' => $this->entity->uuid(),
+          'questionnaire_uuid' => $this->getQuestionnaireUuid(),
+          'question_uuid' => $question['uuid'],
+          'session_id' => \Drupal::request()->getSession()->getId(),
+          'form_build_id' => $values['form_build_id'],
+          'user_id' => (\Drupal::currentUser()->isAnonymous()) ? NULL : \Drupal::currentUser()->id(),
+          'name' => (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) ? \Drupal::request()->getSession()->get(self::getNameKey()) : NULL,
+          'answer' => $answer,
+          'created' => REQUEST_TIME,
+        ];
+      }
+    }
+
+    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'user_id', 'name', 'answer', 'created']);
+    foreach ($records as $record) {
+      $query->values($record);
+    }
+    $query->execute();
+  }
+}

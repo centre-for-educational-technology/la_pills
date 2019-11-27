@@ -22,3 +22,17 @@ function hook_la_pills_session_entity_view_alter(array &$content, SessionEntity 
     '#markup' => '<strong>' . $session_entity->getName() . '</strong>',
   ];
 }
+
+/**
+ * Allow template data to be altered.
+ * NB! This would only be called in the contextof download results for Session
+ * Entity questionnaires.
+ *
+ * @param  array         $template
+ *   An array with template data structure
+ * @param  SessionEntity $session_entity
+ *   Session Entity instance
+ */
+function hook_la_pills_session_template_data_alter(array &$template, SessionEntity $session_entity) {
+  $template['title'] = 'New template title';
+}

@@ -306,3 +306,17 @@ function la_pills_timer_la_pills_session_entity_view_alter(array &$content, Sess
     ];
   }
 }
+
+/**
+ * Implements hook_timer_menu_local_tasks_alter().
+ */
+// XXX This is a possible solution to the issue of local_task renderable cache missing the correct cache tags
+/*function la_pills_timer_menu_local_tasks_alter(&$data, $route_name, &$cacheability) {
+    if (strpos($route_name, 'entity.session_entity.') === 0) {
+        $session_entity = \Drupal::request()->get('session_entity');
+
+        if ($session_entity) {
+            $cacheability->addCacheTags($session_entity->getCacheTags());
+        }
+    }
+}*/

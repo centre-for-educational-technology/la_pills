@@ -4,9 +4,9 @@ namespace Drupal\la_pills_quick_feedback;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 
 /**
- * Interface LaPillsQuestionManagerInterface.
+ * Interface LaPillsQuickFeedbackManagerInterface.
  */
-interface LaPillsQuestionManagerInterface {
+interface LaPillsQuickFeedbackManagerInterface {
 
   /**
    * Returns active questions for current user. Uses static cache.
@@ -14,7 +14,7 @@ interface LaPillsQuestionManagerInterface {
    * @return array
    *   An array of question identifiers
    */
-  function getActiveQuestions();
+  function getActiveQuestions($entities = FALSE);
 
   /**
    * Returns count of active questions for current user. Uses getActiveQuestions

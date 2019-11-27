@@ -8,6 +8,10 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\la_pills\Entity\SessionEntityInterface;
+use Drupal\Core\Url;
+use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionnaireEntity;
 
 /**
  * Implements hook_help().
@@ -50,13 +54,9 @@ function la_pills_quick_feedback_theme() {
  *   An array of options
  */
 function _la_pills_quick_feedback_question_type_allowed_values(BaseFieldDefinition $definition, ContentEntityInterface $entity = NULL, $cacheable) {
-  return [
-    'short-text' => t('Short text'),
-    'long-text' => t('Long text'),
-    'scale' => t('Scale'),
-    'multi-choice' => t('Multi-choice'),
-    'checkboxes' => t('Checkboxes'),
-  ];
+  $manager = \Drupal::service('la_pills_quick_feedback.manager');
+
+  return $manager->getQuestionTypes();
 }
 
 /**
@@ -80,4 +80,205 @@ function _la_pills_quick_feedback_icon_allowed_values(BaseFieldDefinition $defin
   }
 
   return $options;
+}
+
+/**
+ * Callback for Session Entity create/edit form being submitted. Would only be
+ * called if it is possible to add quick feedback.
+ *
+ * @param array             $form
+ *   From structure
+ * @param FormStateInterface $form_state
+ *   Form state object
+ */
+function _la_pills_quick_feedback_session_entity_form_submitted(array &$form, FormStateInterface $form_state) : void {
+  $values = $form_state->getValues();
+
+  if (isset($values['enable_quick_feedback']) && $values['enable_quick_feedback']) {
+    $manager = \Drupal::service('la_pills_quick_feedback.manager');
+    $entity = $form_state->getFormObject()->getEntity();
+
+    if ($manager->hasQuickFeedbackQuestionnaire($entity)) {
+      return;
+    }
+
+    $questions = $manager->getActiveQuestions(TRUE);
+
+    if ($questions) {
+      $data = [];
+
+      foreach ($questions as $question) {
+        $data[$question->uuid()] = [
+          'uuid' => $question->uuid(),
+          'type' => $question->getType(),
+          'icon' => $question->getIcon(),
+          'short_name' => $question->getShortName(),
+          'title' => $question->getPrompt(),
+          'description' => $question->getDescription(),
+        ];
+
+        if ($question->getType() === 'scale') {
+          $question_data = $question->getData();
+
+          $data[$question->uuid()]['min'] = $question_data['range']['min'];
+          $data[$question->uuid()]['max'] = $question_data['range']['max'];
+        } else if ($question->getType() === 'multi-choice' || $question->getType() === 'checkboxes') {
+          $question_data = $question->getData();
+
+          $data[$question->uuid()]['options'] = $question_data['options'];
+        }
+      }
+
+      $questionnaire = \Drupal::entityTypeManager()
+        ->getStorage('la_pills_questionnaire_entity')
+        ->create([
+          'name' => '',
+          'session_id' => $entity->id(),
+          'questions' => $data,
+        ]);
+      $questionnaire->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function la_pills_quick_feedback_form_session_entity_form_alter(&$form, FormStateInterface $form_state, $form_id) : void {
+  if (in_array($form_id, ['session_entity_add_form', 'session_entity_edit_form',]) && \Drupal::currentUser()->hasPermission('add lapills question entity entities')) {
+    $manager = \Drupal::service('la_pills_quick_feedback.manager');
+    $entity = $form_state->getFormObject()->getEntity();
+
+    $form['la_pills_quick_feedback'] = [
+      '#type' => 'container',
+      '#weight' => 55,
+      '#attributes' => [
+        'class' => ['well',],
+      ],
+    ];
+
+    if ($entity->id()) {
+      $questionnaire = $manager->getQuickFeedbackQuestionnaire($entity);
+
+      if ($questionnaire) {
+        $form['la_pills_quick_feedback']['explanation'] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'class' => ['alert', 'alert-info',],
+          ],
+        ];
+        $form['la_pills_quick_feedback']['explanation']['text'] = [
+          '#markup' => t('Data gathering session has a quick feedback questionnaire with @count questions attached to it.', [
+            '@count' => $questionnaire->getQuestionCount(),
+          ]),
+        ];
+
+        return;
+      }
+    }
+
+    $questions_count = $manager->getQuestionsCount();
+    $active_questions_count = $manager->getActiveQuestionsCount();
+
+    $form['la_pills_quick_feedback']['explanation'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['alert', 'alert-info',],
+      ],
+    ];
+    $form['la_pills_quick_feedback']['explanation']['text'] = [
+      '#markup' => t('You have @active active quick feedback questions out of @total total questions. Please access <a href=":url" target="_blank">quick feedback configuration page</a> to make changes.', [
+        '@active' => $active_questions_count,
+        '@total' => $questions_count,
+        ':url' => Url::fromRoute('la_pills_quick_feedback.la_pills_quick_feedback_controller_index')->toString(),
+      ]),
+    ];
+    $form['la_pills_quick_feedback']['enable_quick_feedback'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Enable quick feedback'),
+      '#default_value' => $entity->id() ? 0 : 1,
+      '#disabled' => $active_questions_count > 0 ? FALSE : TRUE,
+      '#attributes' => [
+        'title' => t('Create a quick feedback questionnaire based on your currently active questions and use that with current session. Please note that this can no longer be changed.'),
+        'data-toggle' => 'tooltip',
+      ],
+    ];
+
+    $form['actions']['submit']['#submit'][] = '_la_pills_quick_feedback_session_entity_form_submitted';
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete().
+ */
+function la_pills_quick_feedback_session_entity_predelete(SessionEntityInterface $entity) : void {
+  // TODO Make sure that any data about session quick feedbck questionnaire is
+  // removed
+}
+
+/**
+ * Implements hook_la_pills_session_entity_view_alter().
+ */
+function la_pills_quick_feedback_la_pills_session_entity_view_alter(array &$content, SessionEntityInterface $session_entity) : void {
+  $manager = \Drupal::service('la_pills_quick_feedback.manager');
+
+  $questionnaire = $manager->getQuickFeedbackQuestionnaire($session_entity);
+
+  if ($questionnaire) {
+    $content['alerts']['quick_feedback'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['alert', 'alert-info',],
+      ],
+      '#weight' => -4,
+    ];
+
+    if ($session_entity->access('update')) {
+      $content['alerts']['quick_feedback']['text'] = [
+        '#markup' => t('You have selected questions to your students for quick feedback. The questionnaire consists of :count questions and is located <a href=":url" data-questionnaire-uuid=":uuid">here</a>.', [
+          ':url' => Url::fromRoute('la_pills_quick_feedback.session_entity_quick_feedback_form', [
+            'session_entity' => $session_entity->id(),
+          ])->toString(),
+          ':count' => count($questionnaire->getQuestions()),
+          ':uuid' => $questionnaire->uuid(),
+        ]),
+      ];
+    } else {
+      $content['alerts']['quick_feedback']['text'] = [
+        '#markup' => t('When the teacher asks for quick feedback, please provide your answers <a href=":url">here</a>.', [
+          ':url' => Url::fromRoute('la_pills_quick_feedback.session_entity_quick_feedback_form', [
+            'session_entity' => $session_entity->id(),
+          ])->toString(),
+        ]),
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_la_pills_session_template_data_alter().
+ */
+function la_pills_quick_feedback_la_pills_session_template_data_alter(array &$template, SessionEntityInterface $session_entity) : void {
+  $manager = \Drupal::service('la_pills_quick_feedback.manager');
+
+  $questionnaire = $manager->getQuickFeedbackQuestionnaire($session_entity);
+
+  if ($questionnaire) {
+    $types = $manager->getQuestionTypes(FALSE);
+    $questions = $questionnaire->getQuestions();
+
+    array_walk($questions, function(&$question) use ($types) {
+      if (array_key_exists($question['type'], $types)) {
+        $question['type'] = $types[$question['type']];
+      }
+    });
+
+    $template['questionnaires'][$questionnaire->uuid()] = [
+      'title' => t('Quick Feedback'),
+      'questions' => $questions,
+    ];
+    foreach ($questions as $question) {
+      $template['questions'][$question['uuid']] = $question;
+    }
+  }
 }

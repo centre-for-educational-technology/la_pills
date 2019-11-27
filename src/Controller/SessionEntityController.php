@@ -568,7 +568,11 @@ class SessionEntityController extends ControllerBase {
     $template = $session_entity->getSessionTemplateData();
     $salt = $random->string();
 
+    // Allow template data to be changed or extended
+    \Drupal::moduleHandler()->alter('la_pills_session_template_data', $template, $session_entity);
+
     while ($row = $result->fetchObject()) {
+      // XXX This will not be able to handle the Quick Feedback values
       fputcsv($handle, [$session_entity->getName(), $template['questionnaires'][$row->questionnaire_uuid]['title'], $template['questions'][$row->question_uuid]['title'], $template['questions'][$row->question_uuid]['type'], hash('sha256', $row->session_id . $salt), hash('sha256', $row->form_build_id . $salt), $row->user_uuid, $row->name, $row->answer, $row->created,]);
     }
     rewind($handle);

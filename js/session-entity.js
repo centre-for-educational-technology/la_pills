@@ -22,7 +22,7 @@
                 text: value.count,
                 class: 'answers-count',
                 title: title
-              }).css('color', '#fff').css('background-color', $element.css('color')));
+              }).css('color', ($element.css('color') === 'rgb(255, 255, 255)') ? '#000' : '#fff').css('background-color', $element.css('color')));
             });
           }
         })

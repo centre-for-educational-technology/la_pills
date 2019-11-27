@@ -18,3 +18,23 @@ view published lapills question entity entities:
 view unpublished lapills question entity entities:
   title: 'View unpublished LaPills Question Entity entities'
 
+add lapills questionnaire entity entities:
+  title: 'Create new LaPills Questionnaire Entity entities'
+
+administer lapills questionnaire entity entities:
+  title: 'Administer LaPills Questionnaire Entity entities'
+  description: 'Allow to access the administration form to configure LaPills Questionnaire Entity entities.'
+  restrict access: true
+
+delete lapills questionnaire entity entities:
+  title: 'Delete LaPills Questionnaire Entity entities'
+
+edit lapills questionnaire entity entities:
+  title: 'Edit LaPills Questionnaire Entity entities'
+
+view published lapills questionnaire entity entities:
+  title: 'View published LaPills Questionnaire Entity entities'
+
+view unpublished lapills questionnaire entity entities:
+  title: 'View unpublished LaPills Questionnaire Entity entities'
+

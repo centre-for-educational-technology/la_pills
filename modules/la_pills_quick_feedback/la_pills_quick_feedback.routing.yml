@@ -17,3 +17,15 @@ la_pills_quick_feedback.la_pills_quick_feedback_controller_ajaxQuestionActiveIna
         type: entity:la_pills_question_entity
   requirements:
     _entity_access: 'question.update'
+
+la_pills_quick_feedback.session_entity_quick_feedback_form:
+  path: '/admin/structure/session_entity/{session_entity}/quick_feedback'
+  defaults:
+    _form: '\Drupal\la_pills_quick_feedback\Form\SessionEntityQuickFeedbackForm'
+    _title: 'Quick Feedback'
+  options:
+    parameters:
+      session_entity:
+        type: entity:session_entity
+  requirements:
+    _access: 'TRUE'

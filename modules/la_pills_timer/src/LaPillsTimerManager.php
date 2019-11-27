@@ -55,7 +55,7 @@ class LaPillsTimerManager implements LaPillsTimerManagerInterface {
     $query = \Drupal::entityQuery('la_pills_session_timer_entity')
       ->condition('session_id', $entity->id());
 
-    return\Drupal::entityTypeManager()
+    return \Drupal::entityTypeManager()
       ->getStorage('la_pills_session_timer_entity')
       ->loadMultiple($query->execute());
   }

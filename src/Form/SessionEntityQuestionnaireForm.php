@@ -4,30 +4,14 @@ namespace Drupal\la_pills\Form;
 
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\la_pills\FetchClass\SessionTemplate;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Url;
-use Drupal\Core\Ajax\RemoveCommand;
-use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\la_pills\Form\SessionEntityQuestionnaireFormTrait;
 
 /**
  * Class SessionEntityQUestionnaireForm.
  */
 class SessionEntityQuestionnaireForm extends EntityForm {
 
-  /**
-   * Name holder key within a session.
-   *
-   * @var string
-   */
-  const NAME_KEY = 'la_pills_name';
-
-  /**
-   * Questionnaire
-   *
-   * @var array
-   */
-  protected $questionnaire;
+  use SessionEntityQuestionnaireFormTrait;
 
   /**
    * {@inheritdoc}
@@ -36,108 +20,45 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     return 'session_entity_questionnaire_form';
   }
 
-  /**
-   * Determines if current user is allowed to answer the questionnaire
-   *
-   * @return boolean
-   */
-  private function canAnswer() {
-    if(!($this->entity->isPublished() && $this->entity->isActive())) {
-      return FALSE;
-    }
+  // TODO Make sure that this is generally usable
+  public function getQuestionnaire() {
+    $route_match = \Drupal::routeMatch();
 
-    if (!$this->entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
-      return FALSE;
-    }
+    $questionnaire_uuid = $route_match->getParameter('questionnaire_uuid');
 
-    return TRUE;
+    $session_template_data = $this->entity->getSessionTemplateData();
+
+    return $session_template_data['questionnaires'][$questionnaire_uuid] ?? NULL;
   }
 
   /**
-   * Determines if the name field should be shown. The field is only shown once and the data is stored for later use.
-   *
-   * @return boolean
-   *   TRUE if anonymous and name is required and name is not set, FALSE otherwise
+   * {@inheritdoc}
    */
-  private function showNameField() {
-    if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName() && !\Drupal::request()->getSession()->has(self::NAME_KEY)) {
-      return TRUE;
-    }
-
-    return FALSE;
+  public function getQuestions() {
+    return $this->questionnaire['questions'];
   }
 
   /**
-   * Returns a name value provided by an anonymous user if one is set.
-   *
-   * @return mixed
-   *   A name if it is set, NULL otherwise
+   * {@inheritdoc}
    */
-  private function getProvidedName() {
-    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has(self::NAME_KEY)) {
-      return \Drupal::request()->getSession()->get(self::NAME_KEY);
-    }
-
-    return NULL;
+  public function getQuestionnaireUuid() {
+    return $this->questionnaire['uuid'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $route_match = \Drupal::routeMatch();
-    $questionnaire_uuid = $route_match->getParameter('questionnaire_uuid');
+    $questionnaire = $this->getQuestionnaire();
 
-    $session_template_data = $this->entity->getSessionTemplateData();
-
-    if(!isset($session_template_data['questionnaires'][$questionnaire_uuid])) {
+    if(!$questionnaire) {
       \Drupal::messenger()->addMessage($this->t('No such questionnaire found.'), 'warning');
       return [];
     }
 
-    $this->questionnaire = $session_template_data['questionnaires'][$questionnaire_uuid];
+    $this->questionnaire = $questionnaire;
 
-    if ($this->showNameField()) {
-      $form['name'] = [
-        '#title' => $this->t('Name'),
-        '#description' => $this->t('Anonymous user is required to provide a name!'),
-        '#placeholder' => $this->t('Your name'),
-        '#required' => TRUE,
-        '#type' => 'textfield',
-        '#wrapper_attributes' => [
-          'class' => ['well'],
-        ],
-      ];
-    } else if (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) {
-      $form['user_data'] = [
-        '#type' => 'container',
-        '#attributes' => [
-          'class' => ['la-pills-user-data', 'alert', 'alert-info'],
-          'id' => 'la-pills-user-name',
-        ],
-      ];
-      $form['user_data']['label'] = [
-        '#markup' => '<strong><span class="icon glyphicon glyphicon-user" aria-hidden="true"></span> ' . $this->t('Name provided by you:') . '</strong>',
-      ];
-      $form['user_data']['name'] = [
-        '#markup' => ' <span>' . $this->getProvidedName() . '</span>',
-      ];
-      $form['user_data']['reset_name'] = [
-        '#type' => 'button',
-        '#name' => 'reset_name',
-        '#value' => $this->t('Not your name?'),
-        '#attributes' => [
-          'class' => ['la-pills-name-reset', 'btn', 'btn-xs', 'btn-warning'],
-          'title' => $this->t('Click here to reset the current name! You can enter a new one once that is done.'),
-          'data-toggle' => 'tooltip',
-        ],
-        '#ajax' => [
-          'callback' => [$this, 'resetNameCallback'],
-          'effect' => 'fade',
-        ],
-        '#limit_validation_errors' => [],
-      ];
-    }
+    $this->addNameFieldToForm($form);
 
     $form['questionnaire']['title'] = [
       '#markup' => '<h2>' . $this->questionnaire['title'] . '</h2>',
@@ -161,37 +82,8 @@ class SessionEntityQuestionnaireForm extends EntityForm {
       ],
     ];
 
-    foreach ($this->questionnaire['questions'] as $question) {
-      $structure = [
-        '#title' => $question['title'],
-        '#required' => ($question['required'] === 'Yes') ? TRUE : FALSE
-      ];
-
-      switch(SessionTemplate::processQuestionType($question['type'])) {
-        case 'short-text':
-        $structure['#type'] = 'textfield';
-        break;
-        case 'long-text':
-        $structure['#type'] = 'textarea';
-        $structure['#rows'] = 5;
-        break;
-        case 'scale':
-        $range = range($question['min'], $question['max']);
-        $structure['#type'] = 'radios';
-        $structure['#options'] = array_combine($range, $range);
-        $structure['#attributes']['class'] = ['scale'];
-        break;
-        case 'multi-choice':
-        $structure['#type'] = 'radios';
-        $structure['#options'] = array_combine($question['options'], $question['options']);
-        break;
-        case 'checkboxes':
-        $structure['#type'] = 'checkboxes';
-        $structure['#options'] = array_combine($question['options'], $question['options']);
-        break;
-      }
-
-      $form['questions'][$question['uuid']] = $structure;
+    foreach ($this->getQuestions() as $question) {
+      $form['questions'][$question['uuid']] = $this->createQuestionRenderable($question);
     }
 
     $form['submit'] = [
@@ -230,75 +122,13 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     }
 
     // Make sure the session exists in case of an anonymous user
-    if (\Drupal::currentUser()->isAnonymous() && !\Drupal::request()->getSession()) {
-      \Drupal::service('session_manager')->start();
-    }
+    $this->forceStartSession();
 
-    $connection = \Drupal::database();
+    $this->storeNameValue($form_state);
 
-    $values = $form_state->getValues();
-    $records = [];
-
-    if (isset($values['name'])) {
-      \Drupal::request()->getSession()->set(self::NAME_KEY, $values['name']);
-    }
-
-    foreach ($this->questionnaire['questions'] as $question) {
-      $answers = $values[$question['uuid']];
-
-      if (is_array($answers)) {
-        // Remove any unchecked value for 'checkboxes' case
-        foreach($answers as $key => $value) {
-          if ($key !== $value && $value === 0) {
-            unset($answers[$key]);
-          }
-        }
-      }
-
-      if (!is_array($answers)) {
-        $answers = [$answers];
-      }
-
-      foreach($answers as $answer) {
-        $records[] = [
-          'session_entity_uuid' => $this->entity->uuid(),
-          'questionnaire_uuid' => $this->questionnaire['uuid'],
-          'question_uuid' => $question['uuid'],
-          'session_id' => \Drupal::request()->getSession()->getId(),
-          'form_build_id' => $values['form_build_id'],
-          'user_id' => (\Drupal::currentUser()->isAnonymous()) ? NULL : \Drupal::currentUser()->id(),
-          'name' => (\Drupal::currentUser()->isAnonymous() && $this->entity->getRequireName()) ? \Drupal::request()->getSession()->get(self::NAME_KEY) : NULL,
-          'answer' => $answer,
-          'created' => REQUEST_TIME,
-        ];
-      }
-    }
-
-    $query = $connection->insert('session_questionnaire_answer')->fields(['session_entity_uuid', 'questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'user_id', 'name', 'answer', 'created']);
-    foreach ($records as $record) {
-      $query->values($record);
-    }
-    $query->execute();
+    $this->storeQuestionnaireAnswers($form_state);
 
     \Drupal::messenger()->addMessage($this->t('Thanks you for responding to this questionnaire. Please proceed to the <a href="@link">session page</a>.', ['@link' => $this->entity->toUrl('canonical', ['absolute' => TRUE,])->toString()]));
-  }
-
-  /**
-   * Name reset ajax callback. Resets the name if present.
-   */
-  public function resetNameCallback() {
-    $response = new AjaxResponse();
-
-    if (\Drupal::currentUser()->isAnonymous() && \Drupal::request()->getSession()->has(self::NAME_KEY)) {
-      $currentURL = Url::fromRoute('<current>');
-
-      \Drupal::request()->getSession()->remove(self::NAME_KEY);
-
-      $response->addCommand(new RemoveCommand('#la-pills-user-name'));
-      $response->addCommand(new RedirectCommand($currentURL->toString()));
-    }
-
-    return $response;
   }
 
 }
