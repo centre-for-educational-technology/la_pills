@@ -2,6 +2,7 @@
 
 namespace Drupal\la_pills_quick_feedback;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
+use Drupal\la_pills\Entity\SessionEntityInterface;
 
 /**
  * Interface LaPillsQuickFeedbackManagerInterface.
