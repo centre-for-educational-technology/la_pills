@@ -261,6 +261,7 @@ function la_pills_quick_feedback_la_pills_session_template_data_alter(array &$te
     });
 
     $template['questionnaires'][$questionnaire->uuid()] = [
+      'uuid' => $questionnaire->uuid(),
       'title' => t('Quick Feedback'),
       'questions' => $questions,
     ];
