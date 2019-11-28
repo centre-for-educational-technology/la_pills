@@ -371,6 +371,10 @@ class SessionEntityController extends ControllerBase {
     $template = $session_entity->getSessionTemplate();
     $structure = $template->getData();
 
+    // Allow template data to be changed or extended
+    // XXX This is most probably a temporary measure time_sleep_until correct visuals are decided upon
+    \Drupal::moduleHandler()->alter('la_pills_session_template_data', $structure, $session_entity);
+
     if ($template && $template->hasExternalDashboard()) {
       $customDashoard = $this->respondWithCustomDashboard($session_entity, $structure);
 
@@ -477,6 +481,8 @@ class SessionEntityController extends ControllerBase {
     }
 
     $response['#attached']['drupalSettings']['laPillsSessionEntityDashboardData'] = $jsData;
+
+    \Drupal::moduleHandler()->alter('la_pills_session_template_dashboard_view', $response, $session_entity);
 
     return $response;
   }

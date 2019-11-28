@@ -36,3 +36,18 @@ function hook_la_pills_session_entity_view_alter(array &$content, SessionEntity 
 function hook_la_pills_session_template_data_alter(array &$template, SessionEntity $session_entity) {
   $template['title'] = 'New template title';
 }
+
+/**
+ * Allow Session Template dashboard view to be altered.
+ *
+ * @param  array         $response
+ *   An array with page renderable
+ * @param  SessionEntity $session_entity
+ *   Session Entity instance
+ */
+function hook_la_pills_session_template_dashboard_view_alter(array &$response, SessionEntity $session_entity) {
+  $additional_content['strong'] = [
+    '#type' => 'markup',
+    '#markup' => '<strong>' . $session_entity->getName() . '</strong>',
+  ];
+}

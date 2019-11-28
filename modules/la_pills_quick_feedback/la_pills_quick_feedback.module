@@ -270,3 +270,36 @@ function la_pills_quick_feedback_la_pills_session_template_data_alter(array &$te
     }
   }
 }
+
+/**
+ * Implements hook_la_pills_session_template_dashboard_view_alter().
+ */
+function la_pills_quick_feedback_la_pills_session_template_dashboard_view_alter(array &$response, SessionEntityInterface $session_entity) : void {
+  $manager = \Drupal::service('la_pills_quick_feedback.manager');
+
+  $questionnaire = $manager->getQuickFeedbackQuestionnaire($session_entity);
+
+  if ($questionnaire) {
+    if (isset($response[$questionnaire->uuid()])) {
+      if (!$session_entity->access('update')) {
+        $response[$questionnaire->uuid()]['#access'] = FALSE;
+      }
+
+      $response[$questionnaire->uuid()]['#attributes']['class'][] = 'quick-feedback';
+      $response[$questionnaire->uuid()]['#attributes']['class'][] = 'well';
+
+      $response[$questionnaire->uuid()]['heading']['#value'] = explode(' ', $response[$questionnaire->uuid()]['heading']['#value'], 2)[1];
+
+      foreach($questionnaire->getQuestions() as $question) {
+        $tmp = $response[$questionnaire->uuid()][$question['uuid']]['heading']['#value'];
+        $tmp = explode('.', $tmp, 2)[1];
+        $tmp = substr_replace($tmp, '. ', strpos($tmp, ' '), 1);
+        $response[$questionnaire->uuid()][$question['uuid']]['heading']['#value'] = $tmp;
+      }
+    }
+
+    if (!$session_entity->access('update') && isset($response['#attached']['drupalSettings']['laPillsSessionEntityDashboardData'][$questionnaire->uuid()])) {
+      unset($response['#attached']['drupalSettings']['laPillsSessionEntityDashboardData'][$questionnaire->uuid()]);
+    }
+  }
+}
