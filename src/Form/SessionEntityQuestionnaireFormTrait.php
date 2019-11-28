@@ -21,6 +21,12 @@ trait SessionEntityQuestionnaireFormTrait {
    */
   protected $questionnaire;
 
+  /**
+   * Returns ananymous user name key stored within current session.
+   *
+   * @return string
+   *   Name key.
+   */
   public static function getNameKey() {
     return 'la_pills_name';
   }
@@ -70,7 +76,13 @@ trait SessionEntityQuestionnaireFormTrait {
     return NULL;
   }
 
-  // TODO Add a docstring
+  /**
+   * Adds name filed to a form in case Session Entity has name required. Only
+   * affects anonymous users.
+   *
+   * @param array $form
+   *   Form renderable structure.
+   */
   public function addNameFieldToForm(array &$form) {
     if ($this->showNameField()) {
       $form['name'] = [
@@ -115,14 +127,26 @@ trait SessionEntityQuestionnaireFormTrait {
     }
   }
 
-  // TODO Add docstring
+  /**
+   * Starts a session if one does not yet exist in for anonymous users.
+   *
+   * @return void
+   */
   public function forceStartSession() {
     if (\Drupal::currentUser()->isAnonymous() && !\Drupal::request()->getSession()) {
       \Drupal::service('session_manager')->start();
     }
   }
 
-  // TODO Add docstring
+  /**
+   * Creates a question renderable structure.
+   *
+   * @param  array  $question
+   *   Question data, should have the smae strcuture as the one in templates.
+   *
+   * @return array
+   *   Renderable structure for a question.
+   */
   public static function createQuestionRenderable(array $question) {
     $structure = [
       '#title' => $question['title'],
@@ -174,20 +198,44 @@ trait SessionEntityQuestionnaireFormTrait {
     return $response;
   }
 
-  // TODO Add docstring
+  /**
+   * Returns questions of a current questionnaire.
+   *
+   * @return array
+   *   Questions of current questionnaire.
+   */
   abstract public function getQuestions();
 
-  // TODO Add docstring
+  /**
+   * Returns questionnaire UUID identifier.
+   *
+   * @return string
+   *   Questionnaire UUID.
+   */
   abstract public function getQuestionnaireUuid();
 
-  // TODO Add docstring
+  /**
+   * Stores name if one has been provided.
+   *
+   * @param  Drupal\Core\Form\FormStateInterface $form_state
+   *   FromState object.
+   *
+   * @return void
+   */
   public function storeNameValue(FormStateInterface $form_state) {
     if ($form_state->hasValue('name')) {
       \Drupal::request()->getSession()->set(self::getNameKey(), $form_state->getValue('name'));
     }
   }
 
-  // TODO Add docstring
+  /**
+   * Store questionnaire answers in the database.
+   *
+   * @param  Drupal\Core\Form\FormStateInterface $form_state
+   *   FormState object.
+   *
+   * @return void
+   */
   public function storeQuestionnaireAnswers(FormStateInterface $form_state) {
     $connection = \Drupal::database();
 

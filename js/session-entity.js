@@ -23,6 +23,12 @@
                 class: 'answers-count',
                 title: title
               }).css('color', ($element.css('color') === 'rgb(255, 255, 255)') ? '#000' : '#fff').css('background-color', $element.css('color')));
+
+              if ($.fn.tooltip) {
+                $element.find('span.answers-count')
+                  .data('toggle', 'tooltip')
+                  .tooltip();
+              }
             });
           }
         })

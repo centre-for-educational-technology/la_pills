@@ -20,7 +20,12 @@ class SessionEntityQuestionnaireForm extends EntityForm {
     return 'session_entity_questionnaire_form';
   }
 
-  // TODO Make sure that this is generally usable
+  /**
+   * Returns questionnaire object for current form, if one exists.
+   *
+   * @return mixed
+   *   Array with questionnaire data or NULL.
+   */
   public function getQuestionnaire() {
     $route_match = \Drupal::routeMatch();
 

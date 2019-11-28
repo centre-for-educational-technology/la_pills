@@ -196,7 +196,7 @@ function la_pills_quick_feedback_form_session_entity_form_alter(&$form, FormStat
 function la_pills_quick_feedback_session_entity_predelete(SessionEntityInterface $entity) : void {
   $manager = \Drupal::service('la_pills_quick_feedback.manager');
 
-  $questionnaire = $manager->getQuickFeedbackQuestionnaire($session_entity);
+  $questionnaire = $manager->getQuickFeedbackQuestionnaire($entity);
 
   if ($questionnaire) {
     $questionnaire->delete();

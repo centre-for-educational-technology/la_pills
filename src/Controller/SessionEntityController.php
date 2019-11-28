@@ -368,10 +368,10 @@ class SessionEntityController extends ControllerBase {
    *   Content structure
    */
   public function dashboard(SessionEntity $session_entity, Request $request) {
-    $structure = $session_entity->getSessionTemplateData();
+    $template = $session_entity->getSessionTemplate();
+    $structure = $template->getData();
 
-    // TODO See if we could use the hasExternalDashoard() metod of SessionTemplate class
-    if (isset($structure['dashboard']) && isset($structure['dashboard']['url']) && $structure['dashboard']['url']) {
+    if ($template && $template->hasExternalDashboard()) {
       $customDashoard = $this->respondWithCustomDashboard($session_entity, $structure);
 
       $showDefaltDashBoard = $request->get('show-default-dashboard') === 'true';
@@ -572,7 +572,6 @@ class SessionEntityController extends ControllerBase {
     \Drupal::moduleHandler()->alter('la_pills_session_template_data', $template, $session_entity);
 
     while ($row = $result->fetchObject()) {
-      // XXX This will not be able to handle the Quick Feedback values
       fputcsv($handle, [$session_entity->getName(), $template['questionnaires'][$row->questionnaire_uuid]['title'], $template['questions'][$row->question_uuid]['title'], $template['questions'][$row->question_uuid]['type'], hash('sha256', $row->session_id . $salt), hash('sha256', $row->form_build_id . $salt), $row->user_uuid, $row->name, $row->answer, $row->created,]);
     }
     rewind($handle);

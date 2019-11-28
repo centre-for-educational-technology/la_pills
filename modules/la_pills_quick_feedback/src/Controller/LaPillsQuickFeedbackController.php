@@ -94,7 +94,9 @@ class LaPillsQuickFeedbackController extends ControllerBase {
       ->getStorage('la_pills_question_entity')
       ->loadMultiple($ids);
 
-    $data['add'] = Link::createFromRoute(Markup::create('<i class="fas fa-plus"></i>'),'entity.la_pills_question_entity.add_form', [], $create_link_options)->toRenderable();
+    if ($this->currentUser->hasPermission('add lapills question entity entities')) {
+      $data['add'] = Link::createFromRoute(Markup::create('<i class="fas fa-plus"></i>'),'entity.la_pills_question_entity.add_form', [], $create_link_options)->toRenderable();
+    }
 
     $data['questions'] = [
       '#type' => 'table',
