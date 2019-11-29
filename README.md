@@ -70,8 +70,9 @@ to the teacher.
   - Install module and configure permissions
   - Currently recommended permissions are (TEACHER is an example role that would
     be creating content)
-    - Create new Question and Questionnaire entities - TEACHER USER
-    - View published Question entities - TEACHER USER
+    - Create new LaPills Question Entity entities - TEACHER USER
+    - Create new LaPills Questionnaire Entity entities - TEACHER USER
+    - View published LaPills Question Entity entities - TEACHER USER
   - Make sure that required libraries are installed in
   `DRUPAL_WEB_ROOT/libraries`. Use `la_pills_quick_feedback.libraries.yml` as a
   source for information
