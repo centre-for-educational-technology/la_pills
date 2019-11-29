@@ -58,6 +58,20 @@ owner could use those for the activity tracking effort.
     - Create new Timer and Timer sessions - TEACHER USER
     - View active Timer and Timer sessions - TEACHER USER
     - View inactive Timer and Timer sessions - TEACHER USER
+* LA Pills Quick Feedback - a module that provides quick feedback functionality
+to data gathering sessions. A user with sufficient permissions could create
+questions and mark them as active. Active ones can be used to construct a Quick
+Feedback questionnaire for an existing session, making copies of question data.
+This newly added questionnaire has all the questions marked as optional and
+behaves in a similar manner to others. Quick Feedback questionnaire replies are
+available for download along with the rest of the data. Dashboard would also
+show a visualisation for it (similar to others), yet it would only be displayed
+to the teacher.
+  - Install module and configure permissions
+  - Currently recommended permissions are (TEACHER is an example role that would
+    be creating content)
+    - Create new Question and Questionnaire entities - TEACHER USER
+    - View published Question entities - TEACHER USER
 
 ## Themes
 
