@@ -72,6 +72,11 @@ to the teacher.
     be creating content)
     - Create new Question and Questionnaire entities - TEACHER USER
     - View published Question entities - TEACHER USER
+  - Make sure that required libraries are installed in
+  `DRUPAL_WEB_ROOT/libraries`. Use `la_pills_quick_feedback.libraries.yml` as a
+  source for information
+    - [Font Awesome](https://fontawesome.com/) in `libraries/fontawesome`, only
+    minified versions of JS and CSS + assets are really required
 
 ## Themes
 
