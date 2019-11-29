@@ -28,4 +28,4 @@ la_pills_quick_feedback.session_entity_quick_feedback_form:
       session_entity:
         type: entity:session_entity
   requirements:
-    _access: 'TRUE'
+    _entity_access: 'session_entity.view'

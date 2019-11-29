@@ -133,7 +133,11 @@ class SessionEntityQuestionnaireForm extends EntityForm {
 
     $this->storeQuestionnaireAnswers($form_state);
 
-    \Drupal::messenger()->addMessage($this->t('Thanks you for responding to this questionnaire. Please proceed to the <a href="@link">session page</a>.', ['@link' => $this->entity->toUrl('canonical', ['absolute' => TRUE,])->toString()]));
+    \Drupal::messenger()->addMessage($this->t('Thank you for responding to <strong>%questionnaire</strong> questionnaire.', [
+      '%questionnaire' => $this->questionnaire['title'],
+    ]));
+
+    $form_state->setRedirect('entity.session_entity.canonical', ['session_entity' => $this->entity->id()]);
   }
 
 }
