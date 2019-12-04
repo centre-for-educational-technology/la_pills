@@ -303,3 +303,10 @@ function la_pills_quick_feedback_la_pills_session_template_dashboard_view_alter(
     }
   }
 }
+
+/**
+ * Imlements hook_la_pills_session_entity_protected_routes_alter().
+ */
+function la_pills_quick_feedback_la_pills_session_entity_protected_routes_alter(array &$routes) : void {
+  $routes[] = 'la_pills_quick_feedback.session_entity_quick_feedback_form';
+}

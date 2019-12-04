@@ -63,6 +63,8 @@ class SessionEntityEventSubscriber implements EventSubscriberInterface {
    */
   public function onRequest(Event $event) {
     $routes = ['entity.session_entity.canonical', 'entity.session_entity.dashboard', 'entity.session_entity.questionnaire'];
+    \Drupal::moduleHandler()->alter('la_pills_session_entity_protected_routes', $routes);
+
     $request = $event->getRequest();
 
     if ($this->currentUser->isAnonymous() && in_array($request->attributes->get('_route'), $routes)) {

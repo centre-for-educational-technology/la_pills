@@ -51,3 +51,14 @@ function hook_la_pills_session_template_dashboard_view_alter(array &$response, S
     '#markup' => '<strong>' . $session_entity->getName() . '</strong>',
   ];
 }
+
+/**
+ * Allow routes list that have SessionEntityEventSubscriber logic activated for
+ * to be extended.
+ *
+ * @param  array  $routes
+ *   A reference to routes array
+ */
+function hook_la_pills_session_entity_protected_routes_alter(array &$routes) {
+    $routes[] = 'entity.session_entity.additional_route';
+}
