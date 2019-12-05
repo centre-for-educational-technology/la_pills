@@ -212,7 +212,7 @@ class SessionEntityController extends ControllerBase {
     ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
     ->condition('sqa.question_uuid', $question_uuids, 'IN')
     ->groupBy('sqa.questionnaire_uuid, sqa.question_uuid, sqa.answer');
-    $query->addExpression('COUNT(sqa.answer)', 'count');
+    $query->addExpression('COUNT(IFNULL(sqa.answer, 1))', 'count');
 
     if ($from && $until) {
       $query->condition('sqa.created', $from, '>=');
@@ -467,6 +467,7 @@ class SessionEntityController extends ControllerBase {
         } else if ($this->isGraphableQuestionType($question_type)) {
           $options = ($question_type !== 'scale') ? $question['options'] : range($question['min'], $question['max'], 1);
           $counts = (isset($all_graphable_counts[$questionnaire['uuid']][$question['uuid']])) ? $all_graphable_counts[$questionnaire['uuid']][$question['uuid']] : [];
+          // This removes NULL key from counts as it uses options as basis
           $this->addMissingOptionsToCounts($counts, $options);
 
           $jsData[$questionnaire['uuid']][$question['uuid']] = [
@@ -476,6 +477,17 @@ class SessionEntityController extends ControllerBase {
             'counts' => $counts,
             'title' => $question['title'],
           ];
+
+          if (isset($all_graphable_counts[$questionnaire['uuid']][$question['uuid']][NULL])) {
+            $response[$questionnaire['uuid']][$question['uuid']]['nulls'] = [
+              '#type' => 'html_tag',
+              '#tag' => 'div',
+              '#value' => $this->t('Empty answers: @count', ['@count' => $all_graphable_counts[$questionnaire['uuid']][$question['uuid']][NULL] ?? 0,]),
+              '#attributes' => [
+                'class' => ['text-muted'],
+              ],
+            ];
+          }
         }
       }
     }

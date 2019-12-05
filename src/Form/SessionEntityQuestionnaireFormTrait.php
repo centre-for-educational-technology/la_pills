@@ -256,16 +256,12 @@ trait SessionEntityQuestionnaireFormTrait {
 
       if (!is_array($answers)) {
         $answers = [$answers];
+      } else if (is_array($answers) && empty($answers)) {
+        // Add NULL value for 'checkboxes' case
+        $answers[] = NULL;
       }
 
       foreach($answers as $answer) {
-        // Do not store NULL values into the database. That would only happen
-        // for certain questions types that do not require an answer. Example:
-        // scale, multi-choice, checkboxes
-        if (is_null($answer)) {
-          continue;
-        }
-
         $records[] = [
           'session_entity_uuid' => $this->entity->uuid(),
           'questionnaire_uuid' => $this->getQuestionnaireUuid(),

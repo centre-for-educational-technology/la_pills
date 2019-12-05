@@ -105,7 +105,7 @@ function la_pills_schema() {
         'description' => 'Answer provided.',
         'type' => 'text',
         'size' => 'medium',
-        'not null' => TRUE,
+        'not null' => FALSE,
       ],
       'created' => [
         'description' => 'Creation time unix timestamp.',
@@ -291,4 +291,19 @@ function la_pills_update_8004() {
     ->installFieldStorageDefinition('require_name', 'session_entity', 'la_pills', $require_name);
   $update_manager
     ->applyUpdates();
+}
+
+/**
+ * Sets answer column on session_questionnaire_answer to allow NULL values.
+ */
+function la_pills_update_8005() {
+  $spec = [
+    'description' => 'Answer provided.',
+    'type' => 'text',
+    'size' => 'medium',
+    'not null' => FALSE,
+  ];
+
+  $connection = \Drupal::service('database');
+  $connection->schema()->changeField('session_questionnaire_answer', 'answer', 'answer', $spec);
 }
