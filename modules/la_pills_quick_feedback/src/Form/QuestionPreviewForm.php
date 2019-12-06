@@ -40,16 +40,6 @@ class QuestionPreviewForm extends FormBase {
 
     $form['preview']['question'] = SessionEntityQuestionnaireFormTrait::createQuestionRenderable($tmp);
 
-    if (!empty($question->getDescription())) {
-      $form['preview']['description'] = [
-        '#type' => 'container',
-        '#attributes' => [
-          'class' => ['well', 'questionnaire-description'],
-        ],
-        '#plain_text' => $question->getDescription(),
-      ];
-    }
-
     return $form;
   }
 

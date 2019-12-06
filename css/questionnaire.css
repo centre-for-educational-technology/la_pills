@@ -29,7 +29,12 @@
   margin-left: 2em;
 }
 
-.questionnaire-description {
+.questionnaire-description, .question-description {
   white-space: pre-wrap;
   font-size: 115%;
+}
+
+.questionnaire-question .question {
+  font-size: 150%;
+  font-weight: 500;
 }

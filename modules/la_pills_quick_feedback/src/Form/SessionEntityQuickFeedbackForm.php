@@ -113,19 +113,9 @@ class SessionEntityQuickFeedbackForm extends FormBase {
 
     foreach ($this->getQuestions() as $question) {
       $question['required'] = 'No';
+      $question['title'] = '<i class="' . $question['icon'] . '"></i> ' . $question['title'];
 
       $form['questions'][$question['uuid']] = $this->createQuestionRenderable($question);
-      $form['questions'][$question['uuid']]['#title'] = '<i class="' . $question['icon'] . '"></i> ' . $form['questions'][$question['uuid']]['#title'];
-
-      if (!empty($question['description'])) {
-        $form['questions'][$question['uuid'] . '-description'] = [
-          '#type' => 'container',
-          '#attributes' => [
-            'class' => ['well', 'questionnaire-description'],
-          ],
-          '#plain_text' => $question['description'],
-        ];
-      }
     }
 
     $form['submit'] = [

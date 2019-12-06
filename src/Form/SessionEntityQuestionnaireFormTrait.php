@@ -148,32 +148,57 @@ trait SessionEntityQuestionnaireFormTrait {
    *   Renderable structure for a question.
    */
   public static function createQuestionRenderable(array $question) {
+    $uuid = $question['uuid'];
+
     $structure = [
-      '#title' => $question['title'],
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['questionnaire-question',],
+      ],
+    ];
+    $structure['question'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'label',
+      '#value' => $question['title'],
+      '#attributes' => [
+        'class' => ['question'],
+      ],
+    ];
+    if (isset($question['description']) && $question['description']) {
+      $structure['description'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#plain_text' => $question['description'],
+        '#attributes' => [
+          'class' => ['well', 'question-description',],
+        ],
+      ];
+    }
+    $structure[$uuid] = [
       '#required' => ($question['required'] === 'Yes') ? TRUE : FALSE
     ];
 
     switch(SessionTemplate::processQuestionType($question['type'])) {
       case 'short-text':
-      $structure['#type'] = 'textfield';
+      $structure[$uuid]['#type'] = 'textfield';
       break;
       case 'long-text':
-      $structure['#type'] = 'textarea';
-      $structure['#rows'] = 5;
+      $structure[$uuid]['#type'] = 'textarea';
+      $structure[$uuid]['#rows'] = 5;
       break;
       case 'scale':
       $range = range($question['min'], $question['max']);
-      $structure['#type'] = 'radios';
-      $structure['#options'] = array_combine($range, $range);
-      $structure['#attributes']['class'] = ['scale'];
+      $structure[$uuid]['#type'] = 'radios';
+      $structure[$uuid]['#options'] = array_combine($range, $range);
+      $structure[$uuid]['#attributes']['class'] = ['scale'];
       break;
       case 'multi-choice':
-      $structure['#type'] = 'radios';
-      $structure['#options'] = array_combine($question['options'], $question['options']);
+      $structure[$uuid]['#type'] = 'radios';
+      $structure[$uuid]['#options'] = array_combine($question['options'], $question['options']);
       break;
       case 'checkboxes':
-      $structure['#type'] = 'checkboxes';
-      $structure['#options'] = array_combine($question['options'], $question['options']);
+      $structure[$uuid]['#type'] = 'checkboxes';
+      $structure[$uuid]['#options'] = array_combine($question['options'], $question['options']);
       break;
     }
 
