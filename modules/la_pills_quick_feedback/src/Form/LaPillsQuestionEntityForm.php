@@ -146,6 +146,12 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
       if (isset($form['actions']['delete'])) {
         $form['actions']['delete']['#access'] = FALSE;
       }
+
+      if ($this->entity->isNew()) {
+        $form['#title'] = $this->t('Create new Quick Feedback item');
+      } else {
+        $form['#title'] = $this->t('Edit Quick Feedback item');
+      }
     }
 
     if (!$this->entity->isNew()) {

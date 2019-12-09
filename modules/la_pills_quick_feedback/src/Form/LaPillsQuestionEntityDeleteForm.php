@@ -73,6 +73,7 @@ class LaPillsQuestionEntityDeleteForm extends ContentEntityDeleteForm {
         ],
         '#weight' => 10,
       ];
+      $form['#title'] = $this->t('Remove Quick Feedback item');
     }
 
     return $form;
