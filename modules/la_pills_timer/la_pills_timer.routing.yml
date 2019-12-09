@@ -85,3 +85,14 @@ la_pills_timer.la_pills_timer_controller_sessionEntityTimers:
         type: entity:session_entity
   requirements:
     _custom_access: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionEntityTimersAccess'
+
+la_pills_timer.la_pills_timer_controller_ajaxTimerActiveInactive:
+  path: '/timers/ajax/{timer}/active-inactive'
+  defaults:
+    _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::ajaxTimerActiveInactive'
+  options:
+    parameters:
+      timer:
+        type: entity:la_pills_timer_entity
+  requirements:
+    _entity_access: 'timer.update'

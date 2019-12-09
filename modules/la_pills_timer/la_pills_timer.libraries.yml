@@ -10,3 +10,10 @@ main:
     #js/la_pills_timer_beforeunload.js: {}
   dependencies:
     - core/drupal.ajax
+timer_active_inactive:
+  version: 1.x
+  js:
+    js/timer_active_inactive.js: {}
+  dependencies:
+    - core/drupal.ajax
+    - core/drupalSettings

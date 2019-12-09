@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Drupal\la_pills\Entity\SessionEntity;
 use Drupal\Core\Ajax\AlertCommand;
 use Drupal\la_pills_timer\Entity\LaPillsTimerEntity;
+use Drupal\la_pills_timer\Entity\LaPillsTimerEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\la_pills_timer\Entity\LaPillsSessionTimerEntity;
@@ -377,6 +378,66 @@ class LaPillsTimerController extends ControllerBase {
     }
 
     return AccessResult::forbidden();
+  }
+
+  /**
+   * Returns renderable for active or inactive checkbox.
+   *
+   * @param  LaPillsTimerEntityInterface $timer
+   *   Timer entity
+   * @return array
+   *   An array with renderable structure
+   */
+  public static function activeRenderable(LaPillsTimerEntityInterface $timer) {
+    $renderable = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'timer-' . $timer->id() . '-active-inactive-wrapper',
+      ],
+    ];
+    $renderable['active'] = [
+      '#type' => 'checkbox',
+      '#checked' => $timer->getStatus() ? TRUE : FALSE,
+      '#attributes' => [
+        'title' => t('Mark timer as active'),
+        'data-toggle' => 'tooltip',
+        'class' => ['timer-active-inactive'],
+        'data-id' => $timer->id(),
+      ],
+    ];
+
+    return $renderable;
+  }
+
+  /**
+   * AJAX callback to make a timer active or inactive.
+   *
+   * @param  LaPillsTimerEntityInterface $timer
+   *   Timer entity
+   * @return AjaxResponse
+   *   AjaxRespone with actions
+   */
+  public function ajaxTimerActiveInactive(LaPillsTimerEntityInterface $timer) {
+    $response = new AjaxResponse();
+
+    if ($timer->getStatus()) {
+      $timer->set('status', FALSE);
+    } else {
+      $timer->set('status', TRUE);
+    }
+
+    $timer->save();
+
+    $renderable = $this->activeRenderable($timer);
+
+    $response->addCommand(
+      new ReplaceCommand(
+        '#timer-' . $timer->id() . '-active-inactive-wrapper',
+        render($renderable)
+      )
+    );
+
+    return $response;
   }
 
 }

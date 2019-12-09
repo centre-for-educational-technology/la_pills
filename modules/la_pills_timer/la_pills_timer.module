@@ -4,6 +4,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\la_pills\Entity\SessionEntityInterface;
+use Drupal\la_pills_timer\Controller\LaPillsTimerController;
 
 /**
  * Implements hook_theme().
@@ -62,15 +63,7 @@ function template_preprocess_la_pills_timer_elements(&$variables) : void {
 
         $remove_link = Link::createFromRoute(t('Remove'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $remove_link_options);
         $edit_link = Link::createFromRoute(t('Edit'),'la_pills_timer.la_pills_timer_controller_editTimer', $parameters, $options);
-        $change_status = [
-          '#type' => 'checkbox',
-          '#attributes' => [
-            'title' => t('Mark timer as active'),
-            'data-toggle' => 'tooltip',
-            'checked' => $entity->getStatus() ? TRUE : FALSE,
-            'disabled' => 'disabled',
-          ],
-        ];
+        $change_status = LaPillsTimerController::activeRenderable($entity);
 
         $timer_color = [
           '#type' => 'html_tag',
