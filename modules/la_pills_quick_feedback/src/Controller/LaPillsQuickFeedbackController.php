@@ -115,7 +115,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
       '#attached' => [
         'library' => [
           'la_pills_quick_feedback/question_active_inactive',
-          'la_pills_quick_feedback/fontawesome',
+          'la_pills/fontawesome',
         ],
       ],
     ];

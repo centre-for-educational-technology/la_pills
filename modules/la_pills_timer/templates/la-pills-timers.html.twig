@@ -1,15 +1,16 @@
 {{ attach_library('la_pills_timer/main') }}
 {{ attach_library('la_pills_timer/timer_active_inactive') }}
+{{ attach_library('la_pills/fontawesome') }}
 <div class="container-fluid">
   <div class="row">
     <div class="col-sm-9">
-
+      {{ new_timer }}
     </div>
-    <div class="col-sm-1">
+    <div class="col-sm-1 text-center">
       <strong>{{ 'Active'|t }}</strong>
     </div>
-    <div class="col-sm-2">
-      {{ new_timer }}
+    <div class="col-sm-2 text-center">
+      <strong>{{ 'Actions'|t }}</strong>
     </div>
   </div>
   <div class="groups">

@@ -105,7 +105,7 @@ class SessionEntityQuickFeedbackForm extends FormBase {
     $form['questions'] = [
       '#attached' => [
         'library' => [
-          'la_pills_quick_feedback/fontawesome',
+          'la_pills/fontawesome',
           'la_pills/questionnaire',
         ],
       ],

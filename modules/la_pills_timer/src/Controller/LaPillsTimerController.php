@@ -20,6 +20,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\la_pills_timer\Entity\LaPillsSessionTimerEntity;
 use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Render\Markup;
 
 /**
  * Class LaPillsTimerController.
@@ -110,11 +111,13 @@ class LaPillsTimerController extends ControllerBase {
       'attributes' => [
         'class' =>['use-ajax', 'btn', 'btn-success'],
         'data-dialog-type' => 'modal',
+        'title' => $this->t('Create new activity'),
+        'data-toggle' => 'tooltip',
       ]
     ];
 
     $link = Link::createFromRoute(
-      $this->t('Create new activity'),
+      Markup::create('<i class="fas fa-plus"></i>'),
       'la_pills_timer.la_pills_timer_controller_addTimer',
       [],
       $options);

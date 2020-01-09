@@ -5,6 +5,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\la_pills\Entity\SessionEntityInterface;
 use Drupal\la_pills_timer\Controller\LaPillsTimerController;
+use Drupal\Core\Render\Markup;
 
 /**
  * Implements hook_theme().
@@ -49,20 +50,27 @@ function template_preprocess_la_pills_timer_elements(&$variables) : void {
 
         $options = [
           'attributes' => [
-            'class' => ['use-ajax',],
+            'class' => ['use-ajax', 'btn',],
             'data-dialog-type' => 'modal',
           ],
         ];
 
+        $edit_link_options = $options;
+        $edit_link_options['attributes']['class'][] = 'btn-success';
+        $edit_link_options['attributes']['title'] = t('Edit');
+        $edit_link_options['attributes']['data-toggle'] = 'tooltip';
+
         $remove_link_options = $options;
-        $remove_link_options['attributes']['class'][] = 'text-danger';
+        $remove_link_options['attributes']['class'][] = 'btn-danger';
+        $remove_link_options['attributes']['title'] = t('Remove');
+        $remove_link_options['attributes']['data-toggle'] = 'tooltip';
 
         $parameters = [
           'timer' => $timer_id,
         ];
 
-        $remove_link = Link::createFromRoute(t('Remove'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $remove_link_options);
-        $edit_link = Link::createFromRoute(t('Edit'),'la_pills_timer.la_pills_timer_controller_editTimer', $parameters, $options);
+        $remove_link = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $remove_link_options);
+        $edit_link = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'),'la_pills_timer.la_pills_timer_controller_editTimer', $parameters, $edit_link_options);
         $change_status = LaPillsTimerController::activeRenderable($entity);
 
         $timer_color = [
@@ -112,6 +120,8 @@ function template_preprocess_la_pills_session_timer_elements(&$variables) : void
               'lapills-timer-time-' . $timer_id
             ],
             'data-duration' => $duration,
+            'title' => t('Click to start or stop logging'),
+            'data-toggle' => 'tooltip',
           ]
         ];
 
