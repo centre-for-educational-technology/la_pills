@@ -21,6 +21,8 @@ information
   used
   - [c3.js](https://c3js.org/) in `libraries/c3` with only `c3.min.js` and
   `c3.min.css` being used
+  - [Font Awesome](https://fontawesome.com/) in `libraries/fontawesome`, only
+  minified versions of JS and CSS + assets are really required
 * Go into administration and activate the module
 * Visit `structure/session_entity` for the list of available sessions and their
 management
@@ -73,11 +75,6 @@ to the teacher.
     - Create new LaPills Question Entity entities - TEACHER USER
     - Create new LaPills Questionnaire Entity entities - TEACHER USER
     - View published LaPills Question Entity entities - TEACHER USER
-  - Make sure that required libraries are installed in
-  `DRUPAL_WEB_ROOT/libraries`. Use `la_pills_quick_feedback.libraries.yml` as a
-  source for information
-    - [Font Awesome](https://fontawesome.com/) in `libraries/fontawesome`, only
-    minified versions of JS and CSS + assets are really required
 
 ## Themes
 
