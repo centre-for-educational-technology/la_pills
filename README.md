@@ -75,6 +75,34 @@ to the teacher.
     - Create new LaPills Question Entity entities - TEACHER USER
     - Create new LaPills Questionnaire Entity entities - TEACHER USER
     - View published LaPills Question Entity entities - TEACHER USER
+* LAPills RESTful Web Services - a module that enables REST API for LAPills
+specific data. Requires OAuth to be present and configured with suitable clients
+and their their settings.
+  - Make sure that all the dependencies are present and configured as needed
+    - [Simple OAuth](https://www.drupal.org/project/simple_oauth) module
+    requires **League\OAuth2** to be installed. Using composer should be the
+    most convenient way on installing the module. Please follow the installation
+    instructions provided by the author.
+  - Install the module and configure permissions
+    - RESTful API resources would be configured automatically. Please use
+    [REST UI](https://www.drupal.org/project/restui) module if you need to make
+    changes or check out the configuration.
+    - Make sure that you create an API user role that has permission to access
+    the newly registered resources. Please make sure that correct role(s) are
+    assigned to consumers that will be created.
+  - Configure the OAuth module and create Consumer(s)
+    - Create a special role for the API calls naming it API
+    - Make sure that this role is assigned all the required permissions to
+    access the REST resources.
+    - Visit the Simple OAuth configuration page and expirations times and batch
+    size. Please make sure that keys are present and stored outside the WWW root
+    - Create all the necessary clients as needed. Please make sure to set the
+    default user account and and Redirect URI if you plan to use the same client
+    for all of the API calls. It depends on the OAuth flow that would be used.
+  - Endpoints
+   - `/oauth/token` - used for all of the OAuth token specific communication
+   - `/oauth/authorize` - used to start the OAuth user authorisation flow
+   - TODO Document own API once it is done
 
 ## Themes
 

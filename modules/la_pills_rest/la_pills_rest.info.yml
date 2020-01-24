@@ -1,0 +1,9 @@
+name: 'LAPills RESTful Web Services'
+type: module
+description: 'RESTful Web Servies for LAPills'
+core: 8.x
+package: 'LAPills'
+dependencies:
+  - drupal:la_pills
+  - drupal:rest
+  - drupal:simple_oauth
