@@ -75,7 +75,7 @@ la_pills_timer.la_pills_timer_controller_exportTimers:
     _entity_access: 'session_entity.update'
 
 la_pills_timer.la_pills_timer_controller_sessionEntityTimers:
-  path: 'admin/structure/session_entity/{session_entity}/timers'
+  path: '/session/{session_entity}/timers'
   defaults:
     _controller: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionEntityTimers'
     _title: 'Activity logging'

@@ -117,7 +117,7 @@ a means of redirecting specific user role to a certain URL. Currently it is
 suggested to redirect user without permission to create sessions to PIN code
 entry page and the rest of the roles to session list page.
   - Authenticated: `/session_entity_code`
-  - Teacher: `/admin/structure/session_entity`
+  - Teacher: `/session/mine`
   - Admin: `/admin/structure/session_entity`
 * [Dropdown Language](https://www.drupal.org/project/dropdown_language) as a
 means of adding a language select. It does play well with

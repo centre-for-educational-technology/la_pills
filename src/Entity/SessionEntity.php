@@ -52,13 +52,14 @@ use Drupal\Core\Session\AccountInterface;
  *     "require_name" = "require_name",
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/session_entity/{session_entity}",
- *     "add-form" = "/admin/structure/session_entity/add",
- *     "edit-form" = "/admin/structure/session_entity/{session_entity}/edit",
- *     "delete-form" = "/admin/structure/session_entity/{session_entity}/delete",
+ *     "canonical" = "/session/{session_entity}",
+ *     "add-form" = "/session/add",
+ *     "edit-form" = "/session/{session_entity}/edit",
+ *     "delete-form" = "/session/{session_entity}/delete",
  *     "collection" = "/admin/structure/session_entity",
- *     "dashboard" = "/admin/structure/session_entity/{session_entity}/dashboard",
- *     "questionnaire" = "/admin/structure/session_entity/{session_entity}/questionnaire/{questionnaire_uuid}",
+ *     "dashboard" = "/session/{session_entity}/dashboard",
+ *     "questionnaire" = "/session/{session_entity}/questionnaire/{questionnaire_uuid}",
+ *     "mine" = "/session/mine",
  *   },
  *   field_ui_base_route = "session_entity.settings"
  * )

@@ -2,7 +2,7 @@ name: 'LaPills Quick Feedback'
 type: module
 description: 'Implements Qucik Feedback functionality for LaPills Session.'
 core: 8.x
-package: 'LaPills'
+package: 'LAPills'
 
 dependencies:
   - drupal:la_pills

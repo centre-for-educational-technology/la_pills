@@ -137,11 +137,9 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
         '#weight' => -50,
       ];
 
-      // Set ajaxSave action and disable any submit callbacks
       $form['actions']['submit']['#ajax'] = [
         'callback' => '::ajaxSave',
       ];
-      $form['actions']['submit']['#submit'] = [];
 
       if (isset($form['actions']['delete'])) {
         $form['actions']['delete']['#access'] = FALSE;
@@ -346,6 +344,11 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
     $this->fillEntityData($form, $form_state);
     $status = parent::save($form, $form_state);
 
+    if ($this->getRequest()->isXmlHttpRequest()) {
+      $form_state->set('savedEntityStatus', $status);
+      return;
+    }
+
     switch ($status) {
       case SAVED_NEW:
         $this->messenger()->addMessage($this->t('Created the %label LaPills Question Entity.', [
@@ -424,7 +427,7 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
       '#type' => 'html_tag',
       '#tag' => 'td',
     ];
-    $renderable['type']['type'] = $entity->short_name->view(['label' => 'hidden',]);
+    $renderable['type']['type'] = $entity->type->view(['label' => 'hidden',]);
     $renderable['active'] = [
       '#type' => 'html_tag',
       '#tag' => 'td',
@@ -497,12 +500,9 @@ class LaPillsQuestionEntityForm extends ContentEntityForm {
       return $response;
     }
 
-    $this->fillEntityData($form, $form_state);
-    $status = parent::save($form, $form_state);
-
     $response->addCommand(new CloseModalDialogCommand());
 
-    switch ($status) {
+    switch ($form_state->get('savedEntityStatus')) {
       case SAVED_NEW:
         $row = $this->buildTableRow($entity);
         $response->addCommand(

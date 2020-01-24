@@ -20,12 +20,19 @@ entity.session_entity.collection.tools:
   parent: tools
   weight: 10
 
+entity.session_entity.mine.tools:
+  title: 'My data gathering sessions'
+  route_name: entity.session_entity.mine
+  description: 'List your data gathering session entities'
+  parent: tools
+  weight: 15
+
 entity.session_entity.add_form.tools:
   title: 'Add data gathering session'
   description: 'Create new data gathering session entity'
   route_name: entity.session_entity.add_form
   parent: tools
-  weight: 15
+  weight: 20
 
 la_pills.session_entity_code:
   title: 'Session PIN'

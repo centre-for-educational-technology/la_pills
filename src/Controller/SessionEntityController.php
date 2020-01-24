@@ -19,6 +19,11 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\RemoveCommand;
 use Drupal\Core\Ajax\AfterCommand;
 use Drupal\Core\Url;
+use Drupal\Core\Session\AccountProxy;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Link;
+use Drupal\la_pills\RenderableHelper;
+use Drupal\Core\Render\Markup;
 
 /**
  * Class SessionEntityController.
@@ -28,23 +33,35 @@ class SessionEntityController extends ControllerBase {
   /**
    * Database connection
    *
-   * @var Drupal\Core\Database\Connection
+   * @var \Drupal\Core\Database\Connection
    */
   protected $connection;
 
   /**
    * Messenger service
    *
-   * @var Drupal\Core\Messenger\Messenger
+   * @var \Drupal\Core\Messenger\Messenger
    */
   protected $messenger;
 
   /**
    * Renderer service
    *
-   * @var Drupal\Core\Render\Renderer
+   * @var \Drupal\Core\Render\Renderer
    */
   protected $renderer;
+
+  /**
+   * Current user account
+   * @var \Drupal\Core\Session\AccountProxy
+   */
+  protected $currentUser;
+
+  /**
+   * Entity type manager
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
 
   /**
    * Controller constructor
@@ -52,10 +69,12 @@ class SessionEntityController extends ControllerBase {
    * @param Drupal\Core\Database\Connection $connection
    *   Database connection
    */
-  public function __construct(Connection $connection, Messenger $messenger, Renderer $renderer) {
+  public function __construct(Connection $connection, Messenger $messenger, Renderer $renderer, AccountProxy $current_user, EntityTypeManagerInterface $entity_type_manager) {
     $this->connection = $connection;
     $this->messenger = $messenger;
     $this->renderer = $renderer;
+    $this->currentUser = $current_user;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -65,8 +84,10 @@ class SessionEntityController extends ControllerBase {
     $connection = $container->get('database');
     $messenger = $container->get('messenger');
     $renderer = $container->get('renderer');
+    $current_user = $container->get('current_user');
+    $entity_type_manager = $container->get('entity_type.manager');
 
-    return new static($connection, $messenger, $renderer);
+    return new static($connection, $messenger, $renderer, $current_user, $entity_type_manager);
   }
 
   /**
@@ -626,6 +647,110 @@ class SessionEntityController extends ControllerBase {
 
       $response->addCommand(new RemoveCommand('.button.close-session-button'));
       $response->addCommand(new AfterCommand('[data-drupal-messages-fallback]', $this->renderer->renderRoot($status_messages)));
+    }
+
+    return $response;
+  }
+
+  /**
+   * Returns index page with user owned sessions
+   *
+   * @return array
+   *   Content structure
+   */
+  public function index() {
+    $link_options = [
+      'attributes' => [
+        'class' => ['use-ajax',],
+        'data-dialog-type' => 'modal',
+      ],
+    ];
+    $create_link_options = $link_options;
+    $create_link_options['attributes']['class'] = array_merge($create_link_options['attributes']['class'], ['btn', 'btn-success',]);
+    $create_link_options['attributes']['title'] = $this->t('Create new Data gathering session');
+    $create_link_options['attributes']['data-toggle'] = 'tooltip';
+
+    // TODO Add pagination
+    $ids = \Drupal::entityQuery('session_entity')
+      ->condition('user_id', $this->currentUser->id())
+      ->sort('created', 'DESC')
+      ->execute();
+
+    $sessions = $this->entityTypeManager
+      ->getStorage('session_entity')
+      ->loadMultiple($ids);
+
+    if ($this->currentUser->hasPermission('add la pills session entities')) {
+      $response['add'] = Link::createFromRoute(Markup::create('<i class="fas fa-plus"></i>'),'entity.session_entity.add_form', [], $create_link_options)->toRenderable();
+    }
+
+    $response['sessions'] = [
+      '#type' => 'table',
+      '#header' => [
+        $this->t('Name'),
+        $this->t('Session template'),
+        $this->t('Code'),
+        $this->t('Answers'),
+        $this->t('Actions'),
+      ],
+      '#empty' => $this->t('You have not created any data gathering sessions yet.'),
+      '#attributes' => [
+        'id' => 'data-gathering-sessions',
+      ],
+      '#attached' => [
+        'library' => [
+          'la_pills/fontawesome',
+        ],
+      ],
+    ];
+
+    if ($sessions) {
+      $edit_link_options = $link_options;
+      $edit_link_options['attributes']['class'][] = 'btn';
+      $edit_link_options['attributes']['class'][] = 'btn-success';
+      $edit_link_options['attributes']['title'] = $this->t('Edit');
+      $edit_link_options['attributes']['data-toggle'] = 'tooltip';
+
+      $remove_link_options = $link_options;
+      $remove_link_options['attributes']['class'][] = 'btn';
+      $remove_link_options['attributes']['class'][] = 'btn-danger';
+      $remove_link_options['attributes']['title'] = $this->t('Remove');
+      $remove_link_options['attributes']['data-toggle'] = 'tooltip';
+
+      foreach ($sessions as $session) {
+        $response['sessions'][$session->id()] = [
+          '#attributes' => [
+            'id' => 'session-entity-' . $session->id(),
+          ],
+          'name' => Link::createFromRoute(
+            $session->label(),
+            'entity.session_entity.canonical',
+            ['session_entity' => $session->id()]
+          )->toRenderable(),
+          'session_template' => [
+            '#plain_text' => $session->getSessionTemplate()->getTitle(),
+          ],
+          'code' => [
+            '#plain_text' => $session->getCode(),
+          ],
+          'answers' => RenderableHelper::downloadAnswersLink($session, ['btn-xs'])->toRenderable(),
+          'actions' => [
+            '#type' => 'container',
+            '#attributes' => [
+              'class' => ['btn-group', 'btn-group-sm',],
+              'role' => 'group',
+              'aria-label' => $this->t('Actions'),
+            ],
+          ],
+        ];
+        if ($session->access('update')) {
+          $response['sessions'][$session->id()]['actions']['update'] = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'), 'entity.session_entity.edit_form', ['session_entity' => $session->id(),], $edit_link_options)->toRenderable();
+        }
+        if ($session->access('delete')) {
+          $response['sessions'][$session->id()]['actions']['delete'] = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'), 'entity.session_entity.delete_form', ['session_entity' => $session->id(),], $remove_link_options)->toRenderable();
+
+        }
+      }
     }
 
     return $response;
