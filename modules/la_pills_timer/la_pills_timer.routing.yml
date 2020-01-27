@@ -83,6 +83,7 @@ la_pills_timer.la_pills_timer_controller_sessionEntityTimers:
     parameters:
       session_entity:
         type: entity:session_entity
+    no_cache: 'TRUE'
   requirements:
     _custom_access: '\Drupal\la_pills_timer\Controller\LaPillsTimerController::sessionEntityTimersAccess'
 

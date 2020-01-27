@@ -670,10 +670,10 @@ class SessionEntityController extends ControllerBase {
     $create_link_options['attributes']['title'] = $this->t('Create new Data gathering session');
     $create_link_options['attributes']['data-toggle'] = 'tooltip';
 
-    // TODO Add pagination
     $ids = \Drupal::entityQuery('session_entity')
       ->condition('user_id', $this->currentUser->id())
       ->sort('created', 'DESC')
+      ->pager(50)
       ->execute();
 
     $sessions = $this->entityTypeManager
@@ -752,6 +752,10 @@ class SessionEntityController extends ControllerBase {
         }
       }
     }
+
+    $response['pager'] = [
+      '#type' => 'pager',
+    ];
 
     return $response;
   }

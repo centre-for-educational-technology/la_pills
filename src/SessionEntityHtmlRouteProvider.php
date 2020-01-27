@@ -87,6 +87,7 @@ class SessionEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
         ->id());
       $route
         ->setRequirement('_entity_access', "{$entity_type_id}.view")
+        ->setOption('no_cache', TRUE)
         ->setOption('parameters', [
         $entity_type_id => [
           'type' => 'entity:' . $entity_type_id,
