@@ -2,26 +2,26 @@
   width: 100%;
 }
 
-.fieldset-wrapper .form-type-radio label.option, .fieldset-wrapper .form-type-checkbox label.option {
+.questionnaire-question .form-type-radio label.option, .questionnaire-question .form-type-checkbox label.option {
   font-weight: bold;
 }
 
-.scale .fieldset-wrapper .form-type-radio {
+.questionnaire-question-scale .form-type-radio {
   display: inline-block;
 }
 
-.scale .fieldset-wrapper .form-type-radio label.option {
+.questionnaire-question-scale .form-type-radio label.option {
   display: block;
   margin: 10px;
 }
 
-.scale .fieldset-wrapper .form-type-radio label.option input.scale.form-radio::before,
-.scale .fieldset-wrapper .form-type-radio label.option input.scale.form-radio::after {
+.questionnaire-question-scale .form-type-radio label.option input.scale.form-radio::before,
+.questionnaire-question-scale .form-type-radio label.option input.scale.form-radio::after {
   position: absolute;
   top: -25px;
 }
 
-.scale .fieldset-wrapper .form-type-radio {
+.questionnaire-question-scale .form-type-radio {
   text-align: center;
 }
 

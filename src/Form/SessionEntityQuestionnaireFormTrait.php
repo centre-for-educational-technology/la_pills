@@ -149,11 +149,12 @@ trait SessionEntityQuestionnaireFormTrait {
    */
   public static function createQuestionRenderable(array $question) {
     $uuid = $question['uuid'];
+    $type = SessionTemplate::processQuestionType($question['type']);
 
     $structure = [
       '#type' => 'container',
       '#attributes' => [
-        'class' => ['questionnaire-question',],
+        'class' => ['questionnaire-question', 'questionnaire-question-' . $type,],
       ],
     ];
     $structure['question'] = [
@@ -178,7 +179,7 @@ trait SessionEntityQuestionnaireFormTrait {
       '#required' => ($question['required'] === 'Yes') ? TRUE : FALSE
     ];
 
-    switch(SessionTemplate::processQuestionType($question['type'])) {
+    switch($type) {
       case 'short-text':
       $structure[$uuid]['#type'] = 'textfield';
       break;
