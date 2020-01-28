@@ -760,4 +760,30 @@ class SessionEntityController extends ControllerBase {
     return $response;
   }
 
+  /**
+   * Redirect old view URL to a new one
+   *
+   * @param Drupal\la_pills\Entity\SessionEntity $session_entity
+   *   Session Entity object
+   *
+   * @return Symfony\Component\HttpFoundation\Response
+   *   Response object
+   */
+  public function viewRedirect(SessionEntity $session_entity) {
+    return $this->redirect('entity.session_entity.canonical', ['session_entity' => $session_entity->id()]);
+  }
+
+  /**
+   * Redirect old dashboard URL to a new one
+   *
+   * @param Drupal\la_pills\Entity\SessionEntity $session_entity
+   *   Session Entity object
+   *
+   * @return Symfony\Component\HttpFoundation\Response
+   *   Response object
+   */
+  public function dashboardRedirect(SessionEntity $session_entity) {
+    return $this->redirect('entity.session_entity.dashboard', ['session_entity' => $session_entity->id()]);
+  }
+
 }

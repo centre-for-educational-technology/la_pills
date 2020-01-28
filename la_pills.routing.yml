@@ -100,3 +100,29 @@ session_template.delete:
     _admin_route: 'TRUE'
   requirements:
     _permission: 'administer site configuration'
+
+la_pills.session_entity.view.redirect:
+  path: '/admin/structure/session_entity/{session_entity}'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionEntityController::viewRedirect'
+    _title: ''
+  options:
+    no_cache: 'TRUE'
+    parameters:
+      session_entity:
+        type: entity:session_entity
+  requirements:
+    _entity_access: 'session_entity.view'
+
+la_pills.session_entity.dashboard.redirect:
+  path: '/admin/structure/session_entity/{session_entity}/dashboard'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionEntityController::dashboardRedirect'
+    _title: ''
+  options:
+    no_cache: 'TRUE'
+    parameters:
+      session_entity:
+        type: entity:session_entity
+  requirements:
+    _entity_access: 'session_entity.view'
