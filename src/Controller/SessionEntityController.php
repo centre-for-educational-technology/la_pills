@@ -786,4 +786,22 @@ class SessionEntityController extends ControllerBase {
     return $this->redirect('entity.session_entity.dashboard', ['session_entity' => $session_entity->id()]);
   }
 
+  /**
+   * Redirect old questionnaire URL to a new one
+   *
+   * @param Drupal\la_pills\Entity\SessionEntity $session_entity
+   *   Session Entity object
+   * @param string $questionnaire_uuid
+   *   Questionnaire unique identifier
+   *
+   * @return Symfony\Component\HttpFoundation\Response
+   *   Response object
+   */
+  public function questionnaireRedirect(SessionEntity $session_entity, string $questionnaire_uuid) {
+    return $this->redirect('entity.session_entity.questionnaire', [
+      'session_entity' => $session_entity->id(),
+      'questionnaire_uuid' => $questionnaire_uuid,
+    ]);
+  }
+
 }

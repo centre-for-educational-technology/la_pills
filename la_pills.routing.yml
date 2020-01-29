@@ -126,3 +126,16 @@ la_pills.session_entity.dashboard.redirect:
         type: entity:session_entity
   requirements:
     _entity_access: 'session_entity.view'
+
+la_pills.session_entity.questionnaire.redirect:
+  path: '/admin/structure/session_entity/{session_entity}/questionnaire/{questionnaire_uuid}'
+  defaults:
+    _controller: '\Drupal\la_pills\Controller\SessionEntityController::questionnaireRedirect'
+    _title: ''
+  options:
+    no_cache: 'TRUE'
+    parameters:
+      session_entity:
+        type: entity:session_entity
+  requirements:
+    _entity_access: 'session_entity.view'
