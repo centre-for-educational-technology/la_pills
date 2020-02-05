@@ -44,7 +44,7 @@ class HomePageController extends ControllerBase {
   public function view() {
     $response = [];
 
-    $teacher_route = $this->currentUser->isAnonymous() ? 'user.login' : 'entity.session_entity.collection';
+    $teacher_route = $this->currentUser->isAnonymous() ? 'user.login' : 'entity.session_entity.mine';
 
     $response['actions'] = [
       '#type' => 'container',
