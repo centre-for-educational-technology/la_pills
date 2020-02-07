@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Drupal\la_pills\Entity\SessionEntity;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides a resource to get view modes by entity and bundle.
@@ -17,11 +18,13 @@ use Drupal\la_pills\Entity\SessionEntity;
  *   id = "la_pills_sessions_answers_resource",
  *   label = @Translation("LAPills Session Answers resource"),
  *   uri_paths = {
- *     "canonical" = "api/la_pills/sessions/{id}/answers"
+ *     "canonical" = "api/la_pills/session/{id}/answers"
  *   }
  * )
  */
 class LaPillsSessionAnswersResource extends ResourceBase {
+
+  use FromAndUntilRestResourceTrait;
 
   /**
    * A current user instance.
@@ -59,7 +62,10 @@ class LaPillsSessionAnswersResource extends ResourceBase {
     /**
      * Responds to GET requests.
      *
-     * @param int $id Session id
+     * @param int $id
+     *   Session id.
+     * @param Request $request
+     *   Request object.
      *
      * @return \Drupal\rest\ResourceResponse
      *   The HTTP response object.
@@ -67,12 +73,14 @@ class LaPillsSessionAnswersResource extends ResourceBase {
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      *   Throws exception expected.
      */
-    public function get(int $id) {
+    public function get(int $id, Request $request) {
       // You must to implement the logic of your REST Resource here.
       // Use current user after pass authentication to validate access.
       if (!$this->currentUser->hasPermission('access content')) {
         throw new AccessDeniedHttpException();
       }
+
+      $this->validateFromAndUntil($request);
 
       $session = SessionEntity::load($id);
 
@@ -87,6 +95,14 @@ class LaPillsSessionAnswersResource extends ResourceBase {
 
       $query = $this->connection->select('session_questionnaire_answer', 'sqa');
       $query->condition('sqa.session_entity_uuid', $session->uuid(), '=');
+
+      if ($this->hasFromParam($request) && $from = $this->fromTimestampt($request)) {
+        $query->condition('created', $from, '>=');
+      }
+      if ($this->hasUntilParam($request) && $until = $this->untilTimestamp($request)) {
+        $query->condition('created', $until, '<=');
+      }
+
       $query->fields('sqa', ['questionnaire_uuid', 'question_uuid', 'session_id', 'form_build_id', 'user_id', 'name', 'answer', 'created',]);
       $query->addExpression('FROM_UNIXTIME(created)', 'created');
 

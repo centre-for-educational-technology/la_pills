@@ -7,6 +7,8 @@ use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides a resource to get view modes by entity and bundle.
@@ -20,6 +22,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * )
  */
 class LaPillsUserSessionsResource extends ResourceBase {
+
+  use FromAndUntilRestResourceTrait;
 
   /**
    * A current user instance.
@@ -48,7 +52,10 @@ class LaPillsUserSessionsResource extends ResourceBase {
   /**
    * Responds to GET requests.
    *
-   * @param int $id User identifier
+   * @param int $id
+   *   User identifier.
+   * @param Request $request
+   *   Request object.
    *
    * @return \Drupal\rest\ResourceResponse
    *   The HTTP response object.
@@ -56,7 +63,7 @@ class LaPillsUserSessionsResource extends ResourceBase {
    * @throws \Symfony\Component\HttpKernel\Exception\HttpException
    *   Throws exception expected.
    */
-  public function get(int $id) {
+  public function get(int $id, Request $request) {
     // You must to implement the logic of your REST Resource here.
     // Use current user after pass authentication to validate access.
     // TODO See if permission checks should be different
@@ -64,10 +71,21 @@ class LaPillsUserSessionsResource extends ResourceBase {
       throw new AccessDeniedHttpException();
     }
 
-    $ids = \Drupal::entityQuery('session_entity')
-      ->condition('user_id', $id)
-      ->sort('created', 'DESC')
-      ->execute();
+    $this->validateFromAndUntil($request);
+
+    $query = \Drupal::entityQuery('session_entity')
+      ->condition('user_id', $id);
+
+    if ($this->hasFromParam($request) && $from = $this->fromTimestampt($request)) {
+      $query->condition('created', $from, '>=');
+    }
+    if ($this->hasUntilParam($request) && $until = $this->untilTimestamp($request)) {
+      $query->condition('created', $until, '<=');
+    }
+
+    $query->sort('created', 'DESC');
+
+    $ids = $query->execute();
 
     $sessions = $this->entityTypeManager
       ->getStorage('session_entity')
