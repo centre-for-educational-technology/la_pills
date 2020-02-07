@@ -1,0 +1,9 @@
+name: 'LaPills Onboarding'
+type: module
+description: 'LAPills Onboarding functionality.'
+core: 8.x
+package: 'LAPills'
+dependencies:
+  - drupal:la_pills
+  - drupal:la_pills_timer
+  - drupal:la_pills_quick_feedback

@@ -3,6 +3,7 @@
 namespace Drupal\la_pills_quick_feedback;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\la_pills\Entity\SessionEntityInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Interface LaPillsQuickFeedbackManagerInterface.
@@ -80,5 +81,25 @@ interface LaPillsQuickFeedbackManagerInterface {
    *   TRUE if exists and FALSE if not
    */
   public function hasQuickFeedbackQuestionnaire(SessionEntityInterface $session_entity) : bool;
+
+  /**
+   * Makes question active for provided user acount.
+   *
+   * @param LaPillsQuestionEntityInterface $question
+   *   Question entity.
+   * @param AccountProxy                   $account
+   *   Account.
+   */
+  public function makeQuestionActive(LaPillsQuestionEntityInterface $question, AccountInterface $account) : void;
+
+  /**
+   * Makes question inactive for provided user account.
+   *
+   * @param LaPillsQuestionEntityInterface $question
+   *   Question entity.
+   * @param AccountProxy                   $account
+   *   Account.
+   */
+  public function makeQuestionInactive(LaPillsQuestionEntityInterface $question, AccountInterface $account) : void;
 
 }

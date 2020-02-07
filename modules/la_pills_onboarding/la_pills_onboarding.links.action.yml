@@ -1,0 +1,5 @@
+entity.la_pills_user_package.add_form:
+  route_name: entity.la_pills_user_package.add_form
+  title: 'Add User package'
+  appears_on:
+    - entity.la_pills_user_package.collection

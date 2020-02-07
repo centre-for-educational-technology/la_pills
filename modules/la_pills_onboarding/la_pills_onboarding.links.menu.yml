@@ -1,0 +1,14 @@
+
+# User package menu items definition
+entity.la_pills_user_package.collection:
+  title: 'User package list'
+  route_name: entity.la_pills_user_package.collection
+  description: 'List User package entities'
+  parent: system.admin_structure
+  weight: 100
+
+la_pills_user_package.admin.structure.settings:
+  title: 'User package settings'
+  description: 'Configure User package entities'
+  route_name: la_pills_user_package.settings
+  parent: system.admin_structure
