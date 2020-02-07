@@ -24,6 +24,7 @@ class SessionEntityListBuilder extends EntityListBuilder {
     $header['template'] = $this->t('Session template');
     $header['code'] = $this->t('Code');
     $header['answers'] = $this->t('Answers');
+    $header['owner'] = $this->t('Owner');
     return $header + parent::buildHeader();
   }
 
@@ -44,6 +45,7 @@ class SessionEntityListBuilder extends EntityListBuilder {
       $row['answers'] = RenderableHelper::downloadAnswersLink($entity, ['btn-xs']);
       $row['code'] = Markup::create('<strong>' . $entity->getCode() . '</strong>');
     }
+    $row['owner'] = $entity->getOwner()->toLink();
     return $row + parent::buildRow($entity);
   }
 
