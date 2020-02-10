@@ -71,7 +71,7 @@ trait FromAndUntilRestResourceTrait {
    * @return mixed
    *   Integer if conversion is successful, FALSE otherwise.
    */
-  private function fromTimestampt(Request $request) {
+  private function fromTimestamp(Request $request) {
     return $this->timestampFromQueryParam($request, 'from');
   }
 
@@ -101,7 +101,7 @@ trait FromAndUntilRestResourceTrait {
    */
   private function validateFromAndUntil(Request $request) : void {
     if ($this->hasFromParam($request)) {
-      $from = $this->fromTimestampt($request);
+      $from = $this->fromTimestamp($request);
 
       if ($from === FALSE) {
         throw new BadRequestHttpException('Malformed from parameter!');

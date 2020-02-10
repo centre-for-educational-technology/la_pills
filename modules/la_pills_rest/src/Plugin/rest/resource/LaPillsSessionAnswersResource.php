@@ -96,7 +96,7 @@ class LaPillsSessionAnswersResource extends ResourceBase {
       $query = $this->connection->select('session_questionnaire_answer', 'sqa');
       $query->condition('sqa.session_entity_uuid', $session->uuid(), '=');
 
-      if ($this->hasFromParam($request) && $from = $this->fromTimestampt($request)) {
+      if ($this->hasFromParam($request) && $from = $this->fromTimestamp($request)) {
         $query->condition('created', $from, '>=');
       }
       if ($this->hasUntilParam($request) && $until = $this->untilTimestamp($request)) {

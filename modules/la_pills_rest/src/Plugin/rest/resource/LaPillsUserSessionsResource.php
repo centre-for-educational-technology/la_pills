@@ -76,7 +76,7 @@ class LaPillsUserSessionsResource extends ResourceBase {
     $query = \Drupal::entityQuery('session_entity')
       ->condition('user_id', $id);
 
-    if ($this->hasFromParam($request) && $from = $this->fromTimestampt($request)) {
+    if ($this->hasFromParam($request) && $from = $this->fromTimestamp($request)) {
       $query->condition('created', $from, '>=');
     }
     if ($this->hasUntilParam($request) && $until = $this->untilTimestamp($request)) {
