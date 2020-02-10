@@ -69,8 +69,8 @@ function template_preprocess_la_pills_timer_elements(&$variables) : void {
           'timer' => $timer_id,
         ];
 
-        $remove_link = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $remove_link_options);
-        $edit_link = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'),'la_pills_timer.la_pills_timer_controller_editTimer', $parameters, $edit_link_options);
+        $remove_link = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'),'la_pills_timer.la_pills_timer_controller_removeTimer', $parameters, $remove_link_options);
+        $edit_link = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'),'la_pills_timer.la_pills_timer_controller_editTimer', $parameters, $edit_link_options);
         $change_status = LaPillsTimerController::activeRenderable($entity);
 
         $timer_color = [
