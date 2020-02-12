@@ -96,7 +96,7 @@ class SessionEntityForm extends ContentEntityForm {
    * Builds a table row renderable for an Entity
    *
    * @param  Drupal\la_pills\Entity\SessionEntityInterface $entity
-   *   LaPillsQuestionEntity instance
+   *   SessionEntity instance
    * @return array
    *   Renderable for entity table row
    */

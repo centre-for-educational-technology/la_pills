@@ -8,6 +8,7 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntity;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
@@ -47,21 +48,54 @@ function la_pills_onboarding_form_user_register_form_alter(&$form, FormStateInte
     '#title' => t('Onboarding'),
     '#open' => TRUE,
     '#weight' => 10,
+    '#attached' => [
+      'library' => [
+        'la_pills_onboarding/package_preview',
+        'la_pills/fontawesome',
+      ],
+    ],
   ];
 
-  $ids = \Drupal::entityQuery('la_pills_user_package')
-    ->execute();
+  $query = \Drupal::entityQuery('la_pills_user_package');
+
+  if (!\Drupal::currentuser()->isAuthenticated()) {
+    $query->condition('status', 1);
+  }
+
+  $ids = $query->execute();
+
   $packages = \Drupal::entityTypeManager()
     ->getStorage('la_pills_user_package')
     ->loadMultiple($ids);
 
+  $urls = [];
+  $options = [];
+
+  array_walk($packages, function($package) use (&$urls, &$options) {
+    $urls[$package->id()] = $package->toUrl()->toString();
+    $options[$package->id()] = $package->label();
+  });
+
   $form['onboarding']['user_package'] = [
     '#type' => 'select',
-    '#options' => array_map(function($package) {
-      return $package->label();
-    }, $packages),
+    '#options' => $options,
     '#empty_value' => '',
-
+    '#attached' => [
+      'drupalSettings' => [
+        'laPillsUserPackageUrls' => $urls,
+      ]
+    ]
+  ];
+  $form['onboarding']['preview'] = [
+    '#type' => 'button',
+    '#value' => t('Preview'),
+    '#states' => [
+      'invisible' => [
+        ':input[name="user_package"]' => [
+          'value' => '',
+        ],
+      ],
+    ],
   ];
   $form['actions']['submit']['#submit'][] = '_la_pills_onboarding_user_register_form_submitted';
 }

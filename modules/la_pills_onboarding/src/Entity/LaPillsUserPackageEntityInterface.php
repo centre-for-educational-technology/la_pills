@@ -58,6 +58,10 @@ interface LaPillsUserPackageEntityInterface extends ContentEntityInterface, Enti
 
   public function getQuestionsEntities() : array;
 
+  public function getQuestionsCount() : int;
+
   public function getActivitiesEntities() : array;
+
+  public function getActivitiesCount() : int;
 
 }

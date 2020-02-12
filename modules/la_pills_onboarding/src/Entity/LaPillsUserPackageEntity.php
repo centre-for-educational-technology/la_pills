@@ -51,7 +51,8 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  *     "add-form" = "/onboarding/package/la_pills_user_package/add",
  *     "edit-form" = "/onboarding/package/la_pills_user_package/{la_pills_user_package}/edit",
  *     "delete-form" = "/onboarding/package/la_pills_user_package/{la_pills_user_package}/delete",
- *     "collection" = "/onboarding/package/la_pills_user_package",
+ *     "collection" = "/admin/structure/la_pills_user_package",
+ *     "mine" = "/onboarding/package/mine",
  *   },
  *   field_ui_base_route = "la_pills_user_package.settings"
  * )
@@ -141,8 +142,22 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
   /**
    * {@inheritdoc}
    */
+  public function getQuestionsCount() : int {
+    return $this->get('questions')->count();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getActivitiesEntities() : array {
     return $this->get('activities')->referencedEntities();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getActivitiesCount() : int {
+    return $this->get('activities')->count();
   }
 
   /**
@@ -161,9 +176,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
       ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'author',
-        'weight' => 5,
+        'type' => 'hidden',
       ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
@@ -187,7 +200,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
       ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
-        'label' => 'above',
+        'label' => 'hidden',
         'type' => 'string',
         'weight' => 1,
       ])

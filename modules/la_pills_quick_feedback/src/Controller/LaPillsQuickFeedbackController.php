@@ -111,7 +111,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
         $this->t('Active'),
         $this->t('Actions'),
       ],
-      '#empty' => $this->t('No qucik feedback questions found'),
+      '#empty' => $this->t('No quick feedback questions found'),
       '#attributes' => [
         'id' => 'quick-feedback-items',
       ],

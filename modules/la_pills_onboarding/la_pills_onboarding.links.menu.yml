@@ -12,3 +12,10 @@ la_pills_user_package.admin.structure.settings:
   description: 'Configure User package entities'
   route_name: la_pills_user_package.settings
   parent: system.admin_structure
+
+entity.la_pills_user_package.user_packages:
+  title: 'User packages'
+  route_name: la_pills_onboarding.la_pills_user_package_controller_mine
+  description: 'Manage your own user packages'
+  parent: tools
+  weight: 100

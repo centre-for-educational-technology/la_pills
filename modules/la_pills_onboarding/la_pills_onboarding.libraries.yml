@@ -1,0 +1,8 @@
+package_preview:
+  version: 1.x
+  js:
+    js/package_preview.js: {}
+  dependencies:
+    - core/drupal.ajax
+    - core/drupalSettings
+    - core/drupal.dialog
