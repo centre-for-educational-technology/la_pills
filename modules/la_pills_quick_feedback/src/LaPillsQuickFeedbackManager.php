@@ -159,7 +159,7 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
     }
 
     // TODO Need to make sure to check if it already is active for this user account
-    $this->database->insert('user_active_question')
+    $this->database->insert(self::USER_ACTIVE_QUESTION_TABLE)
       ->fields([
         'user_id' => $account->id(),
         'question_id' => $question->id(),
@@ -177,9 +177,18 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
     }
 
     // TODO See if we need to check if question is active for this user account
-    $this->database->delete('user_active_question')
+    $this->database->delete(self::USER_ACTIVE_QUESTION_TABLE)
       ->condition('user_id', $account->id())
       ->condition('question_id', $question->id())
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function makeAllUserQuestionsInactive(AccountInterface $account) : void {
+    $this->database->delete(self::USER_ACTIVE_QUESTION_TABLE)
+      ->condition('user_id', $account->id())
       ->execute();
   }
 

@@ -11,7 +11,7 @@
         }
 
         // XXX This will not show attached entities unless permission is added
-        // XXX First call will bring three different commands instaad of one
+        // XXX First call will bring three different commands instead of one
         Drupal.ajax({
           progress: { type: 'throbber' },
           dialogType: 'modal',

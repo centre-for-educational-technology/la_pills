@@ -171,7 +171,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
 
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Authored by'))
-      ->setDescription(t('The user ID of author of the User package entity.'))
+      ->setDescription(t('The user ID of author of the User Package.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
@@ -193,7 +193,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
 
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
-      ->setDescription(t('The name of the User package entity.'))
+      ->setDescription(t('The name of the User Package.'))
       ->setSettings([
         'max_length' => 50,
         'text_processing' => 0,
@@ -214,7 +214,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
 
     $fields['description'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Description'))
-      ->setDescription(t('The description of the package.'))
+      ->setDescription(t('The description of the User Package.'))
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
@@ -229,7 +229,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
       ->setDisplayConfigurable('view', TRUE)
       ->setRequired(FALSE);
 
-    $fields['status']->setDescription(t('A boolean indicating whether the User package is published.'))
+    $fields['status']->setDescription(t('A boolean indicating whether the User Package is published. This would make it available to unauthenticated users when registering an account.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
         'weight' => 5,
@@ -237,7 +237,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
 
     $fields['questions'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Quick feedback questions'))
-      ->setDescription(t('Quick feedback question identifiers.'))
+      ->setDescription(t('Select quick feedback questions for this package.'))
       ->setRevisionable(FALSE)
       ->setSetting('target_type', 'la_pills_question_entity')
       ->setSetting('handler', 'entity_owner')
@@ -259,7 +259,7 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
 
     $fields['activities'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Activity log activities'))
-      ->setDescription(t('Activity log activity identifiers.'))
+      ->setDescription(t('Select activity log activities for this package.'))
       ->setRevisionable(FALSE)
       ->setSetting('target_type', 'la_pills_timer_entity')
       ->setSetting('handler', 'entity_owner')
@@ -281,11 +281,11 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the entity was created.'));
+      ->setDescription(t('The time that the package was created.'));
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the entity was last edited.'));
+      ->setDescription(t('The time that the package was last edited.'));
 
     return $fields;
   }

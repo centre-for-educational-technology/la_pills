@@ -102,4 +102,12 @@ interface LaPillsQuickFeedbackManagerInterface {
    */
   public function makeQuestionInactive(LaPillsQuestionEntityInterface $question, AccountInterface $account) : void;
 
+  /**
+   * Makes all user questions inactive.
+   *
+   * @param AccountInterface $account
+   *   Account.
+   */
+  public function makeAllUserQuestionsInactive(AccountInterface $account) : void;
+
 }
