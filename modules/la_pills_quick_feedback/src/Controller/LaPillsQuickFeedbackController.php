@@ -90,7 +90,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
 
     $ids = \Drupal::entityQuery('la_pills_question_entity')
       ->condition('user_id', $this->currentUser->id())
-      ->sort('created', 'DESC')
+      ->sort('id', 'DESC')
       ->execute();
 
     $questions = $this->entityTypeManager

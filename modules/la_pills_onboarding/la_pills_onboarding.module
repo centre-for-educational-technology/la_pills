@@ -113,7 +113,7 @@ function la_pills_onboarding_form_user_register_form_alter(&$form, FormStateInte
  *   Form structure.
  * @param  \Drupal\Core\Form\FormStateInterface $form_state
  *   Form state.
- * 
+ *
  * @return \Drupal\Core\Ajax\AjaxResponse
  *   AJAX response with modal dialog open command.
  */
@@ -197,6 +197,12 @@ function _la_pills_onboarding_user_register_form_submitted(array &$form, FormSta
 function la_pills_onboarding_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) : void {
   // TODO See if it would be better to add our own permission
   if (!\Drupal::currentuser()->hasPermission('administer users')) {
+    return;
+  }
+
+  // This hook is called for user_register_form if an account is being created
+  // by and administrator
+  if ($form_id !== 'user_form') {
     return;
   }
 

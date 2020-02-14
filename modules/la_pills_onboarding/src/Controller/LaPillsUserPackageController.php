@@ -56,7 +56,7 @@ class LaPillsUserPackageController extends ControllerBase {
 
     $ids = \Drupal::entityQuery('la_pills_user_package')
       ->condition('user_id', $this->currentUser->id())
-      ->sort('created', 'DESC')
+      ->sort('id', 'DESC')
       ->execute();
 
     $packages = $this->entityTypeManager
