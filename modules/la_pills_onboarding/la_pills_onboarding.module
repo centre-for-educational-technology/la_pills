@@ -10,6 +10,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntity;
 use Drupal\Core\Url;
 use Drupal\la_pills_timer\Entity\LaPillsTimerEntity;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\OpenModalDialogCommand;
 
 /**
  * Implements hook_help().
@@ -71,7 +73,7 @@ function la_pills_onboarding_form_user_register_form_alter(&$form, FormStateInte
     '#weight' => 10,
     '#attached' => [
       'library' => [
-        'la_pills_onboarding/package_preview',
+        'core/drupal.dialog.ajax'
       ],
     ],
   ];
@@ -96,8 +98,40 @@ function la_pills_onboarding_form_user_register_form_alter(&$form, FormStateInte
         ],
       ],
     ],
+    '#limit_validation_errors' => [],
+    '#ajax' => [
+      'callback' => '_la_pills_onboarding_user_package_preview_callback_modal',
+    ],
   ];
   $form['actions']['submit']['#submit'][] = '_la_pills_onboarding_user_register_form_submitted';
+}
+
+/**
+ * AJAX response with user package preview modal. Uses user package full view.
+ *
+ * @param  array $form
+ *   Form structure.
+ * @param  \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form state.
+ * 
+ * @return \Drupal\Core\Ajax\AjaxResponse
+ *   AJAX response with modal dialog open command.
+ */
+function _la_pills_onboarding_user_package_preview_callback_modal($form, FormStateInterface $form_state) {
+  $title = '';
+  $content = [];
+
+  if ($form_state->hasValue('user_package') && $form_state->getValue('user_package')) {
+    $entity = LaPillsUserPackageEntity::load($form_state->getValue('user_package'));
+    $title = $entity->label();
+    $content = \Drupal::entityTypeManager()
+          ->getViewBuilder($entity->getEntityTypeId())
+          ->view($entity);
+  }
+
+  $response = new AjaxResponse();
+  $response->addCommand(new OpenModalDialogCommand($title, $content));
+  return $response;
 }
 
 /**
