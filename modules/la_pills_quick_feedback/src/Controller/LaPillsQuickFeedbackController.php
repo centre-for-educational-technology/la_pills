@@ -12,6 +12,7 @@ use Drupal\Core\Render\Markup;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\la_pills_quick_feedback\LaPillsQuickFeedbackManagerInterface;
 
 /**
  * Class LaPillsQuickFeedbackController.
@@ -21,10 +22,11 @@ class LaPillsQuickFeedbackController extends ControllerBase {
   /**
    * @inheritdoc
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountProxy $currentUser, Connection $database) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountProxy $currentUser, Connection $database, LaPillsQuickFeedbackManagerInterface $quick_feedback_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $currentUser;
     $this->database = $database;
+    $this->quickFeedbackManager = $quick_feedback_manager;
   }
 
   /**
@@ -34,7 +36,8 @@ class LaPillsQuickFeedbackController extends ControllerBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('current_user'),
-      $container->get('database')
+      $container->get('database'),
+      $container->get('la_pills_quick_feedback.manager')
     );
   }
 
@@ -87,7 +90,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
 
     $ids = \Drupal::entityQuery('la_pills_question_entity')
       ->condition('user_id', $this->currentUser->id())
-      ->sort('created', 'DESC')
+      ->sort('id', 'DESC')
       ->execute();
 
     $questions = $this->entityTypeManager
@@ -108,7 +111,7 @@ class LaPillsQuickFeedbackController extends ControllerBase {
         $this->t('Active'),
         $this->t('Actions'),
       ],
-      '#empty' => $this->t('No qucik feedback questions found'),
+      '#empty' => $this->t('No quick feedback questions found'),
       '#attributes' => [
         'id' => 'quick-feedback-items',
       ],
@@ -178,21 +181,13 @@ class LaPillsQuickFeedbackController extends ControllerBase {
    *   AjaxRespone with actions
    */
   public function ajaxQuestionActiveInactive(LaPillsQuestionEntityInterface $question) {
+    $manager = \Drupal::service('la_pills_quick_feedback.manager');
     $response = new AjaxResponse();
 
     if ($question->isActive()) {
-      $this->database->delete('user_active_question')
-        ->condition('user_id', $this->currentUser->id())
-        ->condition('question_id', $question->id())
-        ->execute();
+      $this->quickFeedbackManager->makeQuestionInactive($question, $this->currentUser);
     } else {
-      $this->database->insert('user_active_question')
-        ->fields([
-          'user_id' => $this->currentUser->id(),
-          'question_id' => $question->id(),
-          'created' => REQUEST_TIME,
-        ])
-        ->execute();
+      $this->quickFeedbackManager->makeQuestionActive($question, $this->currentUser);
     }
 
     $renderable = $this->activeRenderable($question);

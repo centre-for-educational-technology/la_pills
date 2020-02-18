@@ -1,9 +1,10 @@
 <?php
 
-namespace Drupal\la_pills\Form;
+namespace Drupal\la_pills_onboarding\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
@@ -11,31 +12,42 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\PrependCommand;
 use Drupal\Core\Ajax\RestripeCommand;
 use Drupal\Core\Ajax\RemoveCommand;
-use Drupal\la_pills\Entity\SessionEntityInterface;
+use Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntityInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Markup;
-use Drupal\la_pills\RenderableHelper;
 
 /**
- * Form controller for LA Pills Session edit forms.
+ * Form controller for User package edit forms.
  *
- * @ingroup la_pills
+ * @ingroup la_pills_onboarding
  */
-class SessionEntityForm extends ContentEntityForm {
+class LaPillsUserPackageEntityForm extends ContentEntityForm {
+
+  /**
+   * The current user account.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $account;
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $session_entity = null) {
-    /* @var $entity \Drupal\la_pills\Entity\SessionEntity */
+  public static function create(ContainerInterface $container) {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->account = $container->get('current_user');
+    return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    /* @var \Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntity $entity */
     $form = parent::buildForm($form, $form_state);
 
     $form['user_id']['#access'] = FALSE;
-
-    if ($form_state->getBuildInfo()['form_id'] === 'session_entity_edit_form') {
-      $form['template']['widget']['#disabled'] = TRUE;
-      $form['code']['widget']['#disabled'] = TRUE;
-    }
 
     if ($this->getRequest()->isXmlHttpRequest()) {
       $form['ajax_messages'] = [
@@ -55,9 +67,9 @@ class SessionEntityForm extends ContentEntityForm {
       }
 
       if ($this->entity->isNew()) {
-        $form['#title'] = $this->t('Create new data gathering session');
+        $form['#title'] = $this->t('Create new User Package');
       } else {
-        $form['#title'] = $this->t('Edit data gathering session');
+        $form['#title'] = $this->t('Edit User Package');
       }
     }
 
@@ -79,34 +91,40 @@ class SessionEntityForm extends ContentEntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        \Drupal::messenger()->addMessage($this->t('Created the %label data gathering session.', [
+        $this->messenger()->addMessage($this->t('Created the %label User package.', [
           '%label' => $entity->label(),
         ]));
         break;
 
       default:
-        \Drupal::messenger()->addMessage($this->t('Saved the %label data gathering session.', [
+        $this->messenger()->addMessage($this->t('Saved the %label User package.', [
           '%label' => $entity->label(),
         ]));
     }
-    $form_state->setRedirect('entity.session_entity.canonical', ['session_entity' => $entity->id()]);
+    $form_state->setRedirect('entity.la_pills_user_package.canonical', ['la_pills_user_package' => $entity->id()]);
   }
 
   /**
    * Builds a table row renderable for an Entity
    *
-   * @param  Drupal\la_pills\Entity\SessionEntityInterface $entity
-   *   SessionEntity instance
+   * @param  Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntityInterface $entity
+   *   LaPillsUserPackageEntity instance
    * @return array
    *   Renderable for entity table row
    */
-  private function buildTableRow(SessionEntityInterface $entity) {
+  private function buildTableRow(LaPillsUserPackageEntityInterface $entity) {
     $link_options = [
       'attributes' => [
         'class' => ['use-ajax',],
         'data-dialog-type' => 'modal',
       ],
     ];
+
+    $preview_link_options = $link_options;
+    $preview_link_options['attributes']['class'][] = 'btn';
+    $preview_link_options['attributes']['class'][] = 'btn-info';
+    $preview_link_options['attributes']['title'] = $this->t('Preview');
+    $preview_link_options['attributes']['data-toggle'] = 'tooltip';
 
     $edit_link_options = $link_options;
     $edit_link_options['attributes']['class'][] = 'btn';
@@ -124,37 +142,35 @@ class SessionEntityForm extends ContentEntityForm {
       '#type' => 'html_tag',
       '#tag' => 'tr',
       '#attributes' => [
-        'id' => 'session-entity-' . $entity->id(),
+        'id' => 'user-package-' . $entity->id(),
       ],
     ];
     $renderable['name'] = [
       '#type' => 'html_tag',
       '#tag' => 'td',
     ];
-    $renderable['name']['name'] = Link::createFromRoute(
-      $entity->label(),
-      'entity.session_entity.canonical',
-      ['session_entity' => $entity->id()]
-    )->toRenderable();
-    $renderable['session_template'] = [
+    $renderable['name']['name'] = $entity->name->view(['label' => 'hidden',]);;
+    $renderable['questions'] = [
       '#type' => 'html_tag',
       '#tag' => 'td',
     ];
-    $renderable['session_template']['session_template'] = [
-      '#plain_text' => $entity->getSessionTemplate()->getTitle(),
+    $renderable['questions']['questions'] = [
+      '#plain_text' => $entity->getQuestionsCount(),
     ];
-    $renderable['code'] = [
+    $renderable['activities'] = [
       '#type' => 'html_tag',
       '#tag' => 'td',
     ];
-    $renderable['code']['code'] = [
-      '#plain_text' => $entity->getCode(),
+    $renderable['activities']['activities'] = [
+      '#plain_text' => $entity->getActivitiesCount(),
     ];
-    $renderable['answers'] = [
+    $renderable['status'] = [
       '#type' => 'html_tag',
       '#tag' => 'td',
     ];
-    $renderable['answers']['answers'] = RenderableHelper::downloadAnswersLink($entity, ['btn-xs'])->toRenderable();
+    $renderable['status']['status'] = [
+      '#markup' => $entity->get('status')->value ? $this->t('Public') : $this->t('Private'),
+    ];
     $renderable['actions'] = [
       '#type' => 'html_tag',
       '#tag' => 'td',
@@ -167,8 +183,9 @@ class SessionEntityForm extends ContentEntityForm {
         'aria-label' => $this->t('Actions'),
       ],
     ];
-    $renderable['actions']['actions']['edit'] = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'), 'entity.session_entity.edit_form', ['session_entity' => $entity->id(),], $edit_link_options)->toRenderable();
-    $renderable['actions']['actions']['remove'] = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'), 'entity.session_entity.delete_form', ['session_entity' => $entity->id(),], $remove_link_options)->toRenderable();
+    $renderable['actions']['actions']['preview'] = Link::createFromRoute(Markup::create('<i class="fas fa-eye"></i>'), 'entity.la_pills_user_package.canonical', ['la_pills_user_package' => $entity->id(),], $preview_link_options)->toRenderable();
+    $renderable['actions']['actions']['edit'] = Link::createFromRoute(Markup::create('<i class="fas fa-edit"></i>'), 'entity.la_pills_user_package.edit_form', ['la_pills_user_package' => $entity->id(),], $edit_link_options)->toRenderable();
+    $renderable['actions']['actions']['remove'] = Link::createFromRoute(Markup::create('<i class="fas fa-trash"></i>'), 'entity.la_pills_user_package.delete_form', ['la_pills_user_package' => $entity->id(),], $remove_link_options)->toRenderable();
 
     return $renderable;
   }
@@ -191,7 +208,7 @@ class SessionEntityForm extends ContentEntityForm {
     $messages = \Drupal::messenger()->all();
 
     if (isset($messages['error']) && count($messages['error']) > 0) {
-      $response->addCommand(new ReplaceCommand('.session-entity-form', $form));
+      $response->addCommand(new ReplaceCommand('.la-pills-user-package-form', $form));
 
       $renderable = [
         '#theme' => 'status_messages',
@@ -213,13 +230,13 @@ class SessionEntityForm extends ContentEntityForm {
         $row = $this->buildTableRow($entity);
         $response->addCommand(
           new PrependCommand(
-            '#data-gathering-sessions > tbody',
+            '#user-packages > tbody',
             render($row)
           )
         );
         // XXX This one does not remove a parent elemnt tr, but a child element td
         $response->addCommand(
-          new RemoveCommand('#data-gathering-sessions > tbody > tr > td.empty.message')
+          new RemoveCommand('#user-packages > tbody > tr > td.empty.message')
         );
         break;
 
@@ -227,13 +244,13 @@ class SessionEntityForm extends ContentEntityForm {
         $row = $this->buildTableRow($entity);
         $response->addCommand(
           new ReplaceCommand(
-            '#session-entity-' . $entity->id(),
+            '#user-package-' . $entity->id(),
             render($row)
           )
         );
     }
 
-    $response->addCommand(new RestripeCommand('#data-gathering-sessions'));
+    $response->addCommand(new RestripeCommand('#user-packages'));
 
     return $response;
   }

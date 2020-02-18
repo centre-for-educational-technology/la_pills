@@ -1,0 +1,10 @@
+
+la_pills_onboarding.la_pills_user_package_controller_mine:
+  path: '/onboarding/package/mine'
+  defaults:
+    _controller: '\Drupal\la_pills_onboarding\Controller\LaPillsUserPackageController::mine'
+    _title: 'User packages'
+  options:
+    no_cache: 'TRUE'
+  requirements:
+    _permission: 'view unpublished user package entities'

@@ -1,0 +1,20 @@
+add user package entities:
+  title: 'Create new User package entities'
+
+administer user package entities:
+  title: 'Administer User package entities'
+  description: 'Allow to access the administration form to configure User package entities.'
+  restrict access: true
+
+delete user package entities:
+  title: 'Delete User package entities'
+
+edit user package entities:
+  title: 'Edit User package entities'
+
+view published user package entities:
+  title: 'View published User package entities'
+
+view unpublished user package entities:
+  title: 'View unpublished User package entities'
+

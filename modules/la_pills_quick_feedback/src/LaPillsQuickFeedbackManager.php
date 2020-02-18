@@ -6,6 +6,7 @@ use Drupal\Core\Database\Driver\mysql\Connection;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\la_pills\Entity\SessionEntityInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Class LaPillsQuickFeedbackManager.
@@ -147,6 +148,48 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
       ->condition('session_id', $session_entity->id())
       ->count()
       ->execute() > 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function makeQuestionActive(LaPillsQuestionEntityInterface $question, AccountInterface $account) : void {
+    if ($question->isNew()) {
+      throw new \Exception('Only saved questions are allowed to be marked active or inactive!');
+    }
+
+    // TODO Need to make sure to check if it already is active for this user account
+    $this->database->insert(self::USER_ACTIVE_QUESTION_TABLE)
+      ->fields([
+        'user_id' => $account->id(),
+        'question_id' => $question->id(),
+        'created' => REQUEST_TIME,
+      ])
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function makeQuestionInactive(LaPillsQuestionEntityInterface $question, AccountInterface $account) : void {
+    if ($question->isNew()) {
+      throw new \Exception('Only saved questions are allowed to be marked active or inactive!');
+    }
+
+    // TODO See if we need to check if question is active for this user account
+    $this->database->delete(self::USER_ACTIVE_QUESTION_TABLE)
+      ->condition('user_id', $account->id())
+      ->condition('question_id', $question->id())
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function makeAllUserQuestionsInactive(AccountInterface $account) : void {
+    $this->database->delete(self::USER_ACTIVE_QUESTION_TABLE)
+      ->condition('user_id', $account->id())
+      ->execute();
   }
 
 }

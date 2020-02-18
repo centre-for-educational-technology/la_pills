@@ -1,0 +1,271 @@
+<?php
+
+/**
+ * @file
+ * Contains la_pills_onboarding.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntity;
+use Drupal\Core\Url;
+use Drupal\la_pills_timer\Entity\LaPillsTimerEntity;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\OpenModalDialogCommand;
+
+/**
+ * Implements hook_help().
+ */
+function la_pills_onboarding_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the la_pills_onboarding module.
+    case 'help.page.la_pills_onboarding':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('LAPills Onboarding functionality that enables creation of User Packages that could be applied to newly created or existing user accounts.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme()
+ */
+function la_pills_onboarding_theme() {
+  return [
+    'la_pills_user_package' => [
+      'render element' => 'elements',
+      'file' => 'la_pills_user_package.page.inc',
+      'template' => 'la_pills_user_package',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function la_pills_onboarding_form_user_register_form_alter(&$form, FormStateInterface $form_state, $form_id) : void {
+  $query = \Drupal::entityQuery('la_pills_user_package');
+
+  if (!\Drupal::currentuser()->isAuthenticated()) {
+    $query->condition('status', 1);
+  }
+
+  $ids = $query->execute();
+
+  $packages = \Drupal::entityTypeManager()
+    ->getStorage('la_pills_user_package')
+    ->loadMultiple($ids);
+
+  $urls = [];
+  $options = [];
+
+  array_walk($packages, function($package) use (&$urls, &$options) {
+    $urls[$package->id()] = $package->toUrl()->toString();
+    $options[$package->id()] = $package->label();
+  });
+
+  $form['onboarding'] = [
+    '#type' => 'details',
+    '#title' => t('Onboarding'),
+    '#open' => TRUE,
+    '#weight' => 10,
+    '#attached' => [
+      'library' => [
+        'core/drupal.dialog.ajax'
+      ],
+    ],
+  ];
+
+  $form['onboarding']['user_package'] = [
+    '#type' => 'select',
+    '#options' => $options,
+    '#empty_value' => '',
+    '#attached' => [
+      'drupalSettings' => [
+        'laPillsUserPackageUrls' => $urls,
+      ]
+    ]
+  ];
+  $form['onboarding']['preview'] = [
+    '#type' => 'button',
+    '#value' => t('Preview'),
+    '#states' => [
+      'invisible' => [
+        ':input[name="user_package"]' => [
+          'value' => '',
+        ],
+      ],
+    ],
+    '#limit_validation_errors' => [],
+    '#ajax' => [
+      'callback' => '_la_pills_onboarding_user_package_preview_callback_modal',
+    ],
+  ];
+  $form['actions']['submit']['#submit'][] = '_la_pills_onboarding_user_register_form_submitted';
+}
+
+/**
+ * AJAX response with user package preview modal. Uses user package full view.
+ *
+ * @param  array $form
+ *   Form structure.
+ * @param  \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form state.
+ *
+ * @return \Drupal\Core\Ajax\AjaxResponse
+ *   AJAX response with modal dialog open command.
+ */
+function _la_pills_onboarding_user_package_preview_callback_modal($form, FormStateInterface $form_state) {
+  $title = '';
+  $content = [];
+
+  if ($form_state->hasValue('user_package') && $form_state->getValue('user_package')) {
+    $entity = LaPillsUserPackageEntity::load($form_state->getValue('user_package'));
+    $title = $entity->label();
+    $content = \Drupal::entityTypeManager()
+          ->getViewBuilder($entity->getEntityTypeId())
+          ->view($entity);
+  }
+
+  $response = new AjaxResponse();
+  $response->addCommand(new OpenModalDialogCommand($title, $content));
+  return $response;
+}
+
+/**
+ * Handles submit of a user registration form, presetting questions and
+ * activities based on selected user package.
+ *
+ * @param array              $form
+ *   Form structure.
+ * @param FormStateInterface $form_state
+ *   Form state.
+ */
+function _la_pills_onboarding_user_register_form_submitted(array &$form, FormStateInterface $form_state) : void {
+  $account = $form_state->getFormObject()->getEntity();
+
+  if ($account->id() && $form_state->hasValue('user_package') && $form_state->getValue('user_package')) {
+    $entity = LaPillsUserPackageEntity::load($form_state->getValue('user_package'));
+
+    if ($entity) {
+      $questions = $entity->getQuestionsEntities();
+
+      if ($questions && $account->hasPermission('add lapills question entity entities')) {
+        $manager = \Drupal::service('la_pills_quick_feedback.manager');
+
+        foreach ($questions as $question) {
+          $duplicate = $question->createDuplicate();
+          $duplicate->setOwnerId($account->id());
+          $duplicate->save();
+          $manager->makeQuestionActive($duplicate, $account);
+        }
+
+        \Drupal::messenger()->addStatus(t('Added <strong>@count</strong> quick feedback questions from the selected <strong>%label</strong> user package.', [
+          '@count' => count($questions),
+          '%label' => $entity->label(),
+        ]));
+      } else if ($questions && !$account->hasPermission('add lapills question entity entities')) {
+        \Drupal::messenger()->addWarning(t('User is not allowed to create quick feedback questions. No questions from selected user package could be created.'));
+      }
+
+      $activities = $entity->getActivitiesEntities();
+
+      if ($activities && $account->hasPermission('add la pills timer entities')) {
+        foreach ($activities as $activity) {
+          $duplicate = $activity->createDuplicate();
+          $duplicate->setOwnerId($account->id());
+          $duplicate->set('status', TRUE);
+          $duplicate->save();
+        }
+
+        \Drupal::messenger()->addStatus(t('Added <strong>@count</strong> activity log activities from the selected <strong>%label</strong> user package.', [
+          '@count' => count($activities),
+          '%label' => $entity->label(),
+        ]));
+      } else if ($activities && !$account->hasPermission('add la pills timer entities')) {
+        \Drupal::messenger()->addWarning(t('User is not allowed to create activity log activities. No activities from selected user package could be created.'));
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function la_pills_onboarding_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) : void {
+  // TODO See if it would be better to add our own permission
+  if (!\Drupal::currentuser()->hasPermission('administer users')) {
+    return;
+  }
+
+  // This hook is called for user_register_form if an account is being created
+  // by and administrator
+  if ($form_id !== 'user_form') {
+    return;
+  }
+
+  // This action needs to be placed above the one in user_register_form
+  $form['actions']['submit']['#submit'][] = '_la_pills_onboarding_user_form_submitted';
+
+  // Not the most elegant solution, but most of the form logic is the same
+  la_pills_onboarding_form_user_register_form_alter($form, $form_state, $form_id);
+
+  $form['onboarding']['warning'] = [
+    '#type' => 'container',
+    '#attributes' => [
+      'class' => ['alert', 'alert-warning',],
+    ],
+    '#weight' => -1,
+  ];
+  $form['onboarding']['warning']['text'] = [
+    '#markup' => t('Please note that applying any User Package to an existing user would mark any questions and activities for this user as inactive and only then apply the selected package. The same package could be applied multiple times.'),
+  ];
+}
+
+/**
+ * Handles submit of a user account form, adding questions and
+ * activities based on selected user package.
+ *
+ * @param array              $form
+ *   Form structure.
+ * @param FormStateInterface $form_state
+ *   Form state.
+ */
+function _la_pills_onboarding_user_form_submitted(array &$form, FormStateInterface $form_state) : void {
+  $account = $form_state->getFormObject()->getEntity();
+
+  if ($account->id() && $form_state->hasValue('user_package') && $form_state->getValue('user_package')) {
+    $entity = LaPillsUserPackageEntity::load($form_state->getValue('user_package'));
+
+    if ($entity) {
+      $questions = $entity->getQuestionsEntities();
+      $activities = $entity->getActivitiesEntities();
+
+      if ($questions && $account->hasPermission('add lapills question entity entities')) {
+        $manager = \Drupal::service('la_pills_quick_feedback.manager');
+        $manager->makeAllUserQuestionsInactive($account);
+      }
+
+      if ($activities && $account->hasPermission('add la pills timer entities')) {
+        // XXX This is a really bad approach and would need to be handled by the
+        // specific module responsible for the functionality
+        $ids = \Drupal::entityQuery('la_pills_timer_entity')
+          ->condition('user_id', $account->id())
+          ->condition('status', 1)
+          ->execute();
+        if ($ids) {
+          $timers = LaPillsTimerEntity::loadMultiple($ids);
+
+          if ($timers) {
+            foreach($timers as $timer) {
+              $timer->set('status',FALSE);
+              $timer->save();
+            }
+          }
+        }
+      }
+    }
+  }
+}
