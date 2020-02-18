@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the User package entity.
@@ -130,6 +131,13 @@ class LaPillsUserPackageEntity extends ContentEntityBase implements LaPillsUserP
   public function setOwner(UserInterface $account) {
     $this->set('user_id', $account->id());
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isOwner(AccountInterface $account) {
+    return $this->getOwnerId() === $account->id();
   }
 
   /**

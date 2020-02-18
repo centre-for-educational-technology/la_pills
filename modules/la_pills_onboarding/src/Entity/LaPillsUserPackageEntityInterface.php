@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides an interface for defining User package entities.
@@ -56,12 +57,47 @@ interface LaPillsUserPackageEntityInterface extends ContentEntityInterface, Enti
    */
   public function setCreatedTime($timestamp);
 
+  /**
+   * Determines if provided account is an owner of this timer
+   *
+   * @param  AccountInterface $account
+   *   User account
+   *
+   * @return boolean
+   *   TRUE if is an owner, FALSE otherwise
+   */
+  public function isOwner(AccountInterface $account);
+
+  /**
+   * Returns all linked questions
+   *
+   * @return array
+   *   An array of LaPillsQuestionEntity objects
+   */
   public function getQuestionsEntities() : array;
 
+  /**
+   * Returns count of liked questions
+   *
+   * @return int
+   *   Linked questions count
+   */
   public function getQuestionsCount() : int;
 
+  /**
+   * Returns all linked activities
+   *
+   * @return array
+   *   An array of LaPillsTimerEntity objects
+   */
   public function getActivitiesEntities() : array;
 
+  /**
+   * Returns count of all linked activities
+   *
+   * @return int
+   *   Linked activities count
+   */
   public function getActivitiesCount() : int;
 
 }

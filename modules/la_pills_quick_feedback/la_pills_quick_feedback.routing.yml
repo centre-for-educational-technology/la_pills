@@ -7,7 +7,7 @@ la_pills_quick_feedback.la_pills_quick_feedback_controller_index:
   options:
     no_cache: 'TRUE'
   requirements:
-    _permission: 'view published lapills question entity entities'
+    _permission: 'add lapills question entity entities'
 
 la_pills_quick_feedback.la_pills_quick_feedback_controller_ajaxQuestionActiveInactive:
   path: '/quick-feedback/ajax/{question}/active-inactive'

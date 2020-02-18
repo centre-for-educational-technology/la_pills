@@ -103,6 +103,24 @@ and their their settings.
    - `/oauth/token` - used for all of the OAuth token specific communication
    - `/oauth/authorize` - used to start the OAuth user authorisation flow
    - TODO Document own API once it is done
+ * LAPills Onboarding - a module that allows users to create User Packages that
+ include activities and questions that could later be user for **Activity Log**
+ and **Quick Feedback** functionalities. Later on those packages could either
+ be used when creating new user accounts or editing an existing ones. The latter
+ is only allowed to the users with administrator privileges. The code would
+ check if the user a package is being applied to has permissions to create
+ content types from the package and would only create those that are possible to
+ create. All the applied content would be marked as active and would instantly
+ become usable with **Sessions**. When editing an existing account and applying
+ a package any previously existing content of certain type would be marked as
+ inactive, provided that package has any content of that type.
+   - Install module and configure permissions
+   - Currently recommended permissions are (TEACHER is an example role that would
+     be creating content)
+     - Create new User package entities - TEACHER USER
+     - View published User package entities - ANONYMOUS USER
+       - This one is required for the preview functionality to work when new
+       accounts are being created by users themselves
 
 ## Themes
 

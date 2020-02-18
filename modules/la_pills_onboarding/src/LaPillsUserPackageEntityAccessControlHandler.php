@@ -23,19 +23,27 @@ class LaPillsUserPackageEntityAccessControlHandler extends EntityAccessControlHa
     switch ($operation) {
 
       case 'view':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
 
         if (!$entity->isPublished()) {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished user package entities');
         }
 
-
         return AccessResult::allowedIfHasPermission($account, 'view published user package entities');
 
       case 'update':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
 
         return AccessResult::allowedIfHasPermission($account, 'edit user package entities');
 
       case 'delete':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
 
         return AccessResult::allowedIfHasPermission($account, 'delete user package entities');
     }

@@ -23,11 +23,13 @@ class LaPillsQuestionEntityAccessControlHandler extends EntityAccessControlHandl
     switch ($operation) {
 
       case 'view':
+        if ($entity->isOwner($account)) {
+          return AccessResult::allowed();
+        }
 
         if (!$entity->isPublished()) {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished lapills question entity entities');
         }
-
 
         return AccessResult::allowedIfHasPermission($account, 'view published lapills question entity entities');
 

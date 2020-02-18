@@ -6,7 +6,7 @@ la_pills_timer.la_pills_timer_controller_timers:
   options:
     no_cache: 'TRUE'
   requirements:
-    _permission: 'view published la pills timer entities'
+    _permission: 'add la pills timer entities'
 
 la_pills_timer.la_pills_timer_controller_addTimer:
   path: '/timers/timer/create'

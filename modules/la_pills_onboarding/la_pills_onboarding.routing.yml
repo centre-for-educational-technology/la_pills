@@ -7,4 +7,4 @@ la_pills_onboarding.la_pills_user_package_controller_mine:
   options:
     no_cache: 'TRUE'
   requirements:
-    _permission: 'view unpublished user package entities'
+    _permission: 'add user package entities'
