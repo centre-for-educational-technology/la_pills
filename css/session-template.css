@@ -1,0 +1,10 @@
+.session-template .session-template-activities .session-template-activity dl.activity-resources dd {
+  margin-left: 0.5em;  
+}
+
+.session-template .session-template-activities .session-template-activity dl.activity-resources dd a::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: '\f35d';
+  margin-right: 0.25em;
+}

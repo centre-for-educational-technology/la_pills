@@ -14,6 +14,7 @@
  * @ingroup themeable
  */
 #}
+{{ attach_library('la_pills/session_template') }}
 <div{{ attributes.addClass('session-template') }}>
   {% if actions %}
     <div class="actions btn-group" role="group" aria-label="{{ 'Actions'|t }}">
@@ -33,9 +34,9 @@
 
   {% if template and template['activities'] %}
     <h2>{{ 'Activities'|t }}</h2>
-    <ol>
+    <ol class="session-template-activities">
     {% for activity in template['activities'] %}
-      <li>
+      <li class="session-template-activity">
       <strong>{{ activity['activity'] }}</strong>
       {% if activity['duration'] %}
         [{{ activity['duration'] }}']
@@ -45,6 +46,20 @@
           <li>{{ line|replace(replacements)|raw }}</li>
         {% endfor %}
       </ul>
+      {% if 'resources' in activity|keys and activity.resources %}
+        <dl class="activity-resources">
+          <dt>{{ 'Resources'|t }}</dt>
+          {% for resource in activity.resources %}
+          <dd>
+            {% if resource is iterable %}
+              <a href="{{ resource.url|raw }}" target="_blank">{{ resource.title }}</a>
+            {% else %}
+              <a href="{{ resource|raw }}" target="_blank">{{ resource }}</a>
+            {% endif %}
+          </dd>
+          {% endfor %}
+        </dl>
+      {% endif %}
       </li>
     {% endfor %}
     </ol>

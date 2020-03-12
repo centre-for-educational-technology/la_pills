@@ -84,3 +84,10 @@ home_page:
     - core/drupal
     - core/jquery
     - core/drupalSettings
+session_template:
+  version: 1.x
+  css:
+      theme:
+          css/session-template.css: {}
+  dependencies:
+    - la_pills/fontawesome
