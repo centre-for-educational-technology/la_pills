@@ -122,6 +122,14 @@ interface SessionEntityInterface extends ContentEntityInterface, EntityChangedIn
   public function isOwner(AccountInterface $account);
 
   /**
+   * Returns Session Template unique identifier.
+   *
+   * @return string
+   *   Session Template unique identifier
+   */
+  public function getSessionTemplateUuid();
+
+  /**
    * Returns chosen Session Template
    *
    * @return Drupal\la_pills\FetchClass\SessionTemplate

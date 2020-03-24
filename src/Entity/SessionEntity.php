@@ -254,9 +254,16 @@ class SessionEntity extends ContentEntityBase implements SessionEntityInterface 
   /**
    * {@inheritdoc}
    */
+  public function getSessionTemplateUuid() {
+    return $this->getEntityKey('template');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSessionTemplate() {
     $manager = \Drupal::service('la_pills.session_template_manager');
-    return $manager->getTemplate($this->getEntityKey('template'));
+    return $manager->getTemplate($this->getSessionTemplateUuid());
   }
 
   /**

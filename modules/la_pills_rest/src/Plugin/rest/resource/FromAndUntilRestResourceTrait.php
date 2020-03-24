@@ -116,7 +116,7 @@ trait FromAndUntilRestResourceTrait {
       }
     }
 
-    if ($from && $until) {
+    if (isset($from) && isset($until) && $from && $until) {
       if ($from > $until) {
         throw new BadRequestHttpException('From parameter value is less than until!');
       }
