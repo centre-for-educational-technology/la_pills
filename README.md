@@ -4,8 +4,8 @@ Please note that current module is in the early stages of development and could
 be unstable or have serious issues.
 Please do not use it in production environment.
 
-Ellu viidud projekti Mobilitas Pluss MOBEC001 "Piireületav haridusuuendus tehnoloogiapõhiste teadusuuringute toel" tegevuskava raames.
-![Ellu viidud projekti Mobilitas Pluss MOBEC001 "Piireületav haridusuuendus tehnoloogiapõhiste teadusuuringute toel" tegevuskava raames.](https://github.com/centre-for-educational-technology/la_pills/blob/master/images/logo-mobilitas-and-eu.jpg)
+**Ellu viidud projekti Mobilitas Pluss MOBEC001 "Piireületav haridusuuendus tehnoloogiapõhiste teadusuuringute toel" tegevuskava raames.**
+![Ellu viidud projekti Mobilitas Pluss MOBEC001 'Piireületav haridusuuendus tehnoloogiapõhiste teadusuuringute toel' tegevuskava raames.](https://github.com/centre-for-educational-technology/la_pills/blob/master/images/logo-mobilitas-and-eu.jpg)
 
 ## System requirements
 
