@@ -54,8 +54,9 @@ class LaPillsUserResource extends ResourceBase {
     }
 
     $data = [
-      'id' => $this->currentUser->id(),
+      'id' => (int)$this->currentUser->id(),
       'name' => $this->currentUser->getAccountName(),
+      'display_name' => $this->currentUser->getDisplayName(),
       'mail' => $this->currentUser->getEmail(),
     ];
 

@@ -28,7 +28,7 @@ trait SessionEntityQuestionnaireFormTrait {
    *   Name key.
    */
   public static function getNameKey() {
-    return 'la_pills_name';
+    return LA_PILLS_NAME_KEY;
   }
 
   /**

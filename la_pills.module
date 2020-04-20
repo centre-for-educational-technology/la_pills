@@ -9,6 +9,12 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
+ * Name key.
+ * @var string
+ */
+define('LA_PILLS_NAME_KEY', 'la_pills_name');
+
+/**
  * Implements hook_theme()
  */
 function la_pills_theme() {

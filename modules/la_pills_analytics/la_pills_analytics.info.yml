@@ -1,0 +1,7 @@
+name: 'LA Pills Analytics'
+type: module
+description: 'LAPills statistics and analytics.'
+core: 8.x
+package: 'LAPills'
+dependencies:
+  - drupal:la_pills
