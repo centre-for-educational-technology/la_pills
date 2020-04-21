@@ -106,6 +106,10 @@ class StorePageViewEventSubscriber implements EventSubscriberInterface {
       'entity.la_pills_user_package.edit_form',
       'entity.la_pills_user_package.delete_form',
       'entity.la_pills_user_package.canonical',
+      'session_template.preview',
+      'la_pills.session_template_upload',
+      'session_templates.manage',
+      'session_template.delete',
     ];
     $action_routes = [
       'session_entity.close',
@@ -116,11 +120,15 @@ class StorePageViewEventSubscriber implements EventSubscriberInterface {
       'la_pills_timer.la_pills_timer_controller_ajaxTimerActiveInactive',
       'la_pills_quick_feedback.la_pills_quick_feedback_controller_ajaxQuestionActiveInactive',
     ];
+    //TODO Make sure that session template actions are handled (upload and delete)
     $request = $event->getRequest();
     $route_name = $request->attributes->get(\Symfony\Cmf\Component\Routing\RouteObjectInterface::ROUTE_NAME);
 
+    // TODO Consider only allowing the GET requests + AJAX form views (not form submissions)
+    // Current solution would also capture form submissions and other actions
+    // Possible solution is to check for _wrapper_format=drupal_ajax and ajax_form=1
     if (in_array($route_name, $view_routes)) {
-      $manager->storeAction('view', $request);
+      $manager->storeView($request);
     }
 
     if (in_array($route_name, $action_routes)) {

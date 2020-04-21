@@ -6,6 +6,11 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\la_pills\Entity\SessionEntityInterface;
+use Drupal\la_pills_timer\Entity\LaPillsTimerEntityInterface;
+use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
+use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionnaireEntityInterface;
+use Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
@@ -24,93 +29,67 @@ function la_pills_analytics_help($route_name, RouteMatchInterface $route_match) 
   }
 }
 
-function la_pills_analytics_session_entity_create(EntityInterface $entity) {
-  // XXX Seems to be added twice
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('create', $request);
+function la_pills_analytics_session_entity_insert(SessionEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
-function la_pills_analytics_session_entity_update(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('update', $request);
+function la_pills_analytics_session_entity_update(SessionEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
-function la_pills_analytics_session_entity_delete(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('delete', $request);
+function la_pills_analytics_session_entity_delete(SessionEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_timer_entity_create(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('create', $request);
+function la_pills_analytics_la_pills_timer_entity_insert(LaPillsTimerEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_timer_entity_update(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('update', $request);
+function la_pills_analytics_la_pills_timer_entity_update(LaPillsTimerEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_timer_entity_delete(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('delete', $request);
+function la_pills_analytics_la_pills_timer_entity_delete(LaPillsTimerEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_question_entity_create(EntityInterface $entity) {
-  // XXX Seems to be added twice
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('create', $request);
+function la_pills_analytics_la_pills_question_entity_insert(LaPillsQuestionEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_question_entity_update(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('update', $request);
+function la_pills_analytics_la_pills_question_entity_update(LaPillsQuestionEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_question_entity_delete(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('delete', $request);
+function la_pills_analytics_la_pills_question_entity_delete(LaPillsQuestionEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_user_package_create(EntityInterface $entity) {
-  // XXX Seems to be added twice
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('create', $request);
+function la_pills_analytics_la_pills_user_package_insert(LaPillsUserPackageEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_user_package_update(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('update', $request);
+function la_pills_analytics_la_pills_user_package_update(LaPillsUserPackageEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
-function la_pills_analytics_la_pills_user_package_delete(EntityInterface $entity) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('delete', $request);
+function la_pills_analytics_la_pills_user_package_delete(LaPillsUserPackageEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
+// TODO It would be better to have questionnaire as an object not an array
 function la_pills_analytics_questionnaire_answered(array $questionnaire, EntityInterface $entity) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
@@ -118,9 +97,11 @@ function la_pills_analytics_questionnaire_answered(array $questionnaire, EntityI
   $manager->storeAction('answered', $request);
 }
 
-function la_pills_analytics_quick_feedback_answered(EntityInterface $questionnaire, EntityInterface $entity) {
+function la_pills_analytics_quick_feedback_answered(LaPillsQuestionEntityInterface $questionnaire, SessionEntityInterface $entity) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
 
   $manager->storeAction('answered', $request);
 }
+
+// TODO Need to capture the user package applied action

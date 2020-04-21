@@ -6,7 +6,7 @@
  */
 
 function la_pills_analytics_schema() {
-  $schema['la_pills_analytics_actions'] = [
+  $schema['la_pills_analytics_action'] = [
     'description' => 'Stores actions data for LaPills analytics.',
     'fields' => [
       'type' => [
