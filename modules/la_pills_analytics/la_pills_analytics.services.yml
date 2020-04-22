@@ -1,7 +1,7 @@
 services:
   la_pills_analytics.store.page.view:
     class: Drupal\la_pills_analytics\EventSubscriber\StorePageViewEventSubscriber
-    arguments: ['@current_user']
+    arguments: ['@current_user', '@la_pills_analytics.manager']
     tags:
       - { name: event_subscriber }
   logger.channel.la_pills_analytics:

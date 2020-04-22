@@ -133,7 +133,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
 
     $this->storeQuestionnaireAnswers($form_state);
 
-    \Drupal::moduleHandler()->invokeAll('questionnaire_answered', [$this->questionnaire, $this->entity]);
+    \Drupal::moduleHandler()->invokeAll('questionnaire_answered', [$this->questionnaire, $this->entity,]);
 
     \Drupal::messenger()->addMessage($this->t('Thank you for responding to <strong>%questionnaire</strong> questionnaire.', [
       '%questionnaire' => $this->questionnaire['title'],

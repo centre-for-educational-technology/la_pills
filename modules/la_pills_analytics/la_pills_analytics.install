@@ -37,7 +37,7 @@ function la_pills_analytics_schema() {
         'description' => 'Unique identifier for a user session.',
         'type' => 'varchar_ascii',
         'length' => 255,
-        'not null' => FALSE,
+        'not null' => TRUE,
       ],
       'user_id' => [
         'description' => 'Unique user identifier or NULL for anonymous users.',
@@ -59,7 +59,7 @@ function la_pills_analytics_schema() {
         'type' => 'text',
         'serialize' => TRUE,
         'size' => 'medium',
-        'not null' => TRUE,
+        'not null' => FALSE,
       ],
       'created' => [
         'description' => 'Creation time unix timestamp.',

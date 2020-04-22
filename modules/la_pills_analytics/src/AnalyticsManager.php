@@ -101,7 +101,16 @@ class AnalyticsManager implements AnalyticsManagerInterface {
     return NULL;
   }
 
-  public function storeActionRaw(array $values) {
+  public function getEntityData(EntityInterface $entity) {
+    return [
+      'type' => $entity->getEntityTypeId(),
+      'id' => $entity->id(),
+      'uuid' => $entity->uuid(),
+      'title' => $entity->label(),
+    ];
+  }
+
+  private function storeActionRaw(array $values) {
     // TODO See if we need to have the try/catch block present
     if (!isset($values['user_id'])) {
       $values['user_id'] = $this->currentUser->isAuthenticated() ? $this->currentUser->id() : NULL;
@@ -111,7 +120,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
       $values['created'] = $this->time->getRequestTime();
     }
 
-    $this->database->insert('la_pills_analytics_actions')
+    $this->database->insert('la_pills_analytics_action')
     ->fields(['type', 'path', 'uri', 'title', 'session_id', 'user_id', 'name', 'data', 'created',])
     ->values($values)
     ->execute();
@@ -136,7 +145,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
       'title' => $this->getTitle($request),
       'session_id' => $this->getSessionId($request),
       'name' => $this->getName($request),
-      'data' => serialize($data),
+      'data' => empty($data) ? NULL : serialize($data),
     ]);
   }
 
@@ -153,9 +162,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
       'session_id' => $this->getSessionId($request),
       'name' => $this->getName($request),
       'data' => serialize([
-        'id' => $entity->id(),
-        'uuid' => $entity->uuid(),
-        'title' => $entity->label(),
+        'entity' => $this->getEntityData($entity),
       ]),
     ]);
   }

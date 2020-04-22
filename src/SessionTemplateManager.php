@@ -99,6 +99,8 @@ class SessionTemplateManager implements SessionTemplateManagerInterface {
       'changed' => REQUEST_TIME,
     ])
     ->execute();
+
+    \Drupal::moduleHandler()->invokeAll('session_template_insert', [$this->getTemplate($structure['context']['uuid']),]);
   }
 
   /**

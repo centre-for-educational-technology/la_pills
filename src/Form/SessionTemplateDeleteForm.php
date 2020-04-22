@@ -203,6 +203,7 @@ class SessionTemplateDeleteForm extends FormBase {
     $request = $this->getRequest();
     $session_template = $this->sessionTemplateManager->getTemplate($request->attributes->get('session_template'));
     $this->deleteTemplate($session_template);
+    \Drupal::moduleHandler()->invokeAll('session_template_delete', [$session_template,]);
     $this->messenger->addMessage($this->t('Successfully removed Session Template: @title', [
       '@title' => $session_template->getTitle(),
     ]));

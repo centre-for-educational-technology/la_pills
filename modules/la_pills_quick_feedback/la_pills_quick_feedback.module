@@ -119,6 +119,8 @@ function _la_pills_quick_feedback_session_entity_form_submitted(array &$form, Fo
           'questions' => $data,
         ]);
       $questionnaire->save();
+
+      \Drupal::moduleHandler()->invokeAll('session_entity_enable_quick_feedback', [$entity, $questionnaire,]);
     }
   }
 }

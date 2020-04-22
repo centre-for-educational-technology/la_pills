@@ -11,7 +11,7 @@ use Drupal\la_pills_timer\Entity\LaPillsTimerEntityInterface;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionnaireEntityInterface;
 use Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntityInterface;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\la_pills\FetchClass\SessionTemplate;
 
 /**
  * Implements hook_help().
@@ -90,18 +90,60 @@ function la_pills_analytics_la_pills_user_package_delete(LaPillsUserPackageEntit
 }
 
 // TODO It would be better to have questionnaire as an object not an array
-function la_pills_analytics_questionnaire_answered(array $questionnaire, EntityInterface $entity) {
+function la_pills_analytics_questionnaire_answered(array $questionnaire, SessionEntityInterface $entity) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
 
-  $manager->storeAction('answered', $request);
+  $manager->storeAction('answered', $request, [
+    'entity' => $manager->getEntityData($entity),
+    'questionnaire' => [
+      'type' => 'embedded',
+      'uuid' => $questionnaire['uuid'],
+      'title' => $questionnaire['title'],
+    ],
+  ]);
 }
 
-function la_pills_analytics_quick_feedback_answered(LaPillsQuestionEntityInterface $questionnaire, SessionEntityInterface $entity) {
+function la_pills_analytics_quick_feedback_answered(LaPillsQuestionnaireEntityInterface $questionnaire, SessionEntityInterface $entity) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
 
-  $manager->storeAction('answered', $request);
+  $manager->storeAction('answered', $request, [
+    'entity' => $manager->getEntityData($entity),
+    'questionnaire' => [
+      'type' => 'quick_feedback',
+      'id' => $questionnaire->id(),
+      'uuid' => $questionnaire->uuid(),
+      'title' => $questionnaire->label(),
+    ],
+  ]);
 }
+
+function la_pills_analytics_session_template_insert(SessionTemplate $session_template) {
+  $manager = \Drupal::service('la_pills_analytics.manager');
+  $request = \Drupal::request();
+
+  $manager->storeAction('create', $request, [
+    'template' => [
+      'uuid' => $session_template->uuid,
+      'title' => $session_template->getTitle(),
+    ],
+  ]);
+}
+
+function la_pills_analytics_session_template_delete(SessionTemplate $session_template) {
+  $manager = \Drupal::service('la_pills_analytics.manager');
+  $request = \Drupal::request();
+
+  $manager->storeAction('delete', $request, [
+    'template' => [
+      'uuid' => $session_template->uuid,
+      'title' => $session_template->getTitle(),
+    ],
+  ]);
+}
+
+// session_entity_enable_quick_feedback
+// session_entity_enable_activity_log
 
 // TODO Need to capture the user package applied action

@@ -160,7 +160,7 @@ class SessionEntityQuickFeedbackForm extends FormBase {
 
     $this->storeQuestionnaireAnswers($form_state);
 
-    \Drupal::moduleHandler()->invokeAll('quick_feedback_answered', [$this->questionnaire, $this->entity]);
+    \Drupal::moduleHandler()->invokeAll('quick_feedback_answered', [$this->questionnaire, $this->entity,]);
 
     \Drupal::messenger()->addMessage($this->t('Thank you for responding to Quick Feedback questionnaire.'));
 

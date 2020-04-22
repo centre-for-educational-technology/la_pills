@@ -188,6 +188,9 @@ function _la_pills_timer_session_entity_form_submitted(array &$form, FormStateIn
           ]);
         $session_timer->save();
       }
+
+      \Drupal::moduleHandler()->invokeAll('session_entity_enable_activity_log', [$entity, $timers,]);
+      
       // TODO Need to invalidate local_task cache for an entity
       //\Drupal\Core\Cache\Cache::invalidateTags(['local_task']);
     }
