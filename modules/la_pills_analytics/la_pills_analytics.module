@@ -12,6 +12,8 @@ use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionnaireEntityInterface;
 use Drupal\la_pills_onboarding\Entity\LaPillsUserPackageEntityInterface;
 use Drupal\la_pills\FetchClass\SessionTemplate;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Implements hook_help().
@@ -29,67 +31,106 @@ function la_pills_analytics_help($route_name, RouteMatchInterface $route_match) 
   }
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
 function la_pills_analytics_session_entity_insert(SessionEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
 function la_pills_analytics_session_entity_update(SessionEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
 function la_pills_analytics_session_entity_delete(SessionEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
 function la_pills_analytics_la_pills_timer_entity_insert(LaPillsTimerEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
 function la_pills_analytics_la_pills_timer_entity_update(LaPillsTimerEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
 function la_pills_analytics_la_pills_timer_entity_delete(LaPillsTimerEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
 function la_pills_analytics_la_pills_question_entity_insert(LaPillsQuestionEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
 function la_pills_analytics_la_pills_question_entity_update(LaPillsQuestionEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
 function la_pills_analytics_la_pills_question_entity_delete(LaPillsQuestionEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
 function la_pills_analytics_la_pills_user_package_insert(LaPillsUserPackageEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'create', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
 function la_pills_analytics_la_pills_user_package_update(LaPillsUserPackageEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'update', \Drupal::request());
 }
 
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
 function la_pills_analytics_la_pills_user_package_delete(LaPillsUserPackageEntityInterface $entity) {
   \Drupal::service('la_pills_analytics.manager')
     ->storeEntityAction($entity, 'delete', \Drupal::request());
 }
 
 // TODO It would be better to have questionnaire as an object not an array
+/**
+ * Implements hook_questionnaire_answered().
+ */
 function la_pills_analytics_questionnaire_answered(array $questionnaire, SessionEntityInterface $entity) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
@@ -104,6 +145,9 @@ function la_pills_analytics_questionnaire_answered(array $questionnaire, Session
   ]);
 }
 
+/**
+ * Implements hook_quick_feedback_answered().
+ */
 function la_pills_analytics_quick_feedback_answered(LaPillsQuestionnaireEntityInterface $questionnaire, SessionEntityInterface $entity) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
@@ -119,6 +163,9 @@ function la_pills_analytics_quick_feedback_answered(LaPillsQuestionnaireEntityIn
   ]);
 }
 
+/**
+ * Implements hook_session_template_insert().
+ */
 function la_pills_analytics_session_template_insert(SessionTemplate $session_template) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
@@ -131,6 +178,9 @@ function la_pills_analytics_session_template_insert(SessionTemplate $session_tem
   ]);
 }
 
+/**
+ * Implements hook_session_template_delete().
+ */
 function la_pills_analytics_session_template_delete(SessionTemplate $session_template) {
   $manager = \Drupal::service('la_pills_analytics.manager');
   $request = \Drupal::request();
@@ -143,7 +193,60 @@ function la_pills_analytics_session_template_delete(SessionTemplate $session_tem
   ]);
 }
 
-// session_entity_enable_quick_feedback
-// session_entity_enable_activity_log
+/**
+ * Implements hook_session_entity_enable_quick_feedback().
+ */
+function la_pills_analytics_session_entity_enable_quick_feedback(SessionEntityInterface $session, LaPillsQuestionnaireEntityInterface $questionnaire) {
+  $manager = \Drupal::service('la_pills_analytics.manager');
+  $request = \Drupal::request();
 
-// TODO Need to capture the user package applied action
+  $manager->storeAction('enable_quick_feedback', $request, [
+    'entity' => $manager->getEntityData($session),
+    'questionnaire' => [
+      'type' => 'quick_feedback',
+      'id' => $questionnaire->id(),
+      'uuid' => $questionnaire->uuid(),
+      'title' => $questionnaire->label(),
+    ],
+  ]);
+}
+
+/**
+ * Implements hook_session_entity_enable_activity_log().
+ */
+function la_pills_analytics_session_entity_enable_activity_log(SessionEntityInterface $session, array $activities) {
+  $manager = \Drupal::service('la_pills_analytics.manager');
+  $request = \Drupal::request();
+
+  $manager->storeAction('enable_activity_log', $request, [
+    'entity' => $manager->getEntityData($session),
+    'activities' => array_map(function(EntityInterface $entity) use ($manager) {
+      return $manager->getEntityData($entity);
+    }, $activities),
+  ]);
+}
+
+/**
+ * Implements hook_user_package_preview().
+ */
+function la_pills_analytics_user_package_preview(LaPillsUserPackageEntityInterface $entity) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'preview', \Drupal::request());
+}
+
+// TODO This indicates User Package being selected and not a fact that package
+// contnts are being applied to the user. Activities and questions depend on
+// permissions being present and being present within the package.
+/**
+ * Implements hook_user_package_apply().
+ */
+function la_pills_analytics_user_package_apply(LaPillsUserPackageEntityInterface $entity, UserInterface $user) {
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($entity, 'apply_user_package', \Drupal::request(), [
+      'user' => [
+        'id' => $user->id(),
+        'uuid' => $user->uuid(),
+        'name' => $user->getAccountName(),
+      ],
+    ]);
+}

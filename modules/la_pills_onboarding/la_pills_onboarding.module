@@ -127,6 +127,8 @@ function _la_pills_onboarding_user_package_preview_callback_modal($form, FormSta
     $content = \Drupal::entityTypeManager()
           ->getViewBuilder($entity->getEntityTypeId())
           ->view($entity);
+
+    \Drupal::moduleHandler()->invokeAll('user_package_preview', [$entity,]);
   }
 
   $response = new AjaxResponse();
@@ -187,6 +189,8 @@ function _la_pills_onboarding_user_register_form_submitted(array &$form, FormSta
       } else if ($activities && !$account->hasPermission('add la pills timer entities')) {
         \Drupal::messenger()->addWarning(t('User is not allowed to create activity log activities. No activities from selected user package could be created.'));
       }
+
+      \Drupal::moduleHandler()->invokeAll('user_package_apply', [$entity, $account,]);
     }
   }
 }
@@ -266,6 +270,8 @@ function _la_pills_onboarding_user_form_submitted(array &$form, FormStateInterfa
           }
         }
       }
+
+      \Drupal::moduleHandler()->invokeAll('user_package_apply', [$entity, $account,]);
     }
   }
 }

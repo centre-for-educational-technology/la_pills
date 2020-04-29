@@ -58,7 +58,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
    *   Session identifier or NULL if missing
    */
   private function getSessionId(Request $request) : ?string {
-    // XXX Generates new session id for anonymous witheach request
+    // XXX Generates new session id for anonymous with each request
     return $request->hasSession() ? $request->getSession()->getId() : NULL;
   }
 
@@ -73,8 +73,9 @@ class AnalyticsManager implements AnalyticsManagerInterface {
    */
   private function getName(Request $request) : ?string {
     if ($this->currentUser->isAnonymous() && $request->hasSession()) {
-      // XXX Attribute name should not be hard-coded
-      // XXX Trying to get the value from session object results in an error
+      // TODO It is not good to use _sf2_attributes in hard-coded way, the issue
+      // is that accessing Symfony session data after page alreasyd been sent
+      // results in an arror
       if (isset($_SESSION['_sf2_attributes'][LA_PILLS_NAME_KEY])) {
         return $_SESSION['_sf2_attributes'][LA_PILLS_NAME_KEY];
       }
@@ -101,16 +102,14 @@ class AnalyticsManager implements AnalyticsManagerInterface {
     return NULL;
   }
 
-  public function getEntityData(EntityInterface $entity) {
-    return [
-      'type' => $entity->getEntityTypeId(),
-      'id' => $entity->id(),
-      'uuid' => $entity->uuid(),
-      'title' => $entity->label(),
-    ];
-  }
-
-  private function storeActionRaw(array $values) {
+  /**
+   * Store action data in the database. User identifier and created columns will
+   * be populated automatically.
+   *
+   * @param array $values
+   *   An array of values for available columns
+   */
+  private function storeActionRaw(array $values) : void {
     // TODO See if we need to have the try/catch block present
     if (!isset($values['user_id'])) {
       $values['user_id'] = $this->currentUser->isAuthenticated() ? $this->currentUser->id() : NULL;
@@ -127,6 +126,18 @@ class AnalyticsManager implements AnalyticsManagerInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getEntityData(EntityInterface $entity) : array {
+    return [
+      'type' => $entity->getEntityTypeId(),
+      'id' => $entity->id(),
+      'uuid' => $entity->uuid(),
+      'title' => $entity->label(),
+    ];
+  }
+
+  /**
    * Stores action in the database. Some values are automatically extracted from
    * the provided request object.
    *
@@ -137,7 +148,10 @@ class AnalyticsManager implements AnalyticsManagerInterface {
    * @param  array   $data
    *   Additional data for serialized column
    */
-  public function storeAction(string $type, Request $request, array $data = []) {
+   /**
+    * {@inheritdoc}
+    */
+  public function storeAction(string $type, Request $request, array $data = []) : void {
     $this->storeActionRaw([
       'type' => $type,
       'path' => $request->getPathInfo(),
@@ -149,11 +163,19 @@ class AnalyticsManager implements AnalyticsManagerInterface {
     ]);
   }
 
-  public function storeView(Request $request, array $data = []) {
+  /**
+   * {@inheritdoc}
+   */
+  public function storeView(Request $request, array $data = []) : void {
     $this->storeAction('view', $request, $data);
   }
 
-  public function storeEntityAction(EntityInterface $entity, string $type, Request $request) {
+  /**
+   * {@inheritdoc}
+   */
+  public function storeEntityAction(EntityInterface $entity, string $type, Request $request, array $data = []) : void {
+    $data['entity'] = $this->getEntityData($entity);
+
     $this->storeActionRaw([
       'type' => $type,
       'path' => '/' . $entity->toUrl()->getInternalPath(),
@@ -161,9 +183,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
       'title' => $entity->label(),
       'session_id' => $this->getSessionId($request),
       'name' => $this->getName($request),
-      'data' => serialize([
-        'entity' => $this->getEntityData($entity),
-      ]),
+      'data' => serialize($data),
     ]);
   }
 
