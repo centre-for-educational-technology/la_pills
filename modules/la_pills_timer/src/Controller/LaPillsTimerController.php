@@ -21,6 +21,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\la_pills_timer\Entity\LaPillsSessionTimerEntity;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Render\Markup;
+use Drupal\Core\Url;
 
 /**
  * Class LaPillsTimerController.
@@ -246,7 +247,11 @@ class LaPillsTimerController extends ControllerBase {
     } else if ($request->isXmlHttpRequest()) {
       $response = new AjaxResponse();
 
-      $response->addCommand(new RedirectCommand($request->getUri()));
+      $response->addCommand(new RedirectCommand(Url::fromRoute('la_pills_timer.la_pills_timer_controller_exportTimers', [
+        'session_entity' => $session_entity->id(),
+      ], [
+        'absolute' => TRUE,
+      ])->toString()));
 
       return $response;
     }

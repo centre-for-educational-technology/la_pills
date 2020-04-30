@@ -38,14 +38,19 @@ class StorePageViewEventSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    //$events['kernel.response'] = ['onKernelResponse'];
-    //$events['kernel.finish_request'] = ['onKernelFinishRequest'];
+    $events['kernel.finish_request'] = ['onKernelFinishRequest'];
     $events['kernel.terminate'] = ['onKernelTerminate'];
 
     return $events;
   }
 
-  private function getViewRoutes() {
+  /**
+   * Returns routes to be caputed as view actions.
+   *
+   * @return array
+   *  Array of routes
+   */
+  private function getViewRoutes() : array {
     return [
       'la_pills.home_page_controller_view',
       'la_pills.session_entity_code',
@@ -69,11 +74,13 @@ class StorePageViewEventSubscriber implements EventSubscriberInterface {
       'entity.la_pills_timer_entity.delete_form',
       'entity.la_pills_timer_entity.canonical',
       'la_pills_quick_feedback.la_pills_quick_feedback_controller_index',
+      'entity.la_pills_question_entity.collection',
       'entity.la_pills_question_entity.add_form',
       'entity.la_pills_question_entity.edit_form',
       'entity.la_pills_question_entity.delete_form',
       'entity.la_pills_question_entity.canonical',
       'la_pills_onboarding.la_pills_user_package_controller_mine',
+      'entity.la_pills_user_package.collection',
       'entity.la_pills_user_package.add_form',
       'entity.la_pills_user_package.edit_form',
       'entity.la_pills_user_package.delete_form',
@@ -85,31 +92,22 @@ class StorePageViewEventSubscriber implements EventSubscriberInterface {
     ];
   }
 
-  private function getActionRoutes() {
+  /**
+   * Returns views to be captured as general actions.
+   *
+   * @return array
+   *   Array of routes
+   */
+  private function getActionRoutes() : array {
     return [
       'session_entity.close',
       'session_entity.download_answers',
       'la_pills_timer.la_pills_timer_controller_sessionTimer',
       'la_pills_timer.la_pills_timer_controller_stopAll',
-      'la_pills_timer.la_pills_timer_controller_exportTimers',
+      'la_pills_timer.la_pills_timer_controller_exportTimers', // This produces two events one of those AJAX preflight and the other one POST download event if that is possible
       'la_pills_timer.la_pills_timer_controller_ajaxTimerActiveInactive',
       'la_pills_quick_feedback.la_pills_quick_feedback_controller_ajaxQuestionActiveInactive',
     ];
-  }
-
-  /**
-   * This method is called when the kernel.response is dispatched.
-   *
-   * @param \Symfony\Component\EventDispatcher\Event $event
-   *   The dispatched event.
-   */
-  public function onKernelResponse(Event $event) {
-    $request = $event->getRequest();
-
-    //error_log('onKernelResponse');
-    //error_log($request->attributes->get('_route'));
-    //sleep(10);
-    //\Drupal::messenger()->addMessage('Event kernel.response thrown by Subscriber in module la_pills_analytics.', 'status', TRUE);
   }
 
   /**
@@ -119,13 +117,20 @@ class StorePageViewEventSubscriber implements EventSubscriberInterface {
    *   The dispatched event.
    */
   public function onKernelFinishRequest(Event $event) {
+    $session_key_name = 'la_pills_analytics_force_anonymous_session';
     $request = $event->getRequest();
-    // TODO Need to start session for anonymous user is one does not yet exist
 
-    //error_log('onKernelFinishRequest');
-    //error_log($request->attributes->get('_route'));
-    //sleep(10);
-    //\Drupal::messenger()->addMessage('Event kernel.finish_request thrown by Subscriber in module la_pills_analytics.', 'status', TRUE);
+    // Start session for anonymous user if not present
+    if ($this->currentUser->isAnonymous() && !$request->getSession()) {
+      \Drupal::service('session_manager')->start();
+    }
+
+    // A hacky way to enforce persistent session identifier for anonymous users
+    // Identifier is constantly regenerated if session does not have some data
+    // stored in it
+    if ($this->currentUser->isAnonymous() && !$request->getSession()->has($session_key_name)) {
+      $request->getSession()->set($session_key_name, 'anonymous');
+    }
   }
 
   /**

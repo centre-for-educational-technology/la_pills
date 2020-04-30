@@ -197,18 +197,15 @@ function la_pills_analytics_session_template_delete(SessionTemplate $session_tem
  * Implements hook_session_entity_enable_quick_feedback().
  */
 function la_pills_analytics_session_entity_enable_quick_feedback(SessionEntityInterface $session, LaPillsQuestionnaireEntityInterface $questionnaire) {
-  $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('enable_quick_feedback', $request, [
-    'entity' => $manager->getEntityData($session),
-    'questionnaire' => [
-      'type' => 'quick_feedback',
-      'id' => $questionnaire->id(),
-      'uuid' => $questionnaire->uuid(),
-      'title' => $questionnaire->label(),
-    ],
-  ]);
+  \Drupal::service('la_pills_analytics.manager')
+    ->storeEntityAction($session, 'enable_quick_feedback', \Drupal::request(), [
+      'questionnaire' => [
+        'type' => 'quick_feedback',
+        'id' => $questionnaire->id(),
+        'uuid' => $questionnaire->uuid(),
+        'title' => $questionnaire->label(),
+      ],
+    ]);
 }
 
 /**
@@ -216,10 +213,7 @@ function la_pills_analytics_session_entity_enable_quick_feedback(SessionEntityIn
  */
 function la_pills_analytics_session_entity_enable_activity_log(SessionEntityInterface $session, array $activities) {
   $manager = \Drupal::service('la_pills_analytics.manager');
-  $request = \Drupal::request();
-
-  $manager->storeAction('enable_activity_log', $request, [
-    'entity' => $manager->getEntityData($session),
+  $manager->storeEntityAction($session, 'enable_activity_log', \Drupal::request(), [
     'activities' => array_map(function(EntityInterface $entity) use ($manager) {
       return $manager->getEntityData($entity);
     }, $activities),

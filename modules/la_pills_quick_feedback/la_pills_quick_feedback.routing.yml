@@ -26,6 +26,7 @@ la_pills_quick_feedback.session_entity_quick_feedback_form:
     _form: '\Drupal\la_pills_quick_feedback\Form\SessionEntityQuickFeedbackForm'
     _title: 'Quick Feedback'
   options:
+    no_cache: 'TRUE'
     parameters:
       session_entity:
         type: entity:session_entity

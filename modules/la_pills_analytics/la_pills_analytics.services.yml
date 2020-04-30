@@ -4,9 +4,6 @@ services:
     arguments: ['@current_user', '@la_pills_analytics.manager']
     tags:
       - { name: event_subscriber }
-  logger.channel.la_pills_analytics:
-    parent: logger.channel_base
-    arguments: ['la_pills_analytics']
   la_pills_analytics.manager:
     class: Drupal\la_pills_analytics\AnalyticsManager
     arguments: ['@database', '@datetime.time', '@current_user', '@title_resolver']

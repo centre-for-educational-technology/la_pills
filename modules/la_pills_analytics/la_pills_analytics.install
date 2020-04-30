@@ -5,6 +5,9 @@
  * Contains la_pills_analytics.install.
  */
 
+/**
+ * Implements hook_schema().
+ */
 function la_pills_analytics_schema() {
   $schema['la_pills_analytics_action'] = [
     'description' => 'Stores actions data for LaPills analytics.',

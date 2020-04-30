@@ -126,6 +126,7 @@ class SessionEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
         '_title_callback' => 'Drupal\la_pills\Controller\SessionEntityController::questionnaireTitle',
       ])
         ->setRequirement('_entity_access', "{$entity_type_id}.view")
+        ->setOption('no_cache', TRUE)
         ->setOption('parameters', [
         $entity_type_id => [
           'type' => 'entity:' . $entity_type_id,
