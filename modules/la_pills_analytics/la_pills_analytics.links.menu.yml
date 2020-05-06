@@ -1,0 +1,6 @@
+la_pills_analytics.reports.list:
+  title: 'LAPills Analytics'
+  route_name: la_pills_analytics.reports_controller_list
+  description: 'List of all captured actions'
+  parent: system.admin_reports
+  weight: 99
