@@ -58,9 +58,8 @@ function la_pills_analytics_schema() {
         'default' => NULL,
       ],
       'data' => [
-        'description' => 'Serialized data for action.',
+        'description' => 'JSON encoded data for action.',
         'type' => 'text',
-        'serialize' => TRUE,
         'size' => 'medium',
         'not null' => FALSE,
       ],

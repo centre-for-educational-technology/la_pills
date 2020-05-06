@@ -58,7 +58,8 @@ class AnalyticsManager implements AnalyticsManagerInterface {
    *   Session identifier or NULL if missing
    */
   private function getSessionId(Request $request) : ?string {
-    // XXX Generates new session id for anonymous with each request
+    // NB! EventSubscriber makes sure that session identifier for anonymous user
+    // is set and persists across requests within same session
     return $request->hasSession() ? $request->getSession()->getId() : NULL;
   }
 
@@ -119,6 +120,10 @@ class AnalyticsManager implements AnalyticsManagerInterface {
       $values['created'] = $this->time->getRequestTime();
     }
 
+    if (isset($values['data']) && (is_array($values['data']) || is_object($values['data']))) {
+      $values['data'] = json_encode($values['data']);
+    }
+
     $this->database->insert('la_pills_analytics_action')
     ->fields(['type', 'path', 'uri', 'title', 'session_id', 'user_id', 'name', 'data', 'created',])
     ->values($values)
@@ -146,7 +151,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
    * @param  Request $request
    *   Request object
    * @param  array   $data
-   *   Additional data for serialized column
+   *   Additional data for data column
    */
    /**
     * {@inheritdoc}
@@ -159,7 +164,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
       'title' => $this->getTitle($request),
       'session_id' => $this->getSessionId($request),
       'name' => $this->getName($request),
-      'data' => empty($data) ? NULL : serialize($data),
+      'data' => empty($data) ? NULL : $data,
     ]);
   }
 
@@ -183,7 +188,7 @@ class AnalyticsManager implements AnalyticsManagerInterface {
       'title' => $entity->label(),
       'session_id' => $this->getSessionId($request),
       'name' => $this->getName($request),
-      'data' => serialize($data),
+      'data' => $data,
     ]);
   }
 
