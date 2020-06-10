@@ -37,11 +37,15 @@ trait SessionEntityQuestionnaireFormTrait {
    * @return boolean
    */
   public function canAnswer() {
-    if(!($this->entity->isPublished() && $this->entity->isActive())) {
-      return FALSE;
+    $current_user = \Drupal::currentUser();
+
+    if (!($this->entity->isPublished() && $this->entity->isActive())) {
+      if (!$this->entity->isOwner($current_user)) {
+        return FALSE;
+      }
     }
 
-    if (!$this->entity->getAllowAnonymousResponses() && \Drupal::currentUser()->isAnonymous()) {
+    if (!$this->entity->getAllowAnonymousResponses() && $current_user->isAnonymous()) {
       return FALSE;
     }
 

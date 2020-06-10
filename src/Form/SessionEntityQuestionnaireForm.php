@@ -96,7 +96,7 @@ class SessionEntityQuestionnaireForm extends EntityForm {
       '#value' => $this->t('Submit'),
     ];
 
-    if (!($this->entity->isPublished() && $this->entity->isActive())) {
+    if (!$this->canAnswer()) {
       \Drupal::messenger()->addMessage($this->t('Current session is either unpublished or set to be inactive. Questionnaires can not be answerd!'), 'warning');
     }
 
