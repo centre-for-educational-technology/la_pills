@@ -1,7 +1,7 @@
 name: 'LAPills RESTful Web Services'
 type: module
 description: 'RESTful Web Servies for LAPills'
-core: 8.x
+core_version_requirement: ^8 || ^9
 package: 'LAPills'
 dependencies:
   - drupal:la_pills

@@ -1,7 +1,7 @@
 name: 'LaPills Quick Feedback'
 type: module
 description: 'Implements Qucik Feedback functionality for LaPills Session.'
-core: 8.x
+core_version_requirement: ^8 || ^9
 package: 'LAPills'
 
 dependencies:
