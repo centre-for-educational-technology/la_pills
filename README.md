@@ -10,8 +10,8 @@ Please do not use it in production environment.
 
 ## System requirements
 
-* Drupal 8 (8.7.x or newer)
-* PHP 7.1 or newer
+* Drupal 8 (8.9 or newer) and should also be fully compatible with version 9
+* PHP 7.3 or newer
 
 ## Usage and running in development
 
@@ -53,7 +53,7 @@ any data gathering session entities that have been based on that template.
 
 ### Sub-modules
 
-* LA Pills Timer - a module that provides activity logging functionality to
+* **LA Pills Timer** - a module that provides activity logging functionality to
 data gathering sessions. A user with sufficient permissions could create
 activities to be tracked. The ones that are currently active could be attached
 to a newly created or an existing session (copies are made). Later on session
@@ -64,7 +64,7 @@ owner could use those for the activity tracking effort.
     - Create new Timer and Timer sessions - TEACHER USER
     - View active Timer and Timer sessions - TEACHER USER
     - View inactive Timer and Timer sessions - TEACHER USER
-* LA Pills Quick Feedback - a module that provides quick feedback functionality
+* **LA Pills Quick Feedback** - a module that provides quick feedback functionality
 to data gathering sessions. A user with sufficient permissions could create
 questions and mark them as active. Active ones can be used to construct a Quick
 Feedback questionnaire for an existing session, making copies of question data.
@@ -79,7 +79,7 @@ to the teacher.
     - Create new LaPills Question Entity entities - TEACHER USER
     - Create new LaPills Questionnaire Entity entities - TEACHER USER
     - View published LaPills Question Entity entities - TEACHER USER
-* LAPills RESTful Web Services - a module that enables REST API for LAPills
+* **LAPills RESTful Web Services** - a module that enables REST API for LAPills
 specific data. Requires OAuth to be present and configured with suitable clients
 and their their settings.
   - Make sure that all the dependencies are present and configured as needed
@@ -107,7 +107,7 @@ and their their settings.
    - `/oauth/token` - used for all of the OAuth token specific communication
    - `/oauth/authorize` - used to start the OAuth user authorisation flow
    - TODO Document own API once it is done
- * LAPills Onboarding - a module that allows users to create User Packages that
+ * **LAPills Onboarding** - a module that allows users to create User Packages that
  include activities and questions that could later be user for **Activity Log**
  and **Quick Feedback** functionalities. Later on those packages could either
  be used when creating new user accounts or editing an existing ones. The latter
@@ -125,6 +125,7 @@ and their their settings.
      - View published User package entities - ANONYMOUS USER
        - This one is required for the preview functionality to work when new
        accounts are being created by users themselves
+* **LAPills Analytics** - a simple analytics solution that captures certain usage data and allows administrators to view and download that data
 
 ## Themes
 
