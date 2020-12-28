@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\user\Entity\User;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ReportsController.
@@ -27,12 +28,20 @@ class ReportsController extends ControllerBase {
   protected $dateFormatter;
 
   /**
+   * Form builder
+   *
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected $formBuilder;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     $instance = parent::create($container);
     $instance->database = $container->get('database');
     $instance->dateFormatter = $container->get('date.formatter');
+    $instance->formBuilder = $container->get('form_builder');
     return $instance;
   }
 
@@ -42,9 +51,54 @@ class ReportsController extends ControllerBase {
    * @return array
    *   Page renderable.
    */
-  public function list() {
+  public function list(Request $request) {
     $query = $this->database->select('la_pills_analytics_action', 'a');
     $query->fields('a');
+
+    if ($request->get('op')) {
+      $types = $request->get('types');
+
+      if ($types && is_array($types) && count($types) > 0) {
+        $query->condition('a.type', $types, 'IN');
+      }
+
+      $sessions = $request->get('sessions');
+
+      if ($sessions && is_array($sessions) && count($sessions) > 0) {
+        $query->condition('a.session_id', $sessions, 'IN');
+      }
+
+      $users = $request->get('users');
+
+      if ($users && is_array($users) && count($users) > 0) {
+        $has_special_case = in_array(0, $users);
+
+        if ($has_special_case && count($users) > 1) {
+          $group = $query->orConditionGroup()
+            ->isNull('a.user_id')
+            ->condition('a.user_id', $users, 'IN');
+          $query->condition($group);
+        } else if ($has_special_case) {
+          $query->isNull('a.user_id');
+        } else if (!$has_special_case) {
+          $query->condition('a.user_id', $users, 'IN');
+        }
+      }
+
+      $from = $request->get('from');
+      $until = $request->get('until');
+      
+      if ($from) {
+        $query->condition('a.created', strtotime($from), '>=');
+      }
+
+      if ($until) {
+        $query->condition('a.created', strtotime($until) + strtotime('1 day -1 second', 0), '<=');
+      }
+    }
+
+    $count_query = clone $query;
+
     $query->orderBy('a.created', 'ASC');
     $pager = $query->extend('Drupal\Core\Database\Query\PagerSelectExtender')->limit(50);
     $result = $pager->execute();
@@ -76,13 +130,16 @@ class ReportsController extends ControllerBase {
       ];
     }
 
+    $form = $this->formBuilder->getForm('Drupal\la_pills_analytics\Form\ReportsFilterForm');
+
+    $response['filter-form'] = $form;
     $response['actions'] = [
       '#type' => 'container',
     ];
     $response['actions']['actions'] = [
       '#type' => 'table',
       '#caption' => $this->t('Actions (@count)', [
-        '@count' => $this->database->select('la_pills_analytics_action', 'a')->countQuery()->execute()->fetchField(),
+        '@count' => $count_query->countQuery()->execute()->fetchField(),
       ]),
       '#header' => $header,
       '#rows' => $rows,
