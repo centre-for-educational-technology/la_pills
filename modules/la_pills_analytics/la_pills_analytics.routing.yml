@@ -9,3 +9,13 @@ la_pills_analytics.reports_controller_list:
   options:
     _admin_route: TRUE
     no_cache: 'TRUE'
+la_pills_analytics.reports_controller_download:
+  path: '/admin/reports/analytics/download'
+  defaults:
+    _controller: '\Drupal\la_pills_analytics\Controller\ReportsController::download'
+    _title: 'LAPills Analytics Download'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+    no_cache: 'TRUE'

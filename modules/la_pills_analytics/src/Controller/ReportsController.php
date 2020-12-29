@@ -7,6 +7,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Drupal\Core\Url;
+use Drupal\Core\Database\Query\SelectInterface;
 
 /**
  * Class ReportsController.
@@ -45,16 +48,7 @@ class ReportsController extends ControllerBase {
     return $instance;
   }
 
-  /**
-   * Paginated action list.
-   *
-   * @return array
-   *   Page renderable.
-   */
-  public function list(Request $request) {
-    $query = $this->database->select('la_pills_analytics_action', 'a');
-    $query->fields('a');
-
+  private function applyConditions(SelectInterface &$query, Request &$request) {
     if ($request->get('op')) {
       $types = $request->get('types');
 
@@ -96,8 +90,22 @@ class ReportsController extends ControllerBase {
         $query->condition('a.created', strtotime($until) + strtotime('1 day -1 second', 0), '<=');
       }
     }
+  }
+
+  /**
+   * Paginated action list.
+   *
+   * @return array
+   *   Page renderable.
+   */
+  public function list(Request $request) {
+    $query = $this->database->select('la_pills_analytics_action', 'a');
+    $query->fields('a');
+
+    $this->applyConditions($query, $request);
 
     $count_query = clone $query;
+    $count = $count_query->countQuery()->execute()->fetchField();
 
     $query->orderBy('a.created', 'ASC');
     $pager = $query->extend('Drupal\Core\Database\Query\PagerSelectExtender')->limit(50);
@@ -139,18 +147,91 @@ class ReportsController extends ControllerBase {
     $response['actions']['actions'] = [
       '#type' => 'table',
       '#caption' => $this->t('Actions (@count)', [
-        '@count' => $count_query->countQuery()->execute()->fetchField(),
+        '@count' => $count,
       ]),
       '#header' => $header,
       '#rows' => $rows,
       '#empty' => $this->t('No actions found'),
       '#sticky' => TRUE,
     ];
+
+    if ($count > 0) {
+      $response['actions']['download'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Download as CSV'),
+        '#url' => Url::fromRoute('la_pills_analytics.reports_controller_download', [], [
+          'query' => $request->query->all(),
+        ]),
+        '#attributes' => [
+          'class' => [
+            'button', 'btn', 'btn-primary',
+          ],
+          'target' => '_blank',
+        ],
+      ];
+    }
+
     $response['actions']['pager'] = [
       '#type' => 'pager',
     ];
 
     return $response;
+  }
+
+  public function download(Request $request) {
+    $session = $request->getSession();
+
+    if ($request->get('force_download') && $session->has('la_pills_analytics_report_path')) {
+      $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Description' => 'File Download',
+        'Content-Disposition' => 'attachment; filename=report.csv',
+      ];
+
+      // TODO Remove path from session
+      // TODO Consider removing file itself
+
+      return new BinaryFileResponse($session->get('la_pills_analytics_report_path'), 200, $headers, true);
+    }
+
+    $range_size = 100;
+    $base_query = $this->database->select('la_pills_analytics_action', 'a');
+    $base_query->fields('a');
+
+    $this->applyConditions($base_query, $request);
+
+    $count_query = clone $base_query;
+
+    $count = $count_query->countQuery()->execute()->fetchField();
+
+    $batch = [
+      'title' => $this->t('Processing requested activity data'),
+      'operations' => [
+        [
+          '\Drupal\la_pills_analytics\Batch\ReportDownload::preprocess',
+          [
+            $base_query,
+          ]
+        ]
+      ],
+      'finished' => '\Drupal\la_pills_analytics\Batch\ReportDownload::finished',
+    ];
+
+    foreach(range(0, floor($count / $range_size)) as $number) {
+      $batch['operations'][] = [
+        '\Drupal\la_pills_analytics\Batch\ReportDownload::process',
+        [
+          [
+            'start' => $number * $range_size,
+            'length' => $range_size, // TODO See if we need to determine correct length
+          ]
+        ],
+      ];
+    }
+
+    batch_set($batch);
+
+    return batch_process('admin/reports/analytics/download?force_download=1');
   }
 
 }
