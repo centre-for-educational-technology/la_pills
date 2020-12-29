@@ -48,7 +48,15 @@ class ReportsController extends ControllerBase {
     return $instance;
   }
 
-  private function applyConditions(SelectInterface &$query, Request &$request) {
+  /**
+   * Apply filter conditions to a query
+   *
+   * @param SelectInterface $query   Action select query
+   * @param Request         $request Request object
+   * 
+   * @return void
+   */
+  private function applyConditions(SelectInterface &$query, Request &$request) : void {
     if ($request->get('op')) {
       $types = $request->get('types');
 
@@ -99,6 +107,22 @@ class ReportsController extends ControllerBase {
    *   Page renderable.
    */
   public function list(Request $request) {
+    $session = $request->getSession();
+
+    if ($session->has('la_pills_analytics_report_path')) {
+      $response['download'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['download-report'],
+        ],
+        '#attached' => [
+          'library' => [
+            'la_pills_analytics/download_report',
+          ],
+        ],
+      ];
+    }
+
     $query = $this->database->select('la_pills_analytics_action', 'a');
     $query->fields('a');
 
@@ -166,7 +190,6 @@ class ReportsController extends ControllerBase {
           'class' => [
             'button', 'btn', 'btn-primary',
           ],
-          'target' => '_blank',
         ],
       ];
     }
@@ -178,18 +201,23 @@ class ReportsController extends ControllerBase {
     return $response;
   }
 
+  /**
+   * Prepare or download report
+   *
+   * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\RedirectResponse|null
+   *   Batch process or file download after batch completion.
+   */
   public function download(Request $request) {
     $session = $request->getSession();
 
-    if ($request->get('force_download') && $session->has('la_pills_analytics_report_path')) {
+    if ($request->get('download') && $session->has('la_pills_analytics_report_path')) {
       $headers = [
         'Content-Type' => 'text/csv',
         'Content-Description' => 'File Download',
         'Content-Disposition' => 'attachment; filename=report.csv',
       ];
 
-      // TODO Remove path from session
-      // TODO Consider removing file itself
+      // TODO Consider removing file path from session and file itself
 
       return new BinaryFileResponse($session->get('la_pills_analytics_report_path'), 200, $headers, true);
     }
@@ -231,7 +259,7 @@ class ReportsController extends ControllerBase {
 
     batch_set($batch);
 
-    return batch_process('admin/reports/analytics/download?force_download=1');
+    return batch_process('admin/reports/analytics/list');
   }
 
 }

@@ -4,6 +4,7 @@ namespace Drupal\la_pills_analytics\Batch;
 
 use Drupal\Core\Database\Query\SelectInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Drupal\Core\Url;
 
 class ReportDownload {
 
@@ -86,7 +87,13 @@ class ReportDownload {
         $messenger = \Drupal::service('messenger');
 
         if ($success) {
-            $messenger->addStatus(t('Report creation successful. Download should start shortly.'));
+            $messenger->addStatus(t('Report creation successful. Download should start shortly. Please click <a href=":url" target="_blank" id="download-report-url">here</a> in case it fails to start.', [
+                ':url' => Url::fromRoute('la_pills_analytics.reports_controller_download', [], [
+                    'query' => [
+                        'download' => 'true',
+                    ],
+                ])->toString(),
+            ]));
             
             $request = \Drupal::request();
             $session = $request->getSession();

@@ -1,0 +1,8 @@
+download_report:
+  verson: 1.x
+  js:
+    js/download-report.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
