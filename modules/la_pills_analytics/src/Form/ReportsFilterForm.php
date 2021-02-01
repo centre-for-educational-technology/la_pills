@@ -50,19 +50,6 @@ class ReportsFilterForm extends FormBase {
   }
 
   /**
-   * Fetches and returns all session identifiers for collected activity from the database
-   *
-   * @return array
-   */
-  protected function getSessions() : array {
-    $query = $this->database->select('la_pills_analytics_action', 'a');
-    $query->fields('a', ['session_id']);
-    $result = $query->distinct()->execute();
-
-    return $result->fetchCol();
-  }
-
-  /**
    * Fetches and returns user options based on collected activity from the database
    *
    * @return array
@@ -112,15 +99,6 @@ class ReportsFilterForm extends FormBase {
       '#multiple' => TRUE,
       '#required' => FALSE,
       '#value' => $request->get('types'),
-    ];
-    $sessions = $this->getSessions();
-    $form['inputs']['sessions'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Sessions'),
-      '#options' => array_combine($sessions, $sessions),
-      '#multiple' => TRUE,
-      '#required' => FALSE,
-      '#value' => $request->get('sessions'),
     ];
     $form['inputs']['users'] = [
       '#type' => 'select',

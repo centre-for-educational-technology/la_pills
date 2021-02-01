@@ -64,12 +64,6 @@ class ReportsController extends ControllerBase {
         $query->condition('a.type', $types, 'IN');
       }
 
-      $sessions = $request->get('sessions');
-
-      if ($sessions && is_array($sessions) && count($sessions) > 0) {
-        $query->condition('a.session_id', $sessions, 'IN');
-      }
-
       $users = $request->get('users');
 
       if ($users && is_array($users) && count($users) > 0) {
