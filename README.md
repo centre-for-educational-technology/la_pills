@@ -10,12 +10,12 @@ Please do not use it in production environment.
 
 ## System requirements
 
-* Drupal 8 (8.9 or newer) and should also be fully compatible with version 9
+* Drupal 9.1 (9.2 has a few changes that would still need testing)
 * PHP 7.3 or newer
 
 ## Usage and running in development
 
-* Setup Drupal 8 instance
+* Setup Drupal 9 instance
 * Go to `DRUPAL_ROOT/modules` and run
 `git clone git@github.com:centre-for-educational-technology/la_pills.git`
 * Make sure that required libraries are installed in
