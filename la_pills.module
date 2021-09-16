@@ -107,3 +107,32 @@ function _la_pills_unique_session_numeric_code(FieldableEntityInterface $entity,
 
   return $manager->generateUniqueCode($base_table, $field_name, 6);
 }
+
+/**
+ * Implements hook_library_info_alter().
+ *
+ * Please see this issue for more details https://www.drupal.org/project/bootstrap/issues/3219852#comment-14140239
+ */
+function la_pills_library_info_alter(&$libraries, $extension)
+{
+  if (class_exists('\Drupal\bootstrap\Bootstrap')) {
+    $theme = \Drupal\bootstrap\Bootstrap::getTheme();
+
+    // Apply modal fixes to bootstrap based themes with modal enabled using jquery_ui_bridge
+    if ($theme->isBootstrap() && $theme->getSetting('modal_enabled') && $theme->getSetting('modal_jquery_ui_bridge')) {
+      if ($extension == 'core' && !empty($libraries['drupal.dialog'])) {
+        // See the link above for the origin of this code
+        if (!empty($libraries['drupal.dialog']['js'])) {
+          foreach ($libraries['drupal.dialog']['js'] as $key => $asset) {
+            if (preg_match('`^assets/vendor/jquery\.ui`', $key)) {
+              unset($libraries['drupal.dialog']['js'][$key]);
+            }
+          }
+        }
+        if (isset($libraries['drupal.dialog']['css'])) {
+          unset($libraries['drupal.dialog']['css']);
+        }
+      }
+    }
+  }
+}
