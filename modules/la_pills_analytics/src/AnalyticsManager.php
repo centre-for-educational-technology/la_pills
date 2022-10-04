@@ -1,7 +1,7 @@
 <?php
 
 namespace Drupal\la_pills_analytics;
-use Drupal\Core\Database\Driver\mysql\Connection;
+use Drupal\Core\Database\Connection;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Controller\TitleResolverInterface;
@@ -14,9 +14,9 @@ use Drupal\Core\Entity\EntityInterface;
 class AnalyticsManager implements AnalyticsManagerInterface {
 
   /**
-   * Drupal\Core\Database\Driver\mysql\Connection definition.
+   * Drupal\Core\Database\Connection definition.
    *
-   * @var \Drupal\Core\Database\Driver\mysql\Connection
+   * @var \Drupal\Core\Database\Connection
    */
   protected $database;
 

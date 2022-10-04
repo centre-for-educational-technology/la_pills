@@ -2,7 +2,7 @@
 
 namespace Drupal\la_pills_quick_feedback;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\Core\Database\Driver\mysql\Connection;
+use Drupal\Core\Database\Connection;
 use Drupal\la_pills_quick_feedback\Entity\LaPillsQuestionEntityInterface;
 use Drupal\la_pills\Entity\SessionEntityInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -30,9 +30,9 @@ class LaPillsQuickFeedbackManager implements LaPillsQuickFeedbackManagerInterfac
   protected $currentUser;
 
   /**
-   * Drupal\Core\Database\Driver\mysql\Connection definition.
+   * Drupal\Core\Database\Connection definition.
    *
-   * @var \Drupal\Core\Database\Driver\mysql\Connection
+   * @var \Drupal\Core\Database\Connection
    */
   protected $database;
 

@@ -1,7 +1,7 @@
 <?php
 
 namespace Drupal\la_pills;
-use Drupal\Core\Database\Driver\mysql\Connection;
+use Drupal\Core\Database\Connection;
 use Drupal\la_pills\Entity\SessionEntityInterface;
 
 /**
@@ -10,9 +10,9 @@ use Drupal\la_pills\Entity\SessionEntityInterface;
 class SessionEntityCodeManager implements SessionEntityCodeManagerInterface {
 
   /**
-   * Drupal\Core\Database\Driver\mysql\Connection definition.
+   * Drupal\Core\Database\Connection definition.
    *
-   * @var \Drupal\Core\Database\Driver\mysql\Connection
+   * @var \Drupal\Core\Database\Connection
    */
   protected $database;
   /**

@@ -17,9 +17,9 @@ use Drupal\Core\Database\Query\SelectInterface;
 class ReportsController extends ControllerBase {
 
   /**
-   * Drupal\Core\Database\Driver\mysql\Connection definition.
+   * Drupal\Core\Database\Connection definition.
    *
-   * @var \Drupal\Core\Database\Driver\mysql\Connection
+   * @var \Drupal\Core\Database\Connection
    */
   protected $database;
 
@@ -53,7 +53,7 @@ class ReportsController extends ControllerBase {
    *
    * @param SelectInterface $query   Action select query
    * @param Request         $request Request object
-   * 
+   *
    * @return void
    */
   private function applyConditions(SelectInterface &$query, Request &$request) : void {
@@ -83,7 +83,7 @@ class ReportsController extends ControllerBase {
 
       $from = $request->get('from');
       $until = $request->get('until');
-      
+
       if ($from) {
         $query->condition('a.created', strtotime($from), '>=');
       }
