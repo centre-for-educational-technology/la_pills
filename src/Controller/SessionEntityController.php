@@ -229,10 +229,12 @@ class SessionEntityController extends ControllerBase {
     }
 
     $query = $this->connection->select('session_questionnaire_answer', 'sqa')
-    ->fields('sqa', ['questionnaire_uuid', 'question_uuid', 'answer'])
-    ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
-    ->condition('sqa.question_uuid', $question_uuids, 'IN')
-    ->groupBy('sqa.questionnaire_uuid, sqa.question_uuid, sqa.answer');
+      ->fields('sqa', ['questionnaire_uuid', 'question_uuid', 'answer'])
+      ->condition('sqa.session_entity_uuid', $session_entity_uuid, '=')
+      ->condition('sqa.question_uuid', $question_uuids, 'IN')
+      ->groupBy('sqa.questionnaire_uuid')
+      ->groupBy('sqa.question_uuid')
+      ->groupBy('sqa.answer');
     $query->addExpression('COUNT(IFNULL(sqa.answer, 1))', 'count');
 
     if ($from && $until) {
